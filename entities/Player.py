@@ -4,7 +4,7 @@ from pygame import Surface
 from pygame.sprite import Group
 
 class Player ( Entity ):
-	def __init__(self, frames: list[Surface], pos: tuple[float, float], *groups: Group) -> None:
+	def __init__(self, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group) -> None:
 		super().__init__(frames, pos, *groups)
 
 		self.speed = 250
