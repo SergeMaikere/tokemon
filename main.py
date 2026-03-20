@@ -1,9 +1,9 @@
 from functools import partial
-from pytmx import TiledMap, load_pygame
+from pytmx import TiledMap
 from entities.Player import Player
 from settings import *
 from utils.AllSprites import AllSprites
-from utils.Helper import map_loader, images_loader, frames_loader, pipe, get_name_from_path
+from utils.Helper import map_loader, images_loader_dict, frames_loader, pipe
 from gameobj.Sprite import Sprite
 
 class Game:
@@ -17,7 +17,7 @@ class Game:
 		self.all_sprites = AllSprites()
 
 		self.map = map_loader('world')
-		self.objects_images = images_loader('assets', 'graphics', 'objects')
+		self.objects_images = images_loader_dict('assets', 'graphics', 'objects')
 
 		self.player_spawn = 'house'
 		self.terrains = ['Terrain']
@@ -41,7 +41,7 @@ class Game:
 
 	def __set_objects ( self, maps: TiledMap ) -> TiledMap:
 		for obj in maps.get_layer_by_name('Objects'):
-			Sprite('object', self.objects_images[get_name_from_path(obj.source)], self.all_sprites, center=(obj.x, obj.y))
+			Sprite('object', obj.image, self.all_sprites, center=(obj.x, obj.y))
 		return maps
 	
 	def __setup( self ):
