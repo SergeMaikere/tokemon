@@ -1,9 +1,11 @@
+
+from settings import *
+from gameobj.AnimatedSprite import AnimatedSprite
 from functools import partial
 from pytmx import TiledMap
 from entities.Player import Player
-from settings import *
 from utils.AllSprites import AllSprites
-from utils.Helper import map_loader, images_loader_dict, frames_loader, pipe
+from utils.Helper import map_loader, images_loader_dict, images_loader_list, frames_loader, pipe
 from gameobj.Sprite import Sprite
 
 class Game:
@@ -33,21 +35,31 @@ class Game:
 				Sprite('terrain', image, self.all_sprites, topleft=(x * TILE_SIZE, y * TILE_SIZE))
 		return maps
 
+	def __set_objects ( self, maps: TiledMap ) -> TiledMap:
+		for obj in maps.get_layer_by_name('Objects'):
+			Sprite('object', obj.image, self.all_sprites, center=(obj.x, obj.y))
+		return maps
+
+	def __set_water ( self, maps: TiledMap ) -> TiledMap:
+		frames = images_loader_list('assets', 'graphics', 'tilesets', 'water')
+		for obj in maps.get_layer_by_name('Water'):
+			for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):
+				for x in range(int(obj.x), int(obj.x + obj.width), TILE_SIZE):
+					AnimatedSprite('water', frames, self.all_sprites, topleft=(x, y))
+		return maps
+
+
 	def __set_entities ( self, maps: TiledMap ) -> TiledMap:
 		for obj in maps.get_layer_by_name('Entities'):
 			if obj.name == 'Player' and obj.pos == self.player_spawn: 
 				self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.all_sprites)
 		return maps
 
-	def __set_objects ( self, maps: TiledMap ) -> TiledMap:
-		for obj in maps.get_layer_by_name('Objects'):
-			Sprite('object', obj.image, self.all_sprites, center=(obj.x, obj.y))
-		return maps
-	
 	def __setup( self ):
 		pipe(
 			partial(self.__set_terrain, self.terrains),
 			self.__set_objects,
+			self.__set_water,
 			self.__set_entities,
 		)(self.map)
 
@@ -60,6 +72,8 @@ class Game:
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: self.__quit_game()
+
+			self.canvas.fill('black')
 			
 			self.all_sprites.update(dt)
 

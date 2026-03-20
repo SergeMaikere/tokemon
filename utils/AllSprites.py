@@ -1,6 +1,5 @@
-from pygame.sprite import Group, Sprite
-from entities.Player import Player
 from settings import *
+from pygame.sprite import Sprite
 
 class AllSprites ( pygame.sprite.Group ):
 	def __init__(self, *sprites: Sprite) -> None:

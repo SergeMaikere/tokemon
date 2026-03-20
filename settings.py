@@ -1,7 +1,9 @@
 import pygame
+from pygame import Surface
+from pygame.sprite import Group
 from pygame.math import Vector2 as vector 
 from sys import exit
-from os.path import join
+
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 TILE_SIZE = 64 

@@ -2,7 +2,7 @@ from settings import *
 from typing import Any, Callable, NoReturn
 from pygame import Surface
 from os import walk
-from os.path import basename
+from os.path import basename, join
 from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
