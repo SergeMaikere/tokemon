@@ -8,3 +8,4 @@ class Sprite ( pygame.sprite.Sprite ):
 		self.type = type
 		self.image = image
 		self.rect = self.image.get_frect(**anchor)
+		self.y_order = self.rect.centery

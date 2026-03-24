@@ -45,7 +45,7 @@ class Game:
 		return maps
 
 	def __set_objects ( self, obj: TiledObject ):
-		Sprite('object', obj.image, self.all_sprites, center=(obj.x, obj.y))
+		Sprite('object' if obj.name != 'top' else 'top', obj.image, self.all_sprites, center=(obj.x, obj.y))
 
 	def __set_water ( self, obj: TiledObject ):
 		for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):

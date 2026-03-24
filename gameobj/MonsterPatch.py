@@ -9,3 +9,5 @@ class MonsterPatch ( Sprite ):
 		self.biome = biome
 		self.level = level
 		self.monsters = monsters
+
+		self.y_order -= 60
