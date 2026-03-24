@@ -1,11 +1,10 @@
-
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
 from functools import partial
 from pytmx import TiledMap
 from entities.Player import Player
 from utils.AllSprites import AllSprites
-from utils.Helper import map_loader, images_loader_dict, images_loader_list, frames_loader, pipe
+from utils.Helper import coasts_image_cutter, map_loader, images_loader_dict, images_loader_list, frames_loader, pipe
 from gameobj.Sprite import Sprite
 
 class Game:
@@ -23,6 +22,7 @@ class Game:
 
 		self.player_spawn = 'house'
 		self.terrains = ['Terrain']
+		self.coasts = coasts_image_cutter()
 
 
 	def __quit_game ( self ):
