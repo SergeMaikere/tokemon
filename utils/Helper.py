@@ -67,7 +67,7 @@ def col_cut ( rows_cols: tuple[int, int], props: tuple[Any, ...], image: Surface
 			frames[prop].append(surf)
 	return frames	
 
-def fill_coast_frames ( frames: dict[str, Any] ):
+def fill_coast_frames_obj ( frames: dict[str, Any] ):
 	for coast in frames:
 		frames[coast] = partial(col_cut, (1, 3), ('left', '', 'right'))(frames[coast][0])
 		for col in frames[coast]:
@@ -78,14 +78,12 @@ def fill_coast_frames ( frames: dict[str, Any] ):
 	return frames
 
 def set_coast_frames_obj ( frames: dict[str, Any] ):
-	frames_obj = reduce(lambda obj, k: { **obj, k: {}}, Coasts.__args__, {})
+	my_obj = reduce(lambda obj, k: { **obj, k: {}}, Coasts.__args__, {})
 	for coast in frames:
 		for col in frames[coast]:
 			for level in frames[coast][col][0]:
-				frames_obj[coast][level] = [ frames[coast][col][n][level][0] for n in range(4) ]
-					
-
-	return frames_obj
+				my_obj[coast][level] = [ frames[coast][col][n][level][0] for n in range(4) ]
+	return my_obj
 
 def get_coast_frames_cols (  ):
 	coasts =  tuple(Coasts.__args__)
@@ -93,7 +91,7 @@ def get_coast_frames_cols (  ):
 
 def coasts_image_cutter ():
 	return pipe( 
-		fill_coast_frames, 
+		fill_coast_frames_obj, 
 		set_coast_frames_obj, 
 		# voyeur
 	)(get_coast_frames_cols())

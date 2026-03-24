@@ -1,5 +1,5 @@
 from settings import *
-from pygame import Surface
+from pygame import FRect, Surface
 from pygame.sprite import Group
 
 from utils.Types import States

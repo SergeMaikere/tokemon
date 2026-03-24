@@ -1,4 +1,5 @@
 from typing import Callable
+from entities.Character import Character
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
 from functools import partial
@@ -53,14 +54,21 @@ class Game:
 	def __set_coasts ( self, obj: TiledObject ):
 		AnimatedSprite('coast', self.coast_frames[obj.terrain][obj.side], self.all_sprites, topleft=(obj.x, obj.y))
 
-	def __set_Player ( self, obj: TiledObject ):
+	def __set_player ( self, obj: TiledObject ):
 		if obj.name == 'Player' and obj.pos == self.player_spawn: 
 			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.all_sprites)
 		return obj
 
+	def __set_character ( self, obj: TiledObject ):
+		if obj.name == 'Character':
+			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.all_sprites)
+		return obj
 
 	def __set_entities ( self, obj: TiledObject ):
-		self.__set_Player(obj)
+		pipe(  
+			self.__set_player,
+			self.__set_character
+		)(obj)
 
 
 	def __setup( self ):
