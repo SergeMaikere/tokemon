@@ -82,12 +82,8 @@ def set_coast_frames_obj ( frames: dict[str, Any] ):
 	for coast in frames:
 		for col in frames[coast]:
 			for level in frames[coast][col][0]:
-				pos = level or 'mid'
-				for n in range(4):
-					try:
-						frames_obj[coast][pos].append(frames[coast][col][n][level][0])
-					except KeyError:
-						frames_obj[coast][pos] = frames[coast][col][n][level]
+				frames_obj[coast][level] = [ frames[coast][col][n][level][0] for n in range(4) ]
+					
 
 	return frames_obj
 
