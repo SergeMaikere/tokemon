@@ -1,5 +1,6 @@
 from typing import Callable
 from entities.Character import Character
+from gameobj.MonsterPatch import MonsterPatch
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
 from functools import partial
@@ -51,6 +52,9 @@ class Game:
 			for x in range(int(obj.x), int(obj.x + obj.width), TILE_SIZE):
 				AnimatedSprite('water', self.water_frames, self.all_sprites, topleft=(x, y))
 
+	def __set_monster_patch ( self, obj: TiledObject ):
+		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.all_sprites, topleft=(obj.x, obj.y))
+
 	def __set_coasts ( self, obj: TiledObject ):
 		AnimatedSprite('coast', self.coast_frames[obj.terrain][obj.side], self.all_sprites, topleft=(obj.x, obj.y))
 
@@ -76,6 +80,7 @@ class Game:
 			partial(self.__set_terrain, self.terrains),
 			partial(self.__get_layer, 'Objects', self.__set_objects),
 			partial(self.__get_layer, 'Water', self.__set_water),
+			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
 			partial(self.__get_layer, 'Entities', self.__set_entities)
 		)(self.map)
