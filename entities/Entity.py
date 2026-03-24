@@ -15,7 +15,7 @@ class Entity ( pygame.sprite.Sprite ):
 		self.frames = frames
 
 		self.image = self.frames[self.state][self.index]
-		self.rect = self.image.get_frect(center=pos)
+		self.rect: FRect = self.image.get_frect(center=pos)
 
 		self.direction = pygame.Vector2()
 		self.speed = 100

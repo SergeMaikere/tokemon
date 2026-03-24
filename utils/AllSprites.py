@@ -15,8 +15,8 @@ class AllSprites ( pygame.sprite.Group ):
 	def draw ( self, player_pos: tuple[float, float] ):
 		self.__get_offset(player_pos)
 
-		terrain = [ sprite for sprite in self if sprite.type == 'terrain' ]
-		objects = [ sprite for sprite in self if sprite.type != 'terrain' ]
+		terrain = [ sprite for sprite in self if sprite.type in ['terrain', 'water', 'coast'] ]
+		objects = [ sprite for sprite in self if sprite.type not in ['terrain', 'water', 'coast'] ]
 
 		for layer in [ terrain, objects ]:
 			for sprite in sorted(layer, key=lambda sprite: sprite.rect.centery):

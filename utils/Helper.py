@@ -1,6 +1,5 @@
-from collections import defaultdict
 from settings import *
-from typing import Any, Callable, NoReturn
+from typing import Any, Callable
 from pygame import Surface
 from os import walk
 from os.path import basename, join
