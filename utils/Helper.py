@@ -1,12 +1,18 @@
 from settings import *
-from typing import Any, Callable, NoReturn
+from typing import Any, Callable
 from pygame import Surface
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
-from utils.Types import States
+from utils.Types import Coasts, States
+
+def voyeur ( x: Any ):
+	print('\n****VOYEUR****')
+	print(x)
+	print('************\n')
+	return x
 
 pipe = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
@@ -39,22 +45,64 @@ def cut ( image: Surface, row: int, col: int, width: float, height: float ):
 	surf.blit(image, (0, 0), rect)
 	return surf
 
-def characters_image_cutter ( rows: int, cols: int, image: Surface ) -> dict[str, list[Surface]]:
-	states = States.__args__
-	frames = reduce(lambda obj, state: { **obj, state: [] }, states, {})
-	width, height = image.width/rows, image.height/cols
+get_frames_obj: Callable[ [tuple[Any, ...]], dict[str, Any] ] = lambda my_list: reduce(lambda obj, prop: { **obj, prop: [] }, my_list, {})
 
-	for row in range(rows):
-		for col in range(cols):
+get_cut_dimensions: Callable[ [tuple[int, int], Surface], tuple[float, float] ] = lambda dims, image: ( image.width/ dims[1], image.height/dims[0] )
+
+def row_cut ( rows_cols: tuple[int, int], props: tuple[Any, ...], image: Surface ) -> dict[str, list[Surface]]:
+	frames = get_frames_obj(props)
+	width, height = get_cut_dimensions(rows_cols, image)
+	for row, prop in enumerate(frames):
+		for col in range(rows_cols[1]):
 			surf = cut(image, row, col, width, height)
-			frames[states[row]].append(surf)
+			frames[prop].append(surf)
 	return frames
 
+def col_cut ( rows_cols: tuple[int, int], props: tuple[Any, ...], image: Surface ) -> dict[str, Any]:
+	frames = get_frames_obj(props)
+	width, height = get_cut_dimensions(rows_cols, image)
+	for col, prop in enumerate(frames):
+		for row in range(rows_cols[0]):
+			surf = cut(image, row, col, width, height)
+			frames[prop].append(surf)
+	return frames	
+
+def fill_coast_frames ( frames: dict[str, Any] ):
+	for coast in frames:
+		frames[coast] = partial(col_cut, (1, 3), ('left', '', 'right'))(frames[coast][0])
+		for col in frames[coast]:
+			frames[coast][col] = partial(row_cut, (4, 1), tuple(range(4)))(frames[coast][col][0])
+			props = tuple( f'{level}{col}' for level in ['top', '', 'bottom'] )
+			for row in frames[coast][col]:
+				frames[coast][col][row] = partial( row_cut, (3, 1), props)(frames[coast][col][row][0])
+	return frames
+
+def set_coast_frames_obj ( frames: dict[str, Any] ):
+	frames_obj = reduce(lambda obj, k: { **obj, k: {}}, Coasts.__args__, {})
+	for coast in frames:
+		for col in frames[coast]:
+			for level in frames[coast][col][0]:
+				frames_obj[coast][level] = [ frames[coast][col][n][level][0] for n in range(4) ]
+					
+
+	return frames_obj
+
+def get_coast_frames_cols (  ):
+	coasts =  tuple(Coasts.__args__)
+	return partial(col_cut, (1, len(coasts)), coasts)(small_walker(load_image, join('assets', 'graphics', 'tilesets'), 'coast'))
+
+def coasts_image_cutter ():
+	return pipe( 
+		fill_coast_frames, 
+		set_coast_frames_obj, 
+		# voyeur
+	)(get_coast_frames_cols())
+	
 
 
 load_image = lambda path: pygame.image.load(path).convert_alpha() 
 
-load_frames = pipe(load_image, partial(characters_image_cutter, 4, 4))
+load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
 
 map_loader = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
