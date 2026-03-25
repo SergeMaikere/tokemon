@@ -100,13 +100,14 @@ def coasts_image_cutter ():
 
 load_image = lambda path: pygame.image.load(path).convert_alpha() 
 
+images_loader_dict = partial(big_walker_dict, load_image)
+
+images_loader_list = partial(big_walker_list, load_image)
+
 load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
 
 map_loader = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
 frames_loader = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
 
-images_loader_dict = partial(big_walker_dict, load_image)
-
-images_loader_list = partial(big_walker_list, load_image)
 

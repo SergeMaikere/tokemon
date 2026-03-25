@@ -85,7 +85,7 @@ class Game:
 
 	def __set_collisions_sprites ( self, obj: TiledObject ):
 		image = pygame.Surface((obj.width, obj.height))
-		Sprite(WORLD_LAYERS['bg'], image, self.collision_sprites, self.all_sprites, center=(obj.x, obj.y))
+		Sprite(WORLD_LAYERS['top'], image, self.collision_sprites, self.all_sprites, center=(obj.x, obj.y))
 
 	def __setup( self ):
 		pipe(
@@ -95,7 +95,7 @@ class Game:
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
 			partial(self.__get_layer, 'Entities', self.__set_entities),
-			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites)
+			# partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites)
 		)(self.map)
 
 
