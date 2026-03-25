@@ -15,11 +15,12 @@ class AllSprites ( pygame.sprite.Group ):
 	def draw ( self, player_pos: tuple[float, float] ):
 		self.__get_offset(player_pos)
 
-		terrain = [ sprite for sprite in self if sprite.type in ['terrain', 'water', 'coast'] ]
-		objects = [ sprite for sprite in self if sprite.type not in ['terrain', 'water', 'coast'] ]
+		bg = [ sprite for sprite in self if sprite.z < WORLD_LAYERS['main'] ]
+		main = sorted( [sprite for sprite in self if sprite.z == WORLD_LAYERS['main']], key=lambda sprite: sprite.y_order )
+		top = [ sprite for sprite in self if sprite.z > WORLD_LAYERS['main'] ]
 
-		for layer in [ terrain, objects ]:
-			for sprite in sorted(layer, key=lambda sprite: sprite.rect.centery):
+		for layer in ( bg, main, top ):
+			for sprite in layer:
 				self.canvas.blit(sprite.image, sprite.rect.center + self.offset)
 
 		

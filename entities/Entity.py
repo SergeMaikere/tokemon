@@ -1,25 +1,21 @@
+from gameobj.Sprite import Sprite
 from settings import *
-from pygame import FRect, Surface
+from pygame import Surface
 from pygame.sprite import Group
 
 from utils.Types import States
 
-class Entity ( pygame.sprite.Sprite ):
-	def __init__(self, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group) -> None:
-		super().__init__(*groups)
+class Entity ( Sprite ):
+	def __init__( self, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group ) -> None:
+		super().__init__(WORLD_LAYERS['main'], frames['down'][0], *groups, center=pos)
 
-		self.type = 'entity'
 		self.state: States = 'down'
 		
 		self.index = 0
 		self.frames = frames
 
-		self.image = self.frames[self.state][self.index]
-		self.rect: FRect = self.image.get_frect(center=pos)
-
 		self.direction = pygame.Vector2()
 		self.speed = 100
-		self.animation_speed = 5
 
 	def _set_direction ( self ):
 		pass
@@ -32,13 +28,14 @@ class Entity ( pygame.sprite.Sprite ):
 
 	def _animate ( self, dt: float ):
 		if not self.direction: self.index = 0
-		self.index += self.animation_speed * dt
+		self.index += ANIMATION_SPEED * dt
 		self.image = self.frames[self.state][int(self.index) % len(self.frames[self.state])]
 
 	def _move ( self, dt: float ):
 		self.rect.center += self.direction * self.speed * dt
 
 	def update ( self, dt: float ):
+		self.y_order = self.rect.centery
 		self._set_direction()
 		self._set_state()
 		self._animate(dt)
