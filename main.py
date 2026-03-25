@@ -1,4 +1,6 @@
 from typing import Callable
+
+from pygame import SRCALPHA
 from entities.Character import Character
 from gameobj.MonsterPatch import MonsterPatch
 from settings import *
@@ -19,6 +21,7 @@ class Game:
 		self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 		self.all_sprites = AllSprites()
+		self.collision_sprites = pygame.sprite.Group()
 
 		self.map = map_loader('world')
 		self.terrains = ['Terrain']
@@ -45,7 +48,13 @@ class Game:
 		return maps
 
 	def __set_objects ( self, obj: TiledObject ):
-		Sprite(WORLD_LAYERS['main' if obj.name != 'top' else 'top'], obj.image, self.all_sprites, center=(obj.x, obj.y))
+		Sprite(
+			WORLD_LAYERS['main' if obj.name != 'top' else 'top'], 
+			obj.image, 
+			self.collision_sprites, 
+			self.all_sprites, 
+			center=(obj.x, obj.y)
+		)
 
 	def __set_water ( self, obj: TiledObject ):
 		for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):
@@ -60,12 +69,12 @@ class Game:
 
 	def __set_player ( self, obj: TiledObject ):
 		if obj.name == 'Player' and obj.pos == self.player_spawn: 
-			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.all_sprites)
+			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		return obj
 
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
-			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.all_sprites)
+			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		return obj
 
 	def __set_entities ( self, obj: TiledObject ):
@@ -74,6 +83,9 @@ class Game:
 			self.__set_character
 		)(obj)
 
+	def __set_collisions_sprites ( self, obj: TiledObject ):
+		image = pygame.Surface((obj.width, obj.height))
+		Sprite(WORLD_LAYERS['bg'], image, self.collision_sprites, self.all_sprites, center=(obj.x, obj.y))
 
 	def __setup( self ):
 		pipe(
@@ -82,10 +94,11 @@ class Game:
 			partial(self.__get_layer, 'Water', self.__set_water),
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
-			partial(self.__get_layer, 'Entities', self.__set_entities)
+			partial(self.__get_layer, 'Entities', self.__set_entities),
+			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites)
 		)(self.map)
 
-	
+
 	def run ( self ):
 
 		self.__setup()

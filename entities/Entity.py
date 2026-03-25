@@ -17,6 +17,8 @@ class Entity ( Sprite ):
 		self.direction = pygame.Vector2()
 		self.speed = 100
 
+		self.rect = self.rect.inflate(-80, -40)
+
 	def _set_direction ( self ):
 		pass
 
@@ -35,7 +37,6 @@ class Entity ( Sprite ):
 		self.rect.center += self.direction * self.speed * dt
 
 	def update ( self, dt: float ):
-		self.y_order = self.rect.centery
 		self._set_direction()
 		self._set_state()
 		self._animate(dt)

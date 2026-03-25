@@ -1,4 +1,5 @@
 from settings import *
+from pygame import FRect
 
 
 class Sprite ( pygame.sprite.Sprite ):
@@ -7,5 +8,6 @@ class Sprite ( pygame.sprite.Sprite ):
 
 		self.z = z
 		self.image = image
-		self.rect = self.image.get_frect(**anchor)
+
+		self.rect: FRect = self.image.get_frect(**anchor)
 		self.y_order = self.rect.centery
