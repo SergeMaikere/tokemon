@@ -1,6 +1,7 @@
 from typing import Callable
 
 from pygame import SRCALPHA
+from assets.data.game_data import TRAINER_DATA
 from entities.Character import Character
 from gameobj.CollisionSprite import CollisionSprite
 from gameobj.MonsterPatch import MonsterPatch
@@ -10,6 +11,7 @@ from functools import partial
 from pytmx import TiledMap, TiledObject
 from entities.Player import Player
 from utils.AllSprites import AllSprites
+from utils.DialogManager import DialogManager
 from utils.Helper import coasts_image_cutter, map_loader, images_loader_dict, images_loader_list, frames_loader, pipe
 from gameobj.Sprite import Sprite
 
@@ -23,30 +25,30 @@ class Game:
 
 		self.all_sprites = AllSprites()
 		self.collision_sprites = pygame.sprite.Group()
+		self.all_characters = pygame.sprite.Group()
 
 		self.map = map_loader('world')
 		self.terrains = ['Terrain']
 		self.player_spawn = 'house'
 
-
-		self.objects_images = images_loader_dict('assets', 'graphics', 'objects')
 		self.water_frames = images_loader_list('assets', 'graphics', 'tilesets', 'water')
 		self.coast_frames = coasts_image_cutter()
+
 
 	def __quit_game ( self ):
 		pygame.quit()
 		exit()
 
-	def __get_layer ( self, name: str, func: Callable, maps: TiledMap ) -> TiledMap:
-		for obj in maps.get_layer_by_name(name):
+	def __get_layer ( self, name: str, func: Callable, tmx_maps: TiledMap ) -> TiledMap:
+		for obj in tmx_maps.get_layer_by_name(name):
 			func(obj)
-		return maps
+		return tmx_maps
 
-	def __set_terrain ( self, names: list[str], maps: TiledMap ) -> TiledMap:
+	def __set_terrain ( self, names: list[str], tmx_maps: TiledMap ) -> TiledMap:
 		for name in names:
-			for x, y, image in maps.get_layer_by_name(name).tiles():
+			for x, y, image in tmx_maps.get_layer_by_name(name).tiles():
 				Sprite('terrain', WORLD_LAYERS['bg'], image, self.all_sprites, topleft=(x * TILE_SIZE, y * TILE_SIZE))
-		return maps
+		return tmx_maps
 
 	def __set_objects ( self, obj: TiledObject ):
 		CollisionSprite( 
@@ -79,7 +81,13 @@ class Game:
 
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
-			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
+			Character(
+				obj.direction, 
+				frames_loader(obj.graphic), 
+				(obj.x, obj.y), 
+				TRAINER_DATA[obj.character_id], 
+				self.collision_sprites, self.all_characters, self.all_sprites
+			)
 		return obj
 
 	def __set_entities ( self, obj: TiledObject ):
@@ -100,10 +108,13 @@ class Game:
 			partial(self.__get_layer, 'Entities', self.__set_entities),
 		)(self.map)
 
+	def __set_dialog_manager ( self ): self.dialog_manager = DialogManager(self.player, self.all_characters, self.all_sprites)
+
 
 	def run ( self ):
 
 		self.__setup()
+		self.__set_dialog_manager()
 		
 		while True:
 			dt = self.clock.tick() / 1000
@@ -114,6 +125,8 @@ class Game:
 			self.canvas.fill('black')
 			
 			self.all_sprites.update(dt)
+
+			self.dialog_manager.update()
 
 			self.all_sprites.draw(self.player.rect.center)
 

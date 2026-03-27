@@ -1,5 +1,5 @@
 
-from typing import Literal
+from typing import Literal, TypedDict
 
 
 States = Literal[ 'down', 'left', 'right', 'up' ]
