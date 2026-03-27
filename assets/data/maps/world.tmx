@@ -184,7 +184,7 @@
 </data>
  </layer>
  <objectgroup id="3" name="Entities">
-  <object id="12" name="Player" x="4223.94" y="3661.26">
+  <object id="12" name="Player" x="4257.94" y="3731.26">
    <properties>
     <property name="direction" value="down"/>
     <property name="pos" value="house"/>
@@ -297,7 +297,7 @@
    <point/>
   </object>
  </objectgroup>
- <objectgroup id="9" name="Coast">
+ <objectgroup id="9" name="Coast" visible="0">
   <object id="130" name="coast" x="4224" y="4992" width="64" height="64">
    <properties>
     <property name="side" value="top"/>
@@ -1715,7 +1715,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="6" name="Monsters">
+ <objectgroup id="6" name="Monsters" visible="0">
   <object id="34" gid="242" x="4096" y="4096" width="64" height="64">
    <properties>
     <property name="biome" value="forest"/>
@@ -3874,7 +3874,7 @@
   </object>
  </objectgroup>
  <objectgroup id="2" name="Objects">
-  <object id="1" gid="211" x="4352" y="3776" width="320" height="320"/>
+  <object id="1" gid="211" x="4348" y="3776" width="320" height="320"/>
   <object id="2" gid="226" x="3455.33" y="3783.33" width="128" height="192"/>
   <object id="3" gid="226" x="3264" y="3712" width="128" height="192"/>
   <object id="4" gid="227" x="3264" y="3392" width="128" height="192"/>
@@ -4335,7 +4335,7 @@
   <object id="1133" x="1935.25" y="2341.25" width="416" height="58.5"/>
   <object id="1134" x="1616" y="2085.75" width="352" height="58.5"/>
  </objectgroup>
- <objectgroup id="5" name="Transition">
+ <objectgroup id="5" name="Transition" visible="0">
   <object id="17" x="4421.09" y="3770.75" width="54.6667" height="3.83333">
    <properties>
     <property name="pos" value="world"/>

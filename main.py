@@ -1,5 +1,8 @@
 from typing import Callable
+
+from pygame import SRCALPHA
 from entities.Character import Character
+from gameobj.CollisionSprite import CollisionSprite
 from gameobj.MonsterPatch import MonsterPatch
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
@@ -19,6 +22,7 @@ class Game:
 		self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 		self.all_sprites = AllSprites()
+		self.collision_sprites = pygame.sprite.Group()
 
 		self.map = map_loader('world')
 		self.terrains = ['Terrain']
@@ -41,31 +45,41 @@ class Game:
 	def __set_terrain ( self, names: list[str], maps: TiledMap ) -> TiledMap:
 		for name in names:
 			for x, y, image in maps.get_layer_by_name(name).tiles():
-				Sprite(WORLD_LAYERS['bg'], image, self.all_sprites, topleft=(x * TILE_SIZE, y * TILE_SIZE))
+				Sprite('terrain', WORLD_LAYERS['bg'], image, self.all_sprites, topleft=(x * TILE_SIZE, y * TILE_SIZE))
 		return maps
 
 	def __set_objects ( self, obj: TiledObject ):
-		Sprite(WORLD_LAYERS['main' if obj.name != 'top' else 'top'], obj.image, self.all_sprites, center=(obj.x, obj.y))
+		CollisionSprite( 
+			WORLD_LAYERS['main' if obj.name != 'top' else 'top'],
+			obj.image, 
+			self.collision_sprites, 
+			self.all_sprites, 
+			topleft=(obj.x, obj.y)
+		)
 
 	def __set_water ( self, obj: TiledObject ):
 		for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):
 			for x in range(int(obj.x), int(obj.x + obj.width), TILE_SIZE):
-				AnimatedSprite(WORLD_LAYERS['water'], self.water_frames, self.all_sprites, topleft=(x, y))
+				AnimatedSprite('water', WORLD_LAYERS['water'], self.water_frames, self.all_sprites, topleft=(x, y))
 
 	def __set_monster_patch ( self, obj: TiledObject ):
 		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.all_sprites, topleft=(obj.x, obj.y))
 
 	def __set_coasts ( self, obj: TiledObject ):
-		AnimatedSprite(WORLD_LAYERS['bg'], self.coast_frames[obj.terrain][obj.side], self.all_sprites, topleft=(obj.x, obj.y))
+		AnimatedSprite('coast', WORLD_LAYERS['bg'], self.coast_frames[obj.terrain][obj.side], self.all_sprites, topleft=(obj.x, obj.y))
 
+	def __set_collisions_sprites ( self, obj: TiledObject ):
+		image = pygame.Surface((obj.width, obj.height))
+		Sprite('wall', WORLD_LAYERS['main'], image, self.collision_sprites, topleft=(obj.x, obj.y))
+	
 	def __set_player ( self, obj: TiledObject ):
 		if obj.name == 'Player' and obj.pos == self.player_spawn: 
-			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.all_sprites)
+			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		return obj
 
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
-			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.all_sprites)
+			Character(obj.direction, frames_loader(obj.graphic), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		return obj
 
 	def __set_entities ( self, obj: TiledObject ):
@@ -82,10 +96,11 @@ class Game:
 			partial(self.__get_layer, 'Water', self.__set_water),
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
-			partial(self.__get_layer, 'Entities', self.__set_entities)
+			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites),
+			partial(self.__get_layer, 'Entities', self.__set_entities),
 		)(self.map)
 
-	
+
 	def run ( self ):
 
 		self.__setup()
