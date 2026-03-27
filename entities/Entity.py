@@ -6,18 +6,17 @@ from pygame.sprite import Group
 from utils.Types import States
 
 class Entity ( Sprite ):
-	def __init__( self, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group ) -> None:
-		super().__init__(WORLD_LAYERS['main'], frames['down'][0], *groups, center=pos)
+	def __init__( self, name: str, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group ) -> None:
+		super().__init__(name, WORLD_LAYERS['main'], frames['down'][0], *groups, center=pos)
 
 		self.state: States = 'down'
 		
 		self.index = 0
 		self.frames = frames
+		self.hitbox = self.rect.inflate(-self.rect.width/2, -60)
 
 		self.direction = pygame.Vector2()
 		self.speed = 100
-
-		self.rect = self.rect.inflate(-80, -40)
 
 	def _set_direction ( self ):
 		pass

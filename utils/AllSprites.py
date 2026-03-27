@@ -30,7 +30,6 @@ class AllSprites ( pygame.sprite.Group ):
 		for layer in self.__get_layers():
 			for sprite in layer:
 				if isinstance(sprite, Entity): 
-					self.canvas.blit(self.shadow, sprite.rect.center + self.offset + self.shadow_offset)
-				self.canvas.blit(sprite.image, sprite.rect.center + self.offset)
-
+					self.canvas.blit(self.shadow, sprite.rect.topleft + self.offset + self.shadow_offset)
+				self.canvas.blit(sprite.image, sprite.rect.topleft + self.offset)
 		

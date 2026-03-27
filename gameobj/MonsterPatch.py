@@ -4,7 +4,7 @@ from utils.Types import Biomes
 
 class MonsterPatch ( Sprite ):
 	def __init__(self, biome: Biomes, level: int, monsters: list[str], image: Surface, *groups: Group, **anchor) -> None:
-		super().__init__(WORLD_LAYERS['main' if biome != 'sand' else 'bg'], image, *groups, **anchor)
+		super().__init__('monster_patch', WORLD_LAYERS['main' if biome != 'sand' else 'bg'], image, *groups, **anchor)
 
 		self.biome = biome
 		self.level = level
