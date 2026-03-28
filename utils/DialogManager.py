@@ -22,7 +22,7 @@ class DialogManager:
 					if self.current_dialog: 
 						self.current_dialog.update()
 					else:
-						self.current_dialog = Dialog(character, self.all_sprites)
+						self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
 
 	def __is_player_facing_character_x ( self, player: Player, relation: Vector2 ):
 		state = player.state
@@ -40,6 +40,10 @@ class DialogManager:
 			if abs(relation.y) < tolerance and self.__is_player_facing_character_x(player, relation) or \
 			abs(relation.x) < tolerance and self.__is_player_facing_character_y(player, relation):
 				return True
+
+	def finish_dialog ( self, dialog: Dialog ):
+		del dialog
+		self.current_dialog = None
 
 	def update ( self ):
 		self.input()
