@@ -15,8 +15,9 @@ class Entity ( Sprite ):
 		self.frames = frames
 		self.hitbox = self.rect.inflate(-self.rect.width/2, -60)
 
-		self.direction = pygame.Vector2()
+		self.is_mobile = True
 		self.speed = 100
+		self.direction = pygame.Vector2()
 
 	def _set_direction ( self ):
 		pass
@@ -36,8 +37,9 @@ class Entity ( Sprite ):
 		self.rect.center += self.direction * self.speed * dt
 
 	def update ( self, dt: float ):
-		self._set_direction()
-		self._set_state()
+		if self.is_mobile:
+			self._set_direction()
+			self._set_state()
+			self._move(dt)
 		self._animate(dt)
-		self._move(dt)
 

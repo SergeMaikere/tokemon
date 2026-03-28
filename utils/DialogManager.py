@@ -22,10 +22,7 @@ class DialogManager:
 			if keys[pygame.K_SPACE]:
 				for character in self.characters:
 					if self.__is_dialog_possible(self.player, character):
-						if self.current_dialog: 
-							self.current_dialog.update()
-						else:
-							self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
+						self.__create_dialog(character)
 						self.timer.start()
 
 	def __is_player_facing_character_x ( self, player: Player, relation: Vector2 ):
@@ -45,12 +42,20 @@ class DialogManager:
 			abs(relation.x) < tolerance and self.__is_player_facing_character_y(player, relation):
 				return True
 
+	def __create_dialog ( self, character: Character ):
+		if self.current_dialog: 
+			self.current_dialog.update()
+		else:
+			self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
+			self.player.is_mobile = False
+
+
 	def finish_dialog ( self, dialog: Dialog ):
 		del dialog
 		self.current_dialog = None
+		self.player.is_mobile = True
 
 	def update ( self ):
-		if not self.timer.running:
-			self.input()
+		if not self.timer.running: self.input()
 		self.timer.update()
 
