@@ -1,10 +1,13 @@
 from settings import *
+from functools import partial
 from pygame import Vector2
-from entities.Character import Character
+
 from gameobj.Dialog import Dialog
+from entities.Character import Character
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.Timer import Timer
+from utils.Helper import pipe
 
 class DialogManager:
 	def __init__ ( self, player: Player, characters: Group, all_sprites: AllSprites ):
@@ -17,12 +20,12 @@ class DialogManager:
 		self.current_dialog = None
 		
 
-	def input ( self, dt: float ):
-			keys = pygame.key.get_just_pressed()
-			if keys[pygame.K_SPACE]:
-				self.__update_current_dialog()
-				self.__initiate_dialog()
-				self.timer.start()
+	def input ( self ):
+		keys = pygame.key.get_just_pressed()
+		if keys[pygame.K_SPACE]:
+			self.__update_current_dialog()
+			self.__initiate_dialog()
+			self.timer.start()
 
 	def __update_current_dialog ( self ):
 		if not self.current_dialog: return 
@@ -31,17 +34,21 @@ class DialogManager:
 	def __initiate_dialog ( self ):
 		if self.current_dialog: return
 		for character in self.characters:
-			if self.__is_dialog_possible(self.player, character):
-				self.__set_character_direction(character)
-				self.__create_dialog(character)
-				self.__immobilize_player()
+			pipe(
+				partial(self.__is_dialog_possible, self.player),
+				self.__make_character_face_player,
+				self.__create_dialog
+			)(character)
+		self.__immobilize_player()
 
 	def __is_dialog_possible ( self, player: Player, character: Character, radius: int = 100, tolerance: int = 30 ):
 		relation = pygame.Vector2(character.rect.center) - pygame.Vector2(player.rect.center)
 		if relation.length() <= radius:
 			if abs(relation.y) < tolerance and self.__is_player_facing_character_x(player, relation) or \
 			abs(relation.x) < tolerance and self.__is_player_facing_character_y(player, relation):
-				return True
+				return character
+			else:
+				return None
 
 	def __is_player_facing_character_x ( self, player: Player, relation: Vector2 ):
 		return (player.state == 'left' and relation.x < 0) or (player.state == 'right' and relation.x > 0)
@@ -51,7 +58,8 @@ class DialogManager:
 		return (player.state == 'up' and relation.y < 0) or (player.state == 'down' and relation.x > 0)
 			
 
-	def __set_character_direction ( self, character: Character ):
+	def __make_character_face_player ( self, character: Character ):
+		if not character: return None
 		if self.player.state == 'left': character.state = 'right'
 		if self.player.state == 'right': character.state = 'left'
 		if self.player.state == 'up': character.state = 'down'
@@ -60,7 +68,9 @@ class DialogManager:
 		
 
 	def __create_dialog ( self, character: Character ):
+		if not character: return None
 		self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
+		return character
 
 	def __immobilize_player ( self ): self.player.is_mobile = False
 
@@ -69,7 +79,7 @@ class DialogManager:
 		self.current_dialog = None
 		self.player.is_mobile = True
 
-	def update ( self, dt: float ):
-		if not self.timer.running: self.input(dt)
+	def update ( self ):
+		if not self.timer.running: self.input()
 		self.timer.update()
 

@@ -126,7 +126,7 @@ class Game:
 			
 			self.all_sprites.update(dt)
 
-			self.dialog_manager.update(dt)
+			self.dialog_manager.update()
 
 			self.all_sprites.draw(self.player.rect.center)
 

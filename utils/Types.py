@@ -1,6 +1,9 @@
 
 from typing import Literal, TypedDict
 
+class Size ( TypedDict ):
+	width: float
+	height: float
 
 States = Literal[ 'down', 'left', 'right', 'up' ]
 
