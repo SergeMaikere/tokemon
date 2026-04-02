@@ -1,3 +1,4 @@
+from settings import *
 from typing import Callable
 
 from pygame import SRCALPHA
@@ -5,7 +6,6 @@ from assets.data.game_data import TRAINER_DATA
 from entities.Character import Character
 from gameobj.CollisionSprite import CollisionSprite
 from gameobj.MonsterPatch import MonsterPatch
-from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
 from functools import partial
 from pytmx import TiledMap, TiledObject
@@ -126,7 +126,7 @@ class Game:
 			
 			self.all_sprites.update(dt)
 
-			self.dialog_manager.update()
+			self.dialog_manager.update(dt)
 
 			self.all_sprites.draw(self.player.rect.center)
 

@@ -1,8 +1,7 @@
-from gameobj.Sprite import Sprite
 from settings import *
+from gameobj.Sprite import Sprite
 from pygame import Surface
 from pygame.sprite import Group
-
 from utils.Types import States
 
 class Entity ( Sprite ):

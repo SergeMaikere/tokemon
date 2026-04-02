@@ -19,21 +19,28 @@ class Dialog:
 		
 		self.font: Font = font_loader('PixeloidSans')
 
-		self.image = self.get_surface()
 		self.dialog_sprite = self.__get_sprite()
 
 	def get_surface ( self ):
 		return self.font.render(self.dialogs[self.index], False, COLORS['black'], COLORS['pure white'])
 
 	def __get_sprite ( self ):
-		return Sprite('dialog', WORLD_LAYERS['top'], self.image, self.all_sprites, midbottom=self.character.rect.midtop)
+		return Sprite('dialog', WORLD_LAYERS['top'], self.get_surface(), self.all_sprites, midbottom=self.character.rect.midtop)
 
-	def update ( self ):
+	def __kill_current_sprite ( self ):
 		if self.dialog_sprite: self.dialog_sprite.kill()	
-		self.index += 1 
+
+	def __finish_dialog ( self ):
 		if self.index >= len(self.dialogs): 
 			self.finish_dialog(self)
-		else:
-			self.image = self.get_surface()
+
+	def __create_new_dialog_sprite ( self ): 
+		if self.index < len(self.dialogs):
 			self.dialog_sprite = self.__get_sprite()
+
+	def update ( self ):
+		self.index += 1
+		self.__kill_current_sprite()
+		self.__finish_dialog()
+		self.__create_new_dialog_sprite()
 		

@@ -20,9 +20,9 @@ class Timer:
 		self.running = False
 		if self.loop: self.start()
 
-	def __time_is_up ( self ): return pygame.time.get_ticks() - self.start_time >= self.duration
+	def __is_time_up ( self ): return pygame.time.get_ticks() - self.start_time >= self.duration
 
 	def update ( self ):
-		if self.running and self.__time_is_up():
+		if self.running and self.__is_time_up():
 			if self.func: self.func()
 			self.stop()
