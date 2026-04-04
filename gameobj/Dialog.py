@@ -1,8 +1,7 @@
-from typing import Callable
-
-from pygame.cursors import textmarker_strings
 from settings import *
+from typing import Callable
 from pygame import Font
+
 from gameobj.Sprite import Sprite
 from entities.Character import Character
 from utils.AllSprites import AllSprites
@@ -23,6 +22,7 @@ class Dialog:
 		self.font: Font = font_loader('PixeloidSans')
 		self.padding = 5
 		self.dialog_sprite = self.__create_dialog_sprite()
+
 
 	
 	def __create_dialog_sprite ( self ):
@@ -59,17 +59,15 @@ class Dialog:
 	def __kill_current_sprite ( self ):
 		if self.dialog_sprite: self.dialog_sprite.kill()	
 
-	def __finish_dialog ( self ):
-		if self.index >= len(self.dialogs): 
-			self.finish_dialog(self)
-
 	def __create_new_dialog_sprite ( self ): 
-		if self.index < len(self.dialogs):
-			self.dialog_sprite = self.__create_dialog_sprite()
+		self.dialog_sprite = self.__create_dialog_sprite()
 
 	def update ( self ):
 		self.index += 1
 		self.__kill_current_sprite()
-		self.__finish_dialog()
-		self.__create_new_dialog_sprite()
+		
+		if self.index < len(self.dialogs):
+			self.__create_new_dialog_sprite()
+		else:
+			self.finish_dialog(self)
 		

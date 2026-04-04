@@ -23,12 +23,12 @@ class DialogManager:
 	def input ( self ):
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
-			self.__update_current_dialog()
 			self.__initiate_dialog()
+			self.__update_current_dialog()
 			self.timer.start()
 
 	def __update_current_dialog ( self ):
-		if not self.current_dialog: return 
+		if not self.current_dialog: return
 		self.current_dialog.update()
 
 	def __initiate_dialog ( self ):
@@ -37,9 +37,9 @@ class DialogManager:
 			pipe(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
-				self.__create_dialog
+				self.__create_dialog,
+				self.__immobilize_player
 			)(character)
-		self.__immobilize_player()
 
 	def __is_dialog_possible ( self, player: Player, character: Character, radius: int = 100, tolerance: int = 30 ):
 		relation = pygame.Vector2(character.rect.center) - pygame.Vector2(player.rect.center)
@@ -65,19 +65,21 @@ class DialogManager:
 		if self.player.state == 'up': character.state = 'down'
 		if self.player.state == 'down': character.state = 'up'
 		return character
-		
 
 	def __create_dialog ( self, character: Character ):
 		if not character: return None
 		self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
 		return character
 
-	def __immobilize_player ( self ): self.player.is_mobile = False
+	def __immobilize_player ( self, character: Character ): 
+		if not character: return None
+		self.player.is_mobile = False
+		return character
 
 	def finish_dialog ( self, dialog: Dialog ):
-		del dialog
 		self.current_dialog = None
 		self.player.is_mobile = True
+		del dialog
 
 	def update ( self ):
 		if not self.timer.running: self.input()
