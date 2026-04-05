@@ -18,6 +18,13 @@ class Entity ( Sprite ):
 		self.speed = 100
 		self.direction = pygame.Vector2()
 
+	def block ( self ): self.is_mobile = False
+	def unblock ( self ): self.is_mobile = True
+	
+	def stop( self ):
+		self.block()
+		self.direction = pygame.Vector2()
+
 	def _set_direction ( self ):
 		pass
 

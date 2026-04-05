@@ -7,7 +7,7 @@ from entities.Character import Character
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.Timer import Timer
-from utils.Helper import pipe
+from utils.Helper import pipe, is_dialog_possible
 
 class DialogManager:
 	def __init__ ( self, player: Player, characters: Group, all_sprites: AllSprites ):
@@ -23,8 +23,10 @@ class DialogManager:
 	def input ( self ):
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
-			self.__initiate_dialog()
-			self.__update_current_dialog()
+			if self.current_dialog:
+				self.__update_current_dialog()
+			else:
+				self.__initiate_dialog()
 			self.timer.start()
 
 	def __update_current_dialog ( self ):
@@ -41,22 +43,9 @@ class DialogManager:
 				self.__immobilize_player
 			)(character)
 
-	def __is_dialog_possible ( self, player: Player, character: Character, radius: int = 100, tolerance: int = 30 ):
-		relation = pygame.Vector2(character.rect.center) - pygame.Vector2(player.rect.center)
-		if relation.length() <= radius:
-			if abs(relation.y) < tolerance and self.__is_player_facing_character_x(player, relation) or \
-			abs(relation.x) < tolerance and self.__is_player_facing_character_y(player, relation):
-				return character
-			else:
-				return None
-
-	def __is_player_facing_character_x ( self, player: Player, relation: Vector2 ):
-		return (player.state == 'left' and relation.x < 0) or (player.state == 'right' and relation.x > 0)
-			
-
-	def __is_player_facing_character_y ( self, player: Player, relation: Vector2 ):
-		return (player.state == 'up' and relation.y < 0) or (player.state == 'down' and relation.x > 0)
-			
+	def __is_dialog_possible ( self, player: Player, character: Character ):
+		if not is_dialog_possible(player, character): return None
+		return character
 
 	def __make_character_face_player ( self, character: Character ):
 		if not character: return None

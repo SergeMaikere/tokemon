@@ -1,6 +1,7 @@
+from entities.Entity import Entity
 from settings import *
 from typing import Any, Callable
-from pygame import Surface
+from pygame import Surface, Vector2
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -95,9 +96,27 @@ def coasts_image_cutter ():
 		set_coast_frames_obj, 
 		# voyeur
 	)(get_coast_frames_cols())
+
+def is_dialog_possible ( subject: Entity, character: Entity, radius: int = 100, tolerance: int = 30 ):
+	relation = pygame.Vector2(character.rect.center) - pygame.Vector2(subject.rect.center)
+	if relation.length() > radius: return
+	return is_on_same_axis_x(relation, tolerance) and is_subject_facing_character_x(subject, relation) or\
+		is_on_same_axis_y(relation, tolerance) and is_subject_facing_character_y(subject, relation)
+				
+is_on_same_axis_x: Callable[ [Vector2, int], bool ] = lambda relation, tolerance: abs(relation.y) < tolerance
+is_on_same_axis_y: Callable[ [Vector2, int], bool ] = lambda relation, tolerance: abs(relation.x) < tolerance
+
+def is_subject_facing_character_x ( subject: Entity, relation: Vector2 ):
+		return (subject.state == 'left' and relation.x < 0) or (subject.state == 'right' and relation.x > 0)
+			
+def is_subject_facing_character_y ( subject: Entity, relation: Vector2 ):
+		return (subject.state == 'up' and relation.y < 0) or (subject.state == 'down' and relation.x > 0)
+
+def turn_toward (  subject: Entity, entity: Entity):
+	subject.direction = ( Vector2(entity.rect.center) - Vector2(subject.rect.center) ).normalize()
+	subject._set_state()
+	print(subject.state)
 	
-
-
 load_image = lambda path: pygame.image.load(path).convert_alpha() 
 
 load_font = lambda path, size = 30: pygame.font.Font(path, size)

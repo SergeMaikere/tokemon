@@ -82,10 +82,12 @@ class Game:
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
 			Character(
+				self.player,
 				obj.direction, 
 				frames_loader(obj.graphic), 
 				(obj.x, obj.y), 
-				TRAINER_DATA[obj.character_id], 
+				TRAINER_DATA[obj.character_id],
+				int(obj.radius), 
 				self.collision_sprites, self.all_characters, self.all_sprites
 			)
 		return obj
