@@ -29,10 +29,10 @@ class Entity ( Sprite ):
 		pass
 
 	def _set_state ( self ):
-		if self.direction.x == 1: self.state = 'right'
-		if self.direction.x == -1: self.state = 'left'
-		if self.direction.y == 1: self.state = 'down'
-		if self.direction.y == -1: self.state = 'up'
+		if self.direction.x == 1 and self.direction.y == 0: self.state = 'right'
+		if self.direction.x == -1 and self.direction.y == 0: self.state = 'left'
+		if self.direction.y == 1 and self.direction.x == 0: self.state = 'down'
+		if self.direction.y == -1 and self.direction.x == 0: self.state = 'up'
 
 	def _animate ( self, dt: float ):
 		if not self.direction: self.index = 0

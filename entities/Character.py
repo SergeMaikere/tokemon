@@ -2,7 +2,7 @@ from pygame import Vector2
 from entities.Player import Player
 from settings import *
 from entities.Entity import Entity
-from utils.Helper import is_dialog_possible, turn_toward_entity
+from utils.Helper import is_dialog_possible, turn_toward_entity, get_relation
 from utils.Types import States
 
 class Character ( Entity ):

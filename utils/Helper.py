@@ -110,10 +110,10 @@ is_on_same_axis_x: Callable[ [Vector2, int], bool ] = lambda relation, tolerance
 is_on_same_axis_y: Callable[ [Vector2, int], bool ] = lambda relation, tolerance: abs(relation.x) < tolerance
 
 def is_subject_facing_character_x ( subject: Entity, relation: Vector2 ):
-		return (subject.state == 'left' and relation.x < 0) or (subject.state == 'right' and relation.x > 0)
+	return (subject.state == 'left' and relation.x < 0) or (subject.state == 'right' and relation.x > 0)
 			
 def is_subject_facing_character_y ( subject: Entity, relation: Vector2 ):
-		return (subject.state == 'up' and relation.y < 0) or (subject.state == 'down' and relation.x > 0)
+	return (subject.state == 'up' and relation.y < 0) or (subject.state == 'down' and relation.y > 0)
 
 def turn_toward_entity (  subject: Entity, entity: Entity ):
 	return pipe( 
