@@ -2,7 +2,7 @@ from pygame import Vector2
 from entities.Player import Player
 from settings import *
 from entities.Entity import Entity
-from utils.Helper import is_dialog_possible, turn_toward
+from utils.Helper import is_dialog_possible, turn_toward_entity
 from utils.Types import States
 
 class Character ( Entity ):
@@ -24,7 +24,7 @@ class Character ( Entity ):
 		self.__stop_at_player()
 
 	def __player_stop_and_turn ( self ):
-		turn_toward(self.player, self)
+		turn_toward_entity(self.player, self)
 		self.player.stop()
 
 	def __go_to_player (self):
