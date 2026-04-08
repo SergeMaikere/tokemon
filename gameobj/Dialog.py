@@ -3,14 +3,14 @@ from typing import Callable
 from pygame import Font
 
 from gameobj.Sprite import Sprite
-from entities.Character import Character
+from entities.Entity import Entity
 from utils.AllSprites import AllSprites
 from utils.Helper import font_loader, pipe
 from utils.Types import Size
 
 
 class Dialog:
-	def __init__ ( self, character: Character, finish_dialog: Callable, all_sprites: AllSprites ):
+	def __init__ ( self, character: Entity, finish_dialog: Callable, all_sprites: AllSprites ):
 
 		self.character = character
 		self.finish_dialog = finish_dialog

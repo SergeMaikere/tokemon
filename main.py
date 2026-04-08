@@ -1,7 +1,6 @@
 from settings import *
 from typing import Callable
 
-from pygame import SRCALPHA
 from assets.data.game_data import TRAINER_DATA
 from entities.Character import Character
 from gameobj.CollisionSprite import CollisionSprite
@@ -12,7 +11,7 @@ from pytmx import TiledMap, TiledObject
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.DialogManager import DialogManager
-from utils.Helper import coasts_image_cutter, map_loader, images_loader_dict, images_loader_list, frames_loader, pipe
+from utils.Helper import coasts_image_cutter, get_layer_by_name_tiles, map_loader, images_loader_list, frames_loader, pipe, get_layer_by_name
 from gameobj.Sprite import Sprite
 
 class Game:
@@ -27,28 +26,39 @@ class Game:
 		self.collision_sprites = pygame.sprite.Group()
 		self.all_characters = pygame.sprite.Group()
 
-		self.map = map_loader('world')
-		self.terrains = ['Terrain']
-		self.player_spawn = 'house'
-
 		self.water_frames = images_loader_list('assets', 'graphics', 'tilesets', 'water')
 		self.coast_frames = coasts_image_cutter()
 
+		self.terrains = ['Terrain']
+		self.player_spawn = 'house'
+		self.tmx_map = map_loader('world')
+	
+		self.player = self.get_player(self.tmx_map)
+
+		self.dialog_manager = DialogManager(self.player, self.all_characters, self.all_sprites)
+
+
+	def get_player ( self, tmx_map: TiledMap ):
+		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == self.player_spawn )
+		if obj:
+			return self.__set_player(obj)
+		else:
+			raise ValueError('Player datas are missing from tmx map')
 
 	def __quit_game ( self ):
 		pygame.quit()
 		exit()
 
-	def __get_layer ( self, name: str, func: Callable, tmx_maps: TiledMap ) -> TiledMap:
-		for obj in tmx_maps.get_layer_by_name(name):
+	def __get_layer ( self, name: str, func: Callable, tmx_map: TiledMap ) -> TiledMap:
+		for obj in get_layer_by_name(tmx_map, name):
 			func(obj)
-		return tmx_maps
+		return tmx_map
 
-	def __set_terrain ( self, names: list[str], tmx_maps: TiledMap ) -> TiledMap:
+	def __set_terrain ( self, names: list[str], tmx_map: TiledMap ) -> TiledMap:
 		for name in names:
-			for x, y, image in tmx_maps.get_layer_by_name(name).tiles():
+			for x, y, image in get_layer_by_name_tiles(tmx_map, name):
 				Sprite('terrain', WORLD_LAYERS['bg'], image, self.all_sprites, topleft=(x * TILE_SIZE, y * TILE_SIZE))
-		return tmx_maps
+		return tmx_map
 
 	def __set_objects ( self, obj: TiledObject ):
 		CollisionSprite( 
@@ -75,9 +85,7 @@ class Game:
 		Sprite('wall', WORLD_LAYERS['main'], image, self.collision_sprites, topleft=(obj.x, obj.y))
 	
 	def __set_player ( self, obj: TiledObject ):
-		if obj.name == 'Player' and obj.pos == self.player_spawn: 
-			self.player = Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
-		return obj
+		return Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
@@ -88,36 +96,27 @@ class Game:
 				(obj.x, obj.y), 
 				TRAINER_DATA[obj.character_id],
 				int(obj.radius), 
+				self.dialog_manager,
 				self.collision_sprites, self.all_characters, self.all_sprites
 			)
 		return obj
 
-	def __set_entities ( self, obj: TiledObject ):
-		pipe(  
-			self.__set_player,
-			self.__set_character
-		)(obj)
-
-
-	def __setup( self ):
-		pipe(
+	def __setup( self ) -> TiledMap:
+		return pipe(
 			partial(self.__set_terrain, self.terrains),
 			partial(self.__get_layer, 'Objects', self.__set_objects),
 			partial(self.__get_layer, 'Water', self.__set_water),
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
 			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites),
-			partial(self.__get_layer, 'Entities', self.__set_entities),
-		)(self.map)
-
-	def __set_dialog_manager ( self ): self.dialog_manager = DialogManager(self.player, self.all_characters, self.all_sprites)
+			partial(self.__get_layer, 'Entities', self.__set_character),
+		)(self.tmx_map)
 
 
 	def run ( self ):
-
-		self.__setup()
-		self.__set_dialog_manager()
 		
+		self.__setup()
+
 		while True:
 			dt = self.clock.tick() / 1000
 

@@ -1,13 +1,13 @@
 from settings import *
 from functools import partial
-from pygame import Vector2
 
 from gameobj.Dialog import Dialog
-from entities.Character import Character
+from entities.Entity import Entity
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.Timer import Timer
-from utils.Helper import pipe, is_dialog_possible
+from utils.Helper import pipe
+from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
 	def __init__ ( self, player: Player, characters: Group, all_sprites: AllSprites ):
@@ -39,15 +39,15 @@ class DialogManager:
 			pipe(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
-				self.__create_dialog,
+				self._create_dialog,
 				self.__immobilize_player
 			)(character)
 
-	def __is_dialog_possible ( self, player: Player, character: Character ):
+	def __is_dialog_possible ( self, player: Player, character: Entity ):
 		if not is_dialog_possible(player, character): return None
 		return character
 
-	def __make_character_face_player ( self, character: Character ):
+	def __make_character_face_player ( self, character: Entity ):
 		if not character: return None
 		if self.player.state == 'left': character.state = 'right'
 		if self.player.state == 'right': character.state = 'left'
@@ -55,12 +55,12 @@ class DialogManager:
 		if self.player.state == 'down': character.state = 'up'
 		return character
 
-	def __create_dialog ( self, character: Character ):
+	def _create_dialog ( self, character: Entity ):
 		if not character: return None
 		self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
 		return character
 
-	def __immobilize_player ( self, character: Character ): 
+	def __immobilize_player ( self, character: Entity ): 
 		if not character: return None
 		self.player.is_mobile = False
 		return character
@@ -73,4 +73,5 @@ class DialogManager:
 	def update ( self ):
 		if not self.timer.running: self.input()
 		self.timer.update()
+
 

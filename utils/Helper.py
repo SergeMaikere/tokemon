@@ -1,6 +1,7 @@
+from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
-from typing import Any, Callable
+from typing import Any, Callable, cast
 from pygame import Surface, Vector2
 from os import walk
 from os.path import basename, join
@@ -96,45 +97,13 @@ def coasts_image_cutter ():
 		set_coast_frames_obj, 
 	)(get_coast_frames_cols())
 
-def is_dialog_possible ( subject: Entity, entity: Entity, radius: int = 100, tolerance: int = 30 ):
-	relation = get_relation(subject, entity)
-	if relation.length() > radius: return
-	return is_on_same_axis_x(relation, tolerance) and is_subject_facing_character_x(subject, relation) or\
-		is_on_same_axis_y(relation, tolerance) and is_subject_facing_character_y(subject, relation)
 
-def get_relation ( subject: Entity, entity: Entity, normalize: bool = False ):
-	relation = Vector2(entity.rect.center) - Vector2(subject.rect.center)
-	return relation.normalize() if normalize else relation
+def get_layer_by_name ( tmx_map: TiledMap, name: str ) -> list[TiledObject]: 
+	return cast(list[TiledObject], tmx_map.get_layer_by_name(name))
 
-is_on_same_axis_x: Callable[ [Vector2, int], bool ] = lambda relation, tolerance: abs(relation.y) < tolerance
-is_on_same_axis_y: Callable[ [Vector2, int], bool ] = lambda relation, tolerance: abs(relation.x) < tolerance
+def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float, float, Surface]]: 
+	return tmx_map.get_layer_by_name(name).tiles()
 
-def is_subject_facing_character_x ( subject: Entity, relation: Vector2 ):
-	return (subject.state == 'left' and relation.x < 0) or (subject.state == 'right' and relation.x > 0)
-			
-def is_subject_facing_character_y ( subject: Entity, relation: Vector2 ):
-	return (subject.state == 'up' and relation.y < 0) or (subject.state == 'down' and relation.y > 0)
-
-def turn_toward_entity (  subject: Entity, entity: Entity ):
-	return pipe( 
-		partial(get_subject_direction, entity=entity), 
-		round_subject_direction, 
-		change_subject_state 
-	)(subject)
-
-def get_subject_direction ( subject: Entity, entity: Entity ):
-	subject.direction = partial( get_relation, entity=entity, normalize=True )(subject)
-	return subject
-
-def round_subject_direction ( subject: Entity ):
-	subject.direction = round_vector2(subject.direction)
-	return subject
-
-def change_subject_state ( subject: Entity ):
-	subject._set_state()
-	return subject
-
-round_vector2: Callable[ Vector2, Vector2 ] = lambda v: Vector2( round(v.x), round(v.y) )
 
 	
 load_image = lambda path: pygame.image.load(path).convert_alpha() 
@@ -143,7 +112,7 @@ load_font = lambda path, size = 30: pygame.font.Font(path, size)
 
 font_loader = partial(small_walker, load_font, join('assets', 'graphics', 'fonts'))
 
-map_loader = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
+map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
 images_loader_dict = partial(big_walker_dict, load_image)
 

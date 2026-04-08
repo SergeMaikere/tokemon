@@ -1,27 +1,42 @@
-from pygame import Vector2
-from entities.Player import Player
 from settings import *
+from pygame import Vector2
+
+from entities.Player import Player
 from entities.Entity import Entity
-from utils.Helper import is_dialog_possible, turn_toward_entity, get_relation
+from utils.DialogManager import DialogManager
 from utils.Types import States
+from utils.DialogTools import is_dialog_possible, turn_toward_entity
 
 class Character ( Entity ):
-	def __init__(self, player: Player, state: States, frames: dict[str, list[Surface]], pos: tuple[float, float], datas: dict, radius: int, *groups: Group) -> None:
+	def __init__(
+			self, 
+			player: Player, 
+			state: States, 
+			frames: dict[str, list[Surface]], 
+			pos: tuple[float, float], 
+			datas: dict, 
+			radius: int, 
+			dialog_manager: DialogManager,
+			*groups: Group
+		) -> None:
+
 		super().__init__('character', frames, pos, *groups)
 
 		self.player = player
 		self.state = state
 		self.datas = datas
 		self.radius = radius
+		self.dialog_manager = dialog_manager
 
 		self.is_mobile = False
-		self.walk_hitbox = self.rect.inflate(10, 10)
+		self.walk_hitbox = self.hitbox.inflate(10, 10)
 
 	def __raycast ( self ):
-		if not is_dialog_possible(self, self.player, self.radius): return None
+		if not is_dialog_possible(self, self.player, self.radius) or self.dialog_manager.current_dialog: return None
 		self.__player_stop_and_turn()
 		self.__go_to_player()
 		self.__stop_at_player()
+		self.__create_dialog()
 
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)
@@ -34,7 +49,11 @@ class Character ( Entity ):
 	def __stop_at_player ( self ):
 		self.walk_hitbox.center = self.rect.center
 		if self.player.hitbox.colliderect(self.walk_hitbox): self.stop()
-
+		
+	def __create_dialog ( self ):
+		if self.is_mobile: return
+		self.dialog_manager._create_dialog(self)
+	
 	def update ( self, dt: float ):
 		if self.is_mobile:
 			self._set_direction()
