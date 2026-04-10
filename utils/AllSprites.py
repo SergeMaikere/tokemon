@@ -1,12 +1,14 @@
-from entities.Entity import Entity
 from settings import *
 from os.path import join
 from pygame.sprite import Sprite
-from utils.Helper import load_image
 
-class AllSprites ( pygame.sprite.Group ):
-	def __init__(self, *sprites: Sprite) -> None:
-		super().__init__(*sprites)
+from entities.Entity import Entity
+from utils.Helper import load_image
+from utils.MyGroup import MyGroup
+
+class AllSprites ( MyGroup ):
+	def __init__(self, name: str, *sprites: Sprite) -> None:
+		super().__init__(name, *sprites)
 
 		self.canvas = pygame.display.get_surface()
 		self.shadow = load_image(join('assets', 'graphics', 'other', 'shadow.png'))

@@ -4,6 +4,7 @@ from pygame import Vector2
 from entities.Player import Player
 from entities.Entity import Entity
 from utils.DialogManager import DialogManager
+from utils.MyGroup import MyGroup
 from utils.Types import States
 from utils.DialogTools import is_dialog_possible, turn_toward_entity
 
@@ -17,7 +18,7 @@ class Character ( Entity ):
 			datas: dict, 
 			radius: int, 
 			dialog_manager: DialogManager,
-			*groups: Group
+			*groups: MyGroup
 		) -> None:
 
 		super().__init__('character', frames, pos, *groups)
@@ -28,15 +29,27 @@ class Character ( Entity ):
 		self.radius = radius
 		self.dialog_manager = dialog_manager
 
+		self.collision_rects = self.__get_collisions_rects(groups)
 		self.is_mobile = False
 		self.walk_hitbox = self.hitbox.inflate(10, 10)
 
+	def __get_collisions_rects ( self, groups: tuple[MyGroup, ...] ):
+		collision_sprites = next(group for group in groups if group.name == 'collision_sprites')
+		return [ sprite.rect for sprite in collision_sprites if sprite is not self ]
+
 	def __raycast ( self ):
-		if not is_dialog_possible(self, self.player, self.radius) or self.dialog_manager.current_dialog: return None
+		if not is_dialog_possible(self, self.player, self.radius) or self.dialog_manager.current_dialog or not self.__has_line_of_sight(): return
 		self.__player_stop_and_turn()
 		self.__go_to_player()
 		self.__stop_at_player()
 		self.__create_dialog()
+
+	def __is_player_in_range ( self ): return vector2(self.rect.center).distance_to(self.player.rect.center) < self.radius
+
+	def __has_line_of_sight ( self ):
+		if not self.__is_player_in_range: return
+		collisions = [ bool(rect.clipline(self.rect.center, self.player.rect.center)) for rect in self.collision_rects ]
+		return not any(collisions)
 
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)

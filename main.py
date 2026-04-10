@@ -1,18 +1,19 @@
 from settings import *
+from functools import partial
 from typing import Callable
+from pytmx import TiledMap, TiledObject
 
 from assets.data.game_data import TRAINER_DATA
 from entities.Character import Character
+from entities.Player import Player
 from gameobj.CollisionSprite import CollisionSprite
 from gameobj.MonsterPatch import MonsterPatch
 from gameobj.AnimatedSprite import AnimatedSprite
-from functools import partial
-from pytmx import TiledMap, TiledObject
-from entities.Player import Player
+from gameobj.Sprite import Sprite
 from utils.AllSprites import AllSprites
+from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
 from utils.Helper import coasts_image_cutter, get_layer_by_name_tiles, map_loader, images_loader_list, frames_loader, pipe, get_layer_by_name
-from gameobj.Sprite import Sprite
 
 class Game:
 	def __init__(self) -> None:
@@ -22,9 +23,9 @@ class Game:
 		self.clock = pygame.time.Clock()
 		self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-		self.all_sprites = AllSprites()
-		self.collision_sprites = pygame.sprite.Group()
-		self.all_characters = pygame.sprite.Group()
+		self.all_sprites = AllSprites('all_sprites')
+		self.collision_sprites = MyGroup('collision_sprites')
+		self.all_characters = MyGroup('all_characters')
 
 		self.water_frames = images_loader_list('assets', 'graphics', 'tilesets', 'water')
 		self.coast_frames = coasts_image_cutter()
