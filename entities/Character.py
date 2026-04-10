@@ -32,7 +32,6 @@ class Character ( Entity ):
 
 		self.collision_rects = self.__get_collisions_rects(groups)
 		
-
 		self.is_mobile = False
 		self.walk_hitbox = self.hitbox.inflate(10, 10)
 
@@ -40,6 +39,7 @@ class Character ( Entity ):
 		self.turn_index = 0
 		self.turn_timer = Timer(3000, self.__turn, autostart=True, loop=True)
 
+		self.has_noticed_player = False
 
 	def __get_collisions_rects ( self, groups: tuple[MyGroup, ...] ):
 		collision_sprites = next(group for group in groups if group.name == 'collision_sprites')
@@ -50,22 +50,25 @@ class Character ( Entity ):
 		self.state = self.datas['directions'][self.turn_index]
 
 	def __look_around ( self ):
-		if self.dialog_manager.current_dialog: return
+		if self.__is_still_talking() or self.is_mobile: return
 		self.turn_timer.update()
 
+	def __is_still_talking ( self ): return bool(self.dialog_manager.current_dialog)
+	
 	def __raycast ( self ):
-		if not is_dialog_possible(self, self.player, self.radius) or self.dialog_manager.current_dialog or not self.__has_line_of_sight(): return
+		if self.has_noticed_player or not is_dialog_possible(self, self.player, self.radius) or self.__is_still_talking() or not self.__has_line_of_sight(): return
 		self.__player_stop_and_turn()
 		self.__go_to_player()
 		self.__stop_at_player()
 		self.__create_dialog()
-
-	def __is_player_in_range ( self ): return vector2(self.rect.center).distance_to(self.player.rect.center) < self.radius
+		self.__remembers_player()
 
 	def __has_line_of_sight ( self ):
-		if not self.__is_player_in_range: return
+		if not self.__is_player_in_range(): return
 		collisions = [ bool(rect.clipline(self.rect.center, self.player.rect.center)) for rect in self.collision_rects ]
 		return not any(collisions)
+	
+	def __is_player_in_range ( self ): return vector2(self.rect.center).distance_to(self.player.rect.center) < self.radius
 
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)
@@ -82,6 +85,10 @@ class Character ( Entity ):
 	def __create_dialog ( self ):
 		if self.is_mobile: return
 		self.dialog_manager._create_dialog(self)
+
+	def __remembers_player ( self ):
+		if self.is_mobile: return
+		self.has_noticed_player = True
 	
 	def update ( self, dt: float ):
 		if self.is_mobile:
