@@ -5,6 +5,7 @@ from entities.Player import Player
 from entities.Entity import Entity
 from utils.DialogManager import DialogManager
 from utils.MyGroup import MyGroup
+from utils.Timer import Timer
 from utils.Types import States
 from utils.DialogTools import is_dialog_possible, turn_toward_entity
 
@@ -30,12 +31,27 @@ class Character ( Entity ):
 		self.dialog_manager = dialog_manager
 
 		self.collision_rects = self.__get_collisions_rects(groups)
+		
+
 		self.is_mobile = False
 		self.walk_hitbox = self.hitbox.inflate(10, 10)
+
+		self.can_look_around = len(self.datas['directions']) > 1
+		self.turn_index = 0
+		self.turn_timer = Timer(3000, self.__turn, autostart=True, loop=True)
+
 
 	def __get_collisions_rects ( self, groups: tuple[MyGroup, ...] ):
 		collision_sprites = next(group for group in groups if group.name == 'collision_sprites')
 		return [ sprite.rect for sprite in collision_sprites if sprite is not self ]
+
+	def __turn ( self ):
+		self.turn_index = (self.turn_index + 1) % len(self.datas['directions'])
+		self.state = self.datas['directions'][self.turn_index]
+
+	def __look_around ( self ):
+		if self.dialog_manager.current_dialog: return
+		self.turn_timer.update()
 
 	def __raycast ( self ):
 		if not is_dialog_possible(self, self.player, self.radius) or self.dialog_manager.current_dialog or not self.__has_line_of_sight(): return
@@ -72,5 +88,6 @@ class Character ( Entity ):
 			self._set_direction()
 			self._set_state()
 			self._move(dt)
+		self.__look_around()
 		self._animate(dt)
 		self.__raycast()
