@@ -50,7 +50,7 @@ class Character ( Entity ):
 		self.state = self.datas['directions'][self.turn_index]
 
 	def __look_around ( self ):
-		if self.__is_still_talking() or self.is_mobile: return
+		if not self.datas['look_around'] or self.__is_still_talking() or self.is_mobile: return
 		self.turn_timer.update()
 
 	def __is_still_talking ( self ): return bool(self.dialog_manager.current_dialog)
@@ -61,7 +61,7 @@ class Character ( Entity ):
 		self.__go_to_player()
 		self.__stop_at_player()
 		self.__create_dialog()
-		self.__remembers_player()
+		self.__remember_player()
 
 	def __has_line_of_sight ( self ):
 		if not self.__is_player_in_range(): return
@@ -86,7 +86,7 @@ class Character ( Entity ):
 		if self.is_mobile: return
 		self.dialog_manager._create_dialog(self)
 
-	def __remembers_player ( self ):
+	def __remember_player ( self ):
 		if self.is_mobile: return
 		self.has_noticed_player = True
 	
