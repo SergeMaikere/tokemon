@@ -37,9 +37,10 @@ class Character ( Entity ):
 
 		self.can_look_around = len(self.datas['directions']) > 1
 		self.turn_index = 0
-		self.turn_timer = Timer(3000, self.__turn, autostart=True, loop=True)
+		self.turn_timer = Timer(1500, self.__turn, autostart=True, loop=True)
 
 		self.has_noticed_player = False
+		self.noticed_timer = Timer(500, lambda: self.player.set_is_noticed(False))
 
 	def __get_collisions_rects ( self, groups: tuple[MyGroup, ...] ):
 		collision_sprites = next(group for group in groups if group.name == 'collision_sprites')
@@ -57,6 +58,7 @@ class Character ( Entity ):
 	
 	def __raycast ( self ):
 		if self.has_noticed_player or not is_dialog_possible(self, self.player, self.radius) or self.__is_still_talking() or not self.__has_line_of_sight(): return
+		self.__notice_player()
 		self.__player_stop_and_turn()
 		self.__go_to_player()
 		self.__stop_at_player()
@@ -70,26 +72,34 @@ class Character ( Entity ):
 	
 	def __is_player_in_range ( self ): return vector2(self.rect.center).distance_to(self.player.rect.center) < self.radius
 
+	def __notice_player ( self ):
+		if self.is_mobile: return 
+		if self.noticed_timer.running: return self.noticed_timer.update()
+		self.player.set_is_noticed(True)
+		self.noticed_timer.start()
+
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)
 		self.player.stop()
 
 	def __go_to_player (self):
+		if self.noticed_timer.running: return
 		self.unblock()
 		self.direction = (Vector2(self.player.rect.center) - Vector2(self.rect.center)).normalize()
 
 	def __stop_at_player ( self ):
+		if not self.is_mobile: return
 		self.walk_hitbox.center = self.rect.center
 		if self.player.hitbox.colliderect(self.walk_hitbox): self.stop()
 		
 	def __create_dialog ( self ):
-		if self.is_mobile: return
+		if self.is_mobile or self.noticed_timer.running: return
 		self.dialog_manager._create_dialog(self)
 
 	def __remember_player ( self ):
-		if self.is_mobile: return
+		if self.is_mobile or self.noticed_timer.running: return
 		self.has_noticed_player = True
-	
+
 	def update ( self, dt: float ):
 		if self.is_mobile:
 			self._set_direction()

@@ -130,7 +130,7 @@ class Game:
 
 			self.dialog_manager.update()
 
-			self.all_sprites.draw(self.player.rect.center)
+			self.all_sprites.draw(self.player)
 
 			pygame.display.update()
 
