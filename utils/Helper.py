@@ -1,6 +1,8 @@
+from pytmx import TiledMap, TiledObject
 from settings import *
-from typing import Any, Callable
-from pygame import Surface
+from entities.Entity import Entity
+from typing import Any, Callable, cast
+from pygame import Surface, Vector2
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -93,20 +95,30 @@ def coasts_image_cutter ():
 	return pipe( 
 		fill_coast_frames_obj, 
 		set_coast_frames_obj, 
-		# voyeur
 	)(get_coast_frames_cols())
+
+
+def get_layer_by_name ( tmx_map: TiledMap, name: str ) -> list[TiledObject]: 
+	return cast(list[TiledObject], tmx_map.get_layer_by_name(name))
+
+def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float, float, Surface]]: 
+	return tmx_map.get_layer_by_name(name).tiles()
+
+
 	
-
-
 load_image = lambda path: pygame.image.load(path).convert_alpha() 
+
+load_font = lambda path, size = 30: pygame.font.Font(path, size)
+
+font_loader = partial(small_walker, load_font, join('assets', 'graphics', 'fonts'))
+
+map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
 images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)
 
 load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
-
-map_loader = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
 frames_loader = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
 

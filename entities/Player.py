@@ -7,8 +7,12 @@ class Player ( Entity ):
 	def __init__(self, frames: dict[str, list[Surface]], pos: tuple[float, float], collisions: Group, *groups: Group) -> None:
 		super().__init__('player', frames, pos, *groups)
 
-		self.speed = 250
 		self.collision_sprites = collisions
+		self.speed = 250
+		self.is_noticed = False
+
+
+	def set_is_noticed ( self, noticed: bool ): self.is_noticed = noticed
 
 	def _set_direction ( self ):
 		keys = pygame.key.get_pressed()
