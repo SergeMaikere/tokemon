@@ -24,7 +24,8 @@ class MapsLoader:
 		self.water_frames = images_loader_list('assets', 'graphics', 'tilesets', 'water')
 		self.coast_frames = coasts_image_cutter()
 
-		self.all_sprites, self.collision_sprites, self.all_characters = groups
+		self.groups = groups
+		self.all_sprites, self.collision_sprites, self.all_characters, self.transition_sprites = self.groups
 
 
 	def __get_layer ( self, name: str, func: Callable, tmx_map: TiledMap ) -> TiledMap:
@@ -50,6 +51,9 @@ class MapsLoader:
 		for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):
 			for x in range(int(obj.x), int(obj.x + obj.width), TILE_SIZE):
 				AnimatedSprite('water', WORLD_LAYERS['water'], self.water_frames, self.all_sprites, topleft=(x, y))
+
+	def __set_transition ( self, obj: TiledObject ):
+		Sprite('transition', WORLD_LAYERS['main'], pygame.Surface((obj.width, obj.height)), self.transition_sprites, center=(obj.x, obj.y))
 
 	def __set_monster_patch ( self, obj: TiledObject ):
 		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.all_sprites, topleft=(obj.x, obj.y))
@@ -82,10 +86,11 @@ class MapsLoader:
 		return pipe(
 			partial(self.__set_terrain, 'Terrain'),
 			partial(self.__set_terrain, 'Terrain Top'),
-			partial(self.__get_layer, 'Objects', self.__set_objects),
 			partial(self.__get_layer, 'Water', self.__set_water),
+			partial(self.__get_layer, 'Transition', self.__set_transition),
+			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites),
+			partial(self.__get_layer, 'Objects', self.__set_objects),
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
-			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites),
 			partial(self.__get_layer, 'Entities', self.__set_character),
 		)(tmx_map)

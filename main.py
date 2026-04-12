@@ -1,12 +1,14 @@
+from functools import partial
 from settings import *
 from pytmx import TiledMap, TiledObject
 
 from entities.Player import Player
 from utils.AllSprites import AllSprites
+from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, pipe, voyeur
 
 class Game:
 	def __init__(self) -> None:
@@ -18,13 +20,16 @@ class Game:
 
 		self.all_sprites = AllSprites('all_sprites')
 		self.collision_sprites = MyGroup('collision_sprites')
-		self.all_characters = MyGroup('all_characters')
+		self.character_sprites = MyGroup('character_sprites')
+		self.transition_sprites = MyGroup('transition_sprites')
 	
 		self.player = self.get_player(map_loader('world'), 'house')
 
-		self.dialog_manager = DialogManager(self.player, self.all_characters, self.all_sprites)
+		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.all_sprites)
 
-		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.all_characters)
+		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
+
+		self.transition_manager = MapTransition(self.player)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -37,6 +42,11 @@ class Game:
 		pygame.quit()
 		exit()
 
+	def __handle_transition ( self, dt: float ):
+		pipe(
+			self.transition_manager.check_for_collision,
+			partial(self.transition_manager.fade_to_black, dt),
+		)(self.transition_sprites)
 
 	def run ( self ):
 		
@@ -55,6 +65,8 @@ class Game:
 			self.dialog_manager.update()
 
 			self.all_sprites.draw(self.player)
+
+			self.__handle_transition(dt)
 
 			pygame.display.update()
 
