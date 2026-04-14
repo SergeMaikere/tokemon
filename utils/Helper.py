@@ -114,6 +114,8 @@ font_loader = partial(small_walker, load_font, join('assets', 'graphics', 'fonts
 
 map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
+maps_loader: Callable [ [], dict[str, TiledMap] ] = lambda: big_walker_dict(load_pygame, join('assets', 'data', 'maps'))
+
 images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)

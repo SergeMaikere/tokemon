@@ -16,9 +16,12 @@ class Entity ( Sprite ):
 
 		self.is_mobile = True
 		self.speed = 100
-		self.direction = pygame.Vector2()
+		self.direction = vector2()
 
-	def block ( self ): self.is_mobile = False
+	def block ( self ): 
+		self.is_mobile = False
+		self.direction = vector2()
+
 	def unblock ( self ): self.is_mobile = True
 	
 	def stop( self ):
@@ -40,7 +43,8 @@ class Entity ( Sprite ):
 		self.image = self.frames[self.state][int(self.index) % len(self.frames[self.state])]
 
 	def _move ( self, dt: float ):
-		self.rect.center += self.direction * self.speed * dt
+		self.hitbox.center += self.direction * self.speed * dt
+		self.rect.center = self.hitbox.center
 
 	def update ( self, dt: float ):
 		if self.is_mobile:
