@@ -1,6 +1,6 @@
-from functools import partial
+from gameobj.MonsterIndex import MonsterIndex
 from settings import *
-from pytmx import TiledMap, TiledObject
+from pytmx import TiledMap
 
 from entities.Player import Player
 from utils.AllSprites import AllSprites
@@ -8,7 +8,7 @@ from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, pipe, voyeur
+from utils.Helper import map_loader, frames_loader, get_layer_by_name
 
 class Game:
 	def __init__(self) -> None:
@@ -30,6 +30,8 @@ class Game:
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
 
 		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
+
+		self.monster_index = MonsterIndex(self.player)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -60,8 +62,10 @@ class Game:
 
 			self.all_sprites.draw(self.player)
 
+			self.monster_index.update(dt)
+			
 			self.transition_manager.handle_transitions(dt)
-			# print(self.player.collision_sprites)
+
 			pygame.display.update()
 
 

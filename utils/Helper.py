@@ -20,6 +20,14 @@ pipe = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
+
+def required ( v: Any ):
+	if v is None:
+		raise ValueError('Value is required')
+	else:
+		return v
+
+
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):
 	obj = {}
 	for root, _, files in walk(join(*path)):
