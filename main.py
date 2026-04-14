@@ -29,7 +29,7 @@ class Game:
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
 
-		self.transition_manager = MapTransition(self.player)
+		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -42,23 +42,17 @@ class Game:
 		pygame.quit()
 		exit()
 
-	def __handle_transition ( self, dt: float ):
-		pipe(
-			self.transition_manager.check_for_collision,
-			partial(self.transition_manager.fade_to_black, dt),
-		)(self.transition_sprites)
-
 	def run ( self ):
 		
 		self.maps_loader.setup(self.maps_loader.maps['world'])
 
 		while True:
-			dt = self.clock.tick() / 1000
+			dt = self.clock.tick(60) / 1000
+
+			self.canvas.fill('black')
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: self.__quit_game()
-
-			self.canvas.fill('black')
 			
 			self.all_sprites.update(dt)
 
@@ -66,8 +60,8 @@ class Game:
 
 			self.all_sprites.draw(self.player)
 
-			self.__handle_transition(dt)
-
+			self.transition_manager.handle_transitions(dt)
+			# print(self.player.collision_sprites)
 			pygame.display.update()
 
 

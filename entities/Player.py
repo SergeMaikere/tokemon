@@ -37,10 +37,10 @@ class Player ( Entity ):
 				if self.direction.y > 0: self.hitbox.bottom = sprite.hitbox.top
 				if self.direction.y < 0: self.hitbox.top = sprite.hitbox.bottom
 
-	def _move ( self, dt: float ):
-		self.__update_y_order()
-		self.__move_hitbox_x(dt)
-		self.__collision_handler_x()
-		self.__move_hitbox_y(dt)
-		self.__collision_handler_y()
-		self.rect.center = self.hitbox.center
+	# def _move ( self, dt: float ):
+	# 	self.__update_y_order()
+	# 	self.__move_hitbox_x(dt)
+	# 	self.__collision_handler_x()
+	# 	self.__move_hitbox_y(dt)
+	# 	self.__collision_handler_y()
+	# 	self.rect.center = self.hitbox.center

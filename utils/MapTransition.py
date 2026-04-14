@@ -1,6 +1,6 @@
-from typing import Callable
+from typing import Callable, Literal
+
 from settings import *
-from gameobj.Sprite import Sprite
 from entities.Player import Player
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
@@ -11,43 +11,63 @@ class MapTransition:
 		
 		self.player = player
 		self.maps_loader = maps_loader
+		self.get_player = get_player
 
 		self.canvas = pygame.display.get_surface()
 		self.tint = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
+		self.transition_sprite = None
 		self.transition_speed = 600
 		self.transparency = 0
-		self.direction = 1
+		self.tinted = False
 
 
-	def check_for_collision ( self, transition_sprites: MyGroup ):
-		try:
-			return next( sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox) )
-		except:
-			return None
+	def __handle_collisions ( self, transition_sprites: MyGroup ):
+		if self.transition_sprite or self.tinted: return
+		self.transition_sprite = self.__check_for_collision(transition_sprites)
+		if self.transition_sprite: self.player.block()
 
-	def fade_to_black ( self, dt: float, transition_sprite: Sprite ):
-		if not transition_sprite: return
+	def __check_for_collision ( self, transition_sprites: MyGroup ):
+		return next( (sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox)), None )
 
-		self.__set_transparency(dt)
+	def __fade_to_black ( self, dt: float ):
+		if not self.transition_sprite or self.tinted: return
+		self.__set_transparency(dt, 1)
 		self.__set_tint_alpha()
-		self.__draw_new_fade()		
-		return transition_sprite
+		self.__draw_new_fade()	
+		self.__set_tinted(1)	
 
-	def __set_transparency ( self, dt: float ):
-		self.transparency += self.transition_speed * dt * self.direction
+	def __set_transparency ( self, dt: float, direction: Literal[1, -1] ):
+		self.transparency += self.transition_speed * dt * direction
 		self.transparency = max(0, min(self.transparency, 255))
 
-	def __set_tint_alpha ( self ): self.tint.set_alpha(int(self.transparency))
+	def __set_tint_alpha ( self ): self.tint.set_alpha(round(self.transparency))
 
 	def __draw_new_fade ( self ): self.canvas.blit(self.tint, (0,0))
 
-	def charge_map ( self, transition_sprite: Sprite ):
-		if not transition_sprite or self.transparency < 255: return
-		self.__kill_all_sprites()
-		self.maps_loader.setup(self.maps_loader.maps[transition_sprite.target])
+	def __set_tinted ( self, direction: Literal[1, -1] ): 
+		if direction == 1: self.tinted = self.transparency >= 255
+		if direction == -1: self.tinted = self.transparency > 0
 
-	def __kill_all_sprites ( self ):
-		for group in self.maps_loader.groups:
-			group.empty()
+	def __charge_map ( self ):
+		if not self.transition_sprite or not self.tinted: return
+		self.maps_loader.transition_setup(self.maps_loader.maps[self.transition_sprite.target], self.transition_sprite.pos)
+		self.transition_sprite = None
 
+	def __fade_to_light ( self, dt: float ):
+		if not self.tinted: return
+		self.__set_transparency(dt, -1)
+		self.__set_tint_alpha()
+		self.__draw_new_fade()	
+		self.__set_tinted(-1)
+		self.__unblock_player()
+
+	def __unblock_player ( self ):
+		if self.tinted: return
+		self.player.unblock()
+
+	def handle_transitions ( self, dt: float ):
+		self.__handle_collisions(self.maps_loader.transition_sprites)
+		self.__fade_to_black(dt)
+		self.__charge_map()
+		self.__fade_to_light(dt)

@@ -2,6 +2,7 @@ from functools import partial
 from typing import Callable
 from pytmx import TiledMap, TiledObject
 
+from gameobj.TransitionSprite import TransitionSprite
 from settings import *
 from assets.data.game_data import TRAINER_DATA
 from entities.Character import Character
@@ -53,7 +54,7 @@ class MapsLoader:
 				AnimatedSprite('water', WORLD_LAYERS['water'], self.water_frames, self.all_sprites, topleft=(x, y))
 
 	def __set_transition ( self, obj: TiledObject ):
-		Sprite('transition', WORLD_LAYERS['main'], pygame.Surface((obj.width, obj.height)), self.transition_sprites, center=(obj.x, obj.y))
+		TransitionSprite(pygame.Surface((obj.width, obj.height)), obj.target, obj.pos, self.transition_sprites, center=(obj.x, obj.y))
 
 	def __set_monster_patch ( self, obj: TiledObject ):
 		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.all_sprites, topleft=(obj.x, obj.y))
@@ -65,8 +66,11 @@ class MapsLoader:
 		image = pygame.Surface((obj.width, obj.height))
 		Sprite('wall', WORLD_LAYERS['main'], image, self.collision_sprites, topleft=(obj.x, obj.y))
 	
-	def set_player ( self, obj: TiledObject ):
-		return Player(frames_loader(obj.name.lower()), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
+	def __set_player ( self, player_spawn_pos: str, obj: TiledObject ):
+		if obj.name == 'Player' and obj.pos == player_spawn_pos:
+			self.player.rect.center = (obj.x, obj.y)
+			self.all_sprites.add(self.player)
+		return obj
 
 	def __set_character ( self, obj: TiledObject ):
 		if obj.name == 'Character':
@@ -82,6 +86,15 @@ class MapsLoader:
 			)
 		return obj
 
+	def __set_entities ( self, player_spawn_pos: str, obj: TiledObject ):
+		pipe(
+			partial(self.__set_player, player_spawn_pos),
+			self.__set_character,
+		)(obj)
+
+	def __kill_all_sprites ( self ):
+		for group in self.groups: group.empty()
+
 	def setup( self, tmx_map: TiledMap ) -> TiledMap:
 		return pipe(
 			partial(self.__set_terrain, 'Terrain'),
@@ -93,4 +106,18 @@ class MapsLoader:
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
 			partial(self.__get_layer, 'Entities', self.__set_character),
+		)(tmx_map)
+
+	def transition_setup( self, tmx_map: TiledMap, player_spawn_pos: str ):
+		self.__kill_all_sprites()
+		return pipe(
+			partial(self.__set_terrain, 'Terrain'),
+			partial(self.__set_terrain, 'Terrain Top'),
+			partial(self.__get_layer, 'Water', self.__set_water),
+			partial(self.__get_layer, 'Transition', self.__set_transition),
+			partial(self.__get_layer, 'Collisions', self.__set_collisions_sprites),
+			partial(self.__get_layer, 'Objects', self.__set_objects),
+			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
+			partial(self.__get_layer, 'Coast', self.__set_coasts),
+			partial(self.__get_layer, 'Entities', partial(self.__set_entities, player_spawn_pos)),
 		)(tmx_map)

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="9" height="12" tilewidth="64" tileheight="64" infinite="0" nextlayerid="11" nextobjectid="20">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="9" height="12" tilewidth="64" tileheight="64" infinite="0" nextlayerid="11" nextobjectid="20">
+ <properties>
+  <property name="direction" value="down"/>
+ </properties>
  <tileset firstgid="1" source="../tilesets/world.tsx"/>
  <tileset firstgid="211" source="../tilesets/objects.tsx"/>
  <tileset firstgid="242" source="../tilesets/indoor.tsx"/>
@@ -46,7 +49,9 @@
   <object id="12" name="Character" x="286.934" y="374.101">
    <properties>
     <property name="character_id" value="Nurse"/>
+    <property name="direction" value="down"/>
     <property name="graphic" value="purple_girl"/>
+    <property name="radius" value="0"/>
    </properties>
    <point/>
   </object>
