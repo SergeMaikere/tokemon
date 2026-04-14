@@ -68,7 +68,7 @@ class MapsLoader:
 	
 	def __set_player ( self, player_spawn_pos: str, obj: TiledObject ):
 		if obj.name == 'Player' and obj.pos == player_spawn_pos:
-			self.player.rect.center = (obj.x, obj.y)
+			self.player.rect.center = self.player.hitbox.center = (obj.x, obj.y)
 			self.all_sprites.add(self.player)
 		return obj
 

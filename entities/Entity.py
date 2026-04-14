@@ -43,8 +43,8 @@ class Entity ( Sprite ):
 		self.image = self.frames[self.state][int(self.index) % len(self.frames[self.state])]
 
 	def _move ( self, dt: float ):
-		self.rect.center += self.direction * self.speed * dt
-		self.hitbox.center = self.rect.center
+		self.hitbox.center += self.direction * self.speed * dt
+		self.rect.center = self.hitbox.center
 
 	def update ( self, dt: float ):
 		if self.is_mobile:
