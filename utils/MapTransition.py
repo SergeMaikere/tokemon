@@ -2,8 +2,10 @@ from typing import Callable, Literal
 
 from settings import *
 from entities.Player import Player
+from utils.Timer import Timer
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
+from utils.Types import TransitionState
 
 
 class MapTransition:
@@ -20,7 +22,8 @@ class MapTransition:
 		self.transition_speed = 600
 		self.transparency = 0
 
-		self.state = 'search'
+		self.state: TransitionState = 'check_collision'
+		self.timer = Timer(500, self.__fade_to_light)
 
 
 	def __handle_collisions ( self, transition_sprites: MyGroup ):
@@ -52,8 +55,12 @@ class MapTransition:
 	def __load_new_map ( self ):
 		if not self.transition_sprite: return
 		self.maps_loader.transition_setup(self.maps_loader.maps[self.transition_sprite.target], self.transition_sprite.pos)
-		self.transition_sprite = None
-		self.state = 'fade_to_light'
+		self.__update_datas_after_map_moaded()
+
+	def __update_datas_after_map_moaded ( self ):
+		self.transition_sprite = None # reset transition_sprite so it is ready for next map transition
+		self.state = 'fade_to_light' # set next state
+		self.canvas.fill(0) # cleanse the display surface otherwise it shows ghosts of the old map
 
 	def __fade_to_light ( self, dt: float ):
 		self.__set_transparency(dt, -1)
@@ -66,19 +73,13 @@ class MapTransition:
 
 	def __unblock_player ( self ):
 		self.player.unblock()
-		self.state = 'search'
-
-	# def handle_transitions ( self, dt: float ):
-	# 	self.__handle_collisions(self.maps_loader.transition_sprites)
-	# 	self.__fade_to_black(dt)
-	# 	self.__load_new_map()
-	# 	self.__fade_to_light(dt)
+		self.state = 'check_collision'
 	
 	def handle_transitions ( self, dt: float ):
 		match self.state:
-			case 'fade_to_black': return self.__fade_to_black(dt)
-			case 'load_map': return self.__load_new_map()
-			case 'fade_to_light': return self.__fade_to_light(dt)
-			case 'done': return self.__unblock_player()
-			case 'search': return self.__handle_collisions(self.maps_loader.transition_sprites)
-			case _: raise ValueError('Incorrect state for MapsTransition')
+			case 'check_collision': self.__handle_collisions(self.maps_loader.transition_sprites)
+			case 'fade_to_black': self.__fade_to_black(dt)
+			case 'load_map': self.__load_new_map()
+			case 'fade_to_light': self.__fade_to_light(dt)
+			case 'done': self.__unblock_player()
+			case _: raise ValueError('Incorrect value state for MapsTransition')
