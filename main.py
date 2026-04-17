@@ -8,7 +8,7 @@ from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader
 
 class Game:
 	def __init__(self) -> None:
@@ -17,6 +17,12 @@ class Game:
 
 		self.clock = pygame.time.Clock()
 		self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+		self.fonts = {
+			'regular': font_loader('PixeloidSan', 18),
+			'small': font_loader('PixeloidSan', 14),
+			'bold': font_loader('dogicapixelbold', 20),
+		}
 
 		self.all_sprites = AllSprites('all_sprites')
 		self.collision_sprites = MyGroup('collision_sprites')
@@ -31,7 +37,7 @@ class Game:
 
 		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
 
-		self.monster_index = MonsterIndex(self.player)
+		self.monster_index = MonsterIndex(self.player, self.fonts)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -66,7 +72,7 @@ class Game:
 			
 			self.transition_manager.handle_transitions(dt)
 
-			pygame.display.update()
+			pygame.display.update( )
 
 
 

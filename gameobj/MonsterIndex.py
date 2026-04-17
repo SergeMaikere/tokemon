@@ -1,16 +1,20 @@
 from functools import reduce
+from pygame import FRect, Font
 from random import sample, randint
 
 from entities.Player import Player
 from settings import *
 from assets.data.game_data import MONSTER_DATA
 from entities.Monster import Monster
-from utils.Helper import required
+from utils.Helper import required, images_loader_dict
 
 class MonsterIndex:
-	def __init__( self, player: Player ) -> None:
+	def __init__( self, player: Player, fonts: dict[str, Font ] ) -> None:
 		self.player = player
+		self.fonts = fonts
+
 		self.monsters = self.__get_random_monsters(8)
+		self.monsters_icons = images_loader_dict('assets', 'graphics', 'icons')
 
 		self.canvas = required(pygame.display.get_surface())
 		self.tint_surface = self.__get_tinted_surface()
@@ -34,24 +38,47 @@ class MonsterIndex:
 
 	def __input ( self ):
 		keys = pygame.key.get_just_pressed()
-		if keys[pygame.K_RETURN]:
-			self.player.is_mobile = not self.player.is_mobile
-			self.open = not self.open
+		if keys[pygame.K_RETURN]: 
+			self.__toogle_datas()
+
+	def __toogle_datas ( self ):
+		self.player.is_mobile = not self.player.is_mobile
+		self.open = not self.open
 
 	def __tint ( self ): self.canvas.blit(self.tint_surface, (0, 0))
 
 	def __display_index ( self ):
 		# display index's rect
-		pygame.draw.rect(self.canvas, COLORS['gray'], self.main_rect)
-
+		self.__draw_main_rect()
 		# display side list
 		self.__display_side_list()
 
+	def __draw_main_rect ( self ):
+		pygame.draw.rect(self.canvas, COLORS['gray'], self.main_rect)
+
 	def __display_side_list ( self ):
 		for i, monster in self.monsters.items():
-			top = self.main_rect.top + i * self.card_height
-			card_rect = pygame.FRect(self.main_rect.left, top, self.card_width, self.card_height)
-			pygame.draw.rect(self.canvas, COLORS['pure white'], card_rect)
+			card_rect = self.__set_card(i)
+			self.__set_text(i, card_rect)
+			self.__set_icon(i, card_rect)
+
+	def __set_card ( self, i: int ):
+		top = self.main_rect.top + i * self.card_height
+		card_rect = pygame.FRect(self.main_rect.left, top, self.card_width, self.card_height)
+		pygame.draw.rect(self.canvas, COLORS['pure white'], card_rect)
+		return card_rect
+
+	def __set_text ( self, i: int, card_rect: FRect ):
+		text_surface = self.fonts['regular'].render(self.monsters[i].name, False, COLORS['black'])
+		text_rect = text_surface.get_frect(midleft=card_rect.midleft + vector2(90, 0))
+		self.canvas.blit(text_surface, text_rect)
+		return card_rect
+
+	def __set_icon ( self, i: int, card_rect: FRect ):
+		icon_surface = self.monsters_icons[self.monsters[i].name]
+		icon_rect = icon_surface.get_frect(midleft=card_rect.midleft + vector2(10, 0))
+		self.canvas.blit(icon_surface, icon_rect)
+		return card_rect
 
 	def update ( self, dt: float ):
 		self.__input()

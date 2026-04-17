@@ -2,7 +2,7 @@ from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
 from typing import Any, Callable, cast
-from pygame import Surface, Vector2
+from pygame import Font, Surface, Vector2
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -114,11 +114,11 @@ def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float
 
 
 	
-load_image = lambda path: pygame.image.load(path).convert_alpha() 
+load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 
-load_font = lambda path, size = 30: pygame.font.Font(path, size)
+load_font: Callable[ [int, str], Font ] = lambda size, path: pygame.font.Font(path, size)
 
-font_loader = partial(small_walker, load_font, join('assets', 'graphics', 'fonts'))
+font_loader: Callable[ [str, int], Font ] = lambda name, size: partial(small_walker, partial(load_font, size), join('assets', 'graphics', 'fonts'))(name)
 
 map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 

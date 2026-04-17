@@ -19,7 +19,7 @@ class Dialog:
 		self.index = 0
 		self.dialogs = self.character.datas['dialog']['default' if not self.character.datas['defeated'] else 'defeated']
 		
-		self.font: Font = font_loader('PixeloidSans')
+		self.font: Font = font_loader('PixeloidSans', 30)
 		self.padding = 5
 		self.dialog_sprite = self.__create_dialog_sprite()
 
