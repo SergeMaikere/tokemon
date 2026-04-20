@@ -24,7 +24,6 @@ class MonsterIndex:
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
 		self.list_index = 0
-		# self.list_offset = 0
 		self.card_width, self.card_height, self.max_list_items = self.__get_card_dimensions(6)
 
 		self.open = False
@@ -76,29 +75,30 @@ class MonsterIndex:
 				partial(self.__draw_card, i)
 			)(i)
 
-	def __get_index_offset ( self, i: int ): 
-		return i if self.list_index < self.max_list_items else (i + self.list_index - self.max_list_items + 1) % len(self.monsters)
+	def __set_v_offset ( self ): 
+		return 0 if self.list_index < self.max_list_items else (self.list_index - self.max_list_items + 1)
 
 	def __set_card ( self, i: int ):
-		top = self.main_rect.top + i * self.card_height
+		v_offset = self.__set_v_offset()
+		top = self.main_rect.top + (i - v_offset) * self.card_height
 		card_rect = pygame.FRect(self.main_rect.left, top, self.card_width, self.card_height)
 		return card_rect
 
 	def __set_text ( self, i: int, card_rect: FRect ):
-		text_surface = self.fonts['regular'].render(self.monsters[self.__get_index_offset(i)].name, False, COLORS['pure white'])
+		text_surface = self.fonts['regular'].render(self.monsters[i].name, False, COLORS['pure white'])
 		text_rect = text_surface.get_frect(midleft=card_rect.midleft + vector2(90, 0))
 		return (card_rect, text_surface, text_rect)
 
 	def __set_icon ( self, i: int, datas: tuple[FRect, Surface, FRect] ):
 		card_rect =  datas[0]
-		icon_surface = self.monsters_icons[self.monsters[self.__get_index_offset(i)].name]
+		icon_surface = self.monsters_icons[self.monsters[i].name]
 		icon_rect = icon_surface.get_frect(midleft=card_rect.midleft + vector2(15, 0))
 		return ( *datas, icon_surface, icon_rect )
 
 	def __draw_card ( self, i: int, datas: tuple[FRect, Surface, FRect, Surface, FRect] ):
 		if datas[0].colliderect(self.main_rect):
 			card_rect, text_surface, text_rect, icon_surface, icon_rect = datas
-			bg_color = COLORS['gray'] if self.list_index == self.__get_index_offset(i) else COLORS['light']
+			bg_color = COLORS['gray'] if self.list_index == i else COLORS['light']
 			pygame.draw.rect(self.canvas, bg_color, card_rect)
 			self.canvas.blit(text_surface, text_rect)
 			self.canvas.blit(icon_surface, icon_rect)
