@@ -6,6 +6,7 @@ from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
+from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
 from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader
@@ -37,7 +38,9 @@ class Game:
 
 		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
 
-		self.monster_index = MonsterIndex(self.player, self.fonts)
+		self.monster_manager = MonsterManager()
+
+		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
