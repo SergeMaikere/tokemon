@@ -15,8 +15,8 @@ class SideList:
 		self.icons = icons
 
 		self.canvas = required(pygame.display.get_surface())
-		self.index = 0
 		self.card_width, self.card_height = self.__get_card_dimensions(self.visible_items)
+		self.index, self.selected_index = 0, None
 
 
 	def __get_card_dimensions ( self, n: int ): return ( self.main_rect.width * 0.3, self.main_rect.height / n )
@@ -34,11 +34,12 @@ class SideList:
 		if not card_rect.colliderect(self.main_rect): return
 		return card_rect
 
-	def __set_text ( self, item: Any, card_rect: FRect | None ):
+	def __set_text ( self, i: int, item: Any, card_rect: FRect | None ):
 		if not card_rect: return
-		text_surface = self.font.render(item.name, False, COLORS['white'])
+		text_surface = self.font.render(item.name, False, COLORS['white']  if i != self.selected_index else COLORS['gold'])
 		text_rect = text_surface.get_frect(midleft=card_rect.midleft + vector2(90, 0))
 		return (card_rect, text_surface, text_rect)
+
 
 	def __set_icon ( self, item: Any, datas: tuple[FRect, Surface, FRect] | None ):
 		if not datas: return
@@ -62,7 +63,28 @@ class SideList:
 			pipe(
 				self.__set_card,
 				self.__is_card_visible,
-				partial(self.__set_text, item),
+				partial(self.__set_text, i, item),
 				partial(self.__set_icon, item),
 				partial(self.__draw_card, int(i))
 			)(i)
+
+
+	def __select_item ( self ): self.selected_index = self.index
+
+	def __swith_item_with_selected ( self ):
+		if self.selected_index == self.index: return
+		
+		selected_item = self.dict[self.selected_index]
+		current_item = self.dict[self.index]
+		
+		self.dict[self.index] = selected_item
+		self.dict[self.selected_index] = current_item
+		
+		self.selected_index = None
+
+
+	def select ( self ):
+		if self.selected_index is None:
+			self.__select_item()
+		else:
+			self.__swith_item_with_selected()

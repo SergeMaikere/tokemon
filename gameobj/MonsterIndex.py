@@ -32,6 +32,7 @@ class MonsterIndex:
 		keys = pygame.key.get_just_pressed()
 		self.__display_monster_index(keys)
 		self.__up_and_down(keys)
+		self.__select(keys)
 
 	def __display_monster_index ( self, keys: ScancodeWrapper ):
 		if keys[pygame.K_RETURN]:
@@ -42,6 +43,9 @@ class MonsterIndex:
 		if keys[pygame.K_UP]: self.side_list.index -= 1
 		if keys[pygame.K_DOWN]: self.side_list.index += 1
 		self.side_list.index = self.side_list.index % len(self.MM.monsters)
+
+	def __select ( self, keys: ScancodeWrapper ):
+		if keys[pygame.K_SPACE]: self.side_list.select()
 
 	def __draw_main_rect ( self ):
 		pygame.draw.rect(self.canvas, COLORS['black'], self.main_rect)
