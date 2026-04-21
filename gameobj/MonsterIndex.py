@@ -1,11 +1,15 @@
-from pygame import Font
+from functools import partial
+from pygame import FRect, Font
 from pygame.key import ScancodeWrapper
+from pygame.typing import Point
 
+from entities.Monster import Monster
 from settings import *
 from entities.Player import Player
 from gameobj.SideList import SideList
-from utils.Helper import required
+from utils.Helper import required, pipe
 from utils.MonsterManager import MonsterManager
+from utils.Types import FontTypes
 
 class MonsterIndex:
 	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ] ) -> None:
@@ -20,6 +24,8 @@ class MonsterIndex:
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
 		self.side_list = SideList(self.MM.monsters, self.fonts['regular'], self.main_rect, 6, self.MM.monsters_icons)
+
+		self.top_rect = pygame.FRect(self.main_rect.left + self.side_list.card_width, self.main_rect.top, self.main_rect.width - self.side_list.card_width, self.main_rect.height * 0.4)
 
 		self.open = False
 
@@ -56,13 +62,32 @@ class MonsterIndex:
 	
 	def __tint ( self ): self.canvas.blit(self.tint_surface, (0, 0))
 
+	
+	def __draw_top_rect ( self, monster: Monster ):
+		pygame.draw.rect(self.canvas, COLORS[monster.element], self.top_rect, 0, 0, 0, 12)
+		return monster
+
+	def __set_text ( self, font_type: FontTypes, text: str, **position: Point ):
+		text_surface = self.fonts[font_type].render(text, False, COLORS['white'])
+		text_rect = text_surface.get_frect(**position)
+		self.canvas.blit(text_surface, text_rect)
+
+
+	def __display_top ( self ):
+		monster = self.MM.monsters[self.side_list.index]
+		self.__draw_top_rect(monster)
+		self.__set_text( 'bold', monster.name, topleft=self.top_rect.topleft + vector2(10, 10) )
+		self.__set_text( 'regular', f'Lvl: {monster.level}', bottomleft=self.top_rect.bottomleft + vector2(10, -10) )
+		self.__set_text('regular', monster.element, bottomright=self.top_rect.bottomright + vector2(-10, -10))
+		
+
 	def __display ( self ):
 		if not self.open: return
 		self.__tint()
 		# self.__draw_main_rect()
-		self.__draw_side_list_shadow()
 		self.side_list.display()
-
+		self.__draw_side_list_shadow()
+		self.__display_top()
 
 	def update ( self, dt: float ):
 		self.__input()

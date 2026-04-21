@@ -12,3 +12,5 @@ Coasts = Literal[ 'grass', 'grass_i', 'sand_i', 'sand', 'rock', 'rock_i', 'ice',
 Biomes = Literal[ 'grass', 'grass_ice', 'sand' ]
 
 TransitionState = Literal[ 'check_collision', 'fade_to_black', 'load_map', 'fade_to_light', 'done' ]
+
+FontTypes = Literal[ 'regular', 'small', 'bold', 'dialog' ]

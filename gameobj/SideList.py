@@ -53,7 +53,7 @@ class SideList:
 	def __draw_list_item ( self, i: int, datas: tuple[FRect, Surface, FRect, Surface, FRect] | None ):
 		if not datas: return
 		card_rect, text_surface, text_rect, icon_surface, icon_rect = datas
-		bg_color = COLORS['gray'] if self.index == i else COLORS['light']
+		bg_color = COLORS['light'] if self.index == i else COLORS['gray']
 
 		self.__draw_card(card_rect, bg_color)
 		self.canvas.blit(text_surface, text_rect)
@@ -66,8 +66,7 @@ class SideList:
 			pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 12)
 		else: 
 			pygame.draw.rect(self.canvas, bg_color, card_rect)
-
-		pygame.draw.line(self.canvas, COLORS['black'], card_rect.bottomleft, card_rect.bottomright, 4)
+		pygame.draw.line(self.canvas, COLORS['light-gray'], card_rect.bottomleft, card_rect.bottomright, 4)
 
 	def display ( self ):
 		for i, item in self.dict.items():
