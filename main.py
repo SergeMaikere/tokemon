@@ -40,7 +40,7 @@ class Game:
 
 		self.monster_manager = MonsterManager()
 
-		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts)
+		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts, self.all_sprites)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )

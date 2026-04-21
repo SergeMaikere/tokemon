@@ -128,6 +128,10 @@ images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)
 
+load_monster_frame = pipe( load_image, partial(row_cut, (4, 4), ('idle', 'attack')) )
+
+monsters_frames_loader = partial(big_walker_dict, load_monster_frame)
+
 load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
 
 frames_loader = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
