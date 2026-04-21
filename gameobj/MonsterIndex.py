@@ -48,7 +48,7 @@ class MonsterIndex:
 		if keys[pygame.K_SPACE]: self.side_list.select()
 
 	def __draw_main_rect ( self ):
-		pygame.draw.rect(self.canvas, COLORS['black'], self.main_rect)
+		pygame.draw.rect(self.canvas, COLORS['light-gray'], self.main_rect)
 
 	def __draw_side_list_shadow ( self ):
 		shadow_surface = pygame.Surface((4, self.main_rect.height))

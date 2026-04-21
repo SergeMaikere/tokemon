@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Any
 from pygame import FRect, Font
+from pygame.typing import ColorLike
 
 from settings import *
 from utils.Helper import pipe, required
@@ -10,9 +11,9 @@ class SideList:
 		
 		self.main_rect = main_rect
 		self.dict = my_dict
+		self.icons = icons
 		self.font = font
 		self.visible_items = visible_items
-		self.icons = icons
 
 		self.canvas = required(pygame.display.get_surface())
 		self.card_width, self.card_height = self.__get_card_dimensions(self.visible_items)
@@ -49,14 +50,23 @@ class SideList:
 		icon_rect = icon_surface.get_frect(midleft=card_rect.midleft + vector2(15, 0))
 		return ( *datas, icon_surface, icon_rect )
 
-	def __draw_card ( self, i: int, datas: tuple[FRect, Surface, FRect, Surface, FRect] | None ):
+	def __draw_list_item ( self, i: int, datas: tuple[FRect, Surface, FRect, Surface, FRect] | None ):
 		if not datas: return
 		card_rect, text_surface, text_rect, icon_surface, icon_rect = datas
 		bg_color = COLORS['gray'] if self.index == i else COLORS['light']
 
-		pygame.draw.rect(self.canvas, bg_color, card_rect)
+		self.__draw_card(card_rect, bg_color)
 		self.canvas.blit(text_surface, text_rect)
 		if self.icons: self.canvas.blit(icon_surface, icon_rect)
+
+	def __draw_card ( self, card_rect: FRect, bg_color: ColorLike ):
+		if card_rect.collidepoint(self.main_rect.topleft): 
+			return pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 12)
+
+		if card_rect.collidepoint(self.main_rect.bottomleft + vector2(1, -1)):
+			return pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 12)
+
+		return pygame.draw.rect(self.canvas, bg_color, card_rect)
 
 	def display ( self ):
 		for i, item in self.dict.items():
@@ -65,7 +75,7 @@ class SideList:
 				self.__is_card_visible,
 				partial(self.__set_text, i, item),
 				partial(self.__set_icon, item),
-				partial(self.__draw_card, int(i))
+				partial(self.__draw_list_item, int(i))
 			)(i)
 
 
