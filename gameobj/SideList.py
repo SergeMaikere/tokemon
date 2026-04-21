@@ -61,12 +61,13 @@ class SideList:
 
 	def __draw_card ( self, card_rect: FRect, bg_color: ColorLike ):
 		if card_rect.collidepoint(self.main_rect.topleft): 
-			return pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 12)
+			pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 12)
+		elif card_rect.collidepoint(self.main_rect.bottomleft + vector2(1, -1)):
+			pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 12)
+		else: 
+			pygame.draw.rect(self.canvas, bg_color, card_rect)
 
-		if card_rect.collidepoint(self.main_rect.bottomleft + vector2(1, -1)):
-			return pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 12)
-
-		return pygame.draw.rect(self.canvas, bg_color, card_rect)
+		pygame.draw.line(self.canvas, COLORS['black'], card_rect.bottomleft, card_rect.bottomright, 4)
 
 	def display ( self ):
 		for i, item in self.dict.items():
