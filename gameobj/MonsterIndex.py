@@ -49,13 +49,18 @@ class MonsterIndex:
 
 	def __draw_main_rect ( self ):
 		pygame.draw.rect(self.canvas, COLORS['black'], self.main_rect)
+
+	def __draw_side_list_shadow ( self ):
+		shadow_surface = pygame.Surface((4, self.main_rect.height))
+		self.canvas.blit( shadow_surface, (self.main_rect.left + self.side_list.card_width, self.main_rect.top) )
 	
 	def __tint ( self ): self.canvas.blit(self.tint_surface, (0, 0))
 
 	def __display ( self ):
 		if not self.open: return
 		self.__tint()
-		self.__draw_main_rect()
+		# self.__draw_main_rect()
+		self.__draw_side_list_shadow()
 		self.side_list.display()
 
 
