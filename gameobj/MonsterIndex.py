@@ -8,21 +8,19 @@ from entities.Monster import Monster
 from entities.Player import Player
 from gameobj.AnimatedSprite import AnimatedSprite
 from gameobj.SideList import SideList
-from utils.Helper import required
+from utils.Helper import get_progress_bar, required, pipe
 from utils.MonsterManager import MonsterManager
-from utils.MyGroup import MyGroup
 from utils.Types import FontTypes
 
 class MonsterIndex:
-	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ], all_sprites: MyGroup ) -> None:
+	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ] ) -> None:
 		
 		self.player = player
 		self.fonts = fonts
-		self.all_sprites = all_sprites
 
 		self.MM = monster_manager
 
-		self.canvas = required(pygame.display.get_surface())
+		self.canvas: Surface = required(pygame.display.get_surface())
 		self.tint_surface = self.__get_tinted_surface()
 
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
@@ -73,11 +71,12 @@ class MonsterIndex:
 		return monster
 
 	def __display_monster ( self, dt: float, monster: Monster ):
-		image = self.__get_frame(dt, monster)
+		image = self.__get_monster_frames(dt, monster)
 		rect = image.get_frect(center=self.top_rect.center)
 		self.canvas.blit(image, rect)
+		return monster
 
-	def __get_frame (self, dt: float, monster: Monster ):
+	def __get_monster_frames (self, dt: float, monster: Monster ):
 		frames = self.MM.monster_frames[monster.name]['idle']
 		self.animation_index += ANIMATION_SPEED * dt
 		return frames[int(self.animation_index) % len(frames)]
@@ -87,15 +86,38 @@ class MonsterIndex:
 		text_surface = self.fonts[font_type].render(text, False, COLORS['white'])
 		text_rect = text_surface.get_frect(**position)
 		self.canvas.blit(text_surface, text_rect)
+		return (text_surface, text_rect)
+
+	def __display_monster_level ( self, monster: Monster ):
+		_, rect = self.__set_text( 'regular', f'Lvl: {monster.level}', bottomleft=self.top_rect.bottomleft + vector2(10, -16) )
+		get_progress_bar(
+			surface=self.canvas,
+			rect=pygame.FRect(rect.bottomleft, (100, 4)),
+			bg_color=COLORS['dark'],
+			color=COLORS['white'],
+			value=monster.xp,
+			value_max=monster.level_up
+		)
+		return monster
+
+	def __display_monster_name ( self, monster: Monster ):
+		self.__set_text( 'bold', monster.name, topleft=self.top_rect.topleft + vector2(10, 10) )
+		return monster
+
+	def __display_monster_element ( self, monster: Monster ):
+		self.__set_text('regular', monster.element, bottomright=self.top_rect.bottomright + vector2(-10, -10))
+		return monster
 
 
 	def __display_top ( self, dt: float ):
 		monster = self.MM.monsters[self.side_list.index]
-		self.__draw_top_rect(monster)
-		self.__display_monster(dt, monster)
-		self.__set_text( 'bold', monster.name, topleft=self.top_rect.topleft + vector2(10, 10) )
-		self.__set_text( 'regular', f'Lvl: {monster.level}', bottomleft=self.top_rect.bottomleft + vector2(10, -10) )
-		self.__set_text('regular', monster.element, bottomright=self.top_rect.bottomright + vector2(-10, -10))
+		pipe(
+			self.__draw_top_rect,
+			partial(self.__display_monster, dt),
+			self.__display_monster_name,
+			self.__display_monster_level,
+			self.__display_monster_element,
+		)(monster)
 		
 
 	def __display ( self, dt: float ):

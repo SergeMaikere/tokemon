@@ -1,8 +1,9 @@
+from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
 from typing import Any, Callable, cast
-from pygame import Font, Surface, Vector2
+from pygame import FRect, Font, Surface, Vector2
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -112,6 +113,12 @@ def get_layer_by_name ( tmx_map: TiledMap, name: str ) -> list[TiledObject]:
 def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float, float, Surface]]: 
 	return tmx_map.get_layer_by_name(name).tiles()
 
+def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color: ColorLike, value: int, value_max: int ):
+	ratio = rect.width / value_max
+	progress_value = max(0, min(value * ratio, rect.width))
+	progress_rect = pygame.FRect(rect.left, rect.top, progress_value, rect.height)
+	pygame.draw.rect(surface, bg_color, rect, 0, 1)
+	pygame.draw.rect(surface, color, progress_rect, 0, 1)
 
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
