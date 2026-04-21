@@ -128,7 +128,7 @@ images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)
 
-load_monster_frame = pipe( load_image, partial(row_cut, (4, 4), ('idle', 'attack')) )
+load_monster_frame = pipe( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
 
 monsters_frames_loader = partial(big_walker_dict, load_monster_frame)
 

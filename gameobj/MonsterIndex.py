@@ -92,7 +92,7 @@ class MonsterIndex:
 	def __display_top ( self, dt: float ):
 		monster = self.MM.monsters[self.side_list.index]
 		self.__draw_top_rect(monster)
-		# self.__display_monster(dt, monster)
+		self.__display_monster(dt, monster)
 		self.__set_text( 'bold', monster.name, topleft=self.top_rect.topleft + vector2(10, 10) )
 		self.__set_text( 'regular', f'Lvl: {monster.level}', bottomleft=self.top_rect.bottomleft + vector2(10, -10) )
 		self.__set_text('regular', monster.element, bottomright=self.top_rect.bottomright + vector2(-10, -10))
