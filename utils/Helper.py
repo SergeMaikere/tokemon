@@ -113,12 +113,13 @@ def get_layer_by_name ( tmx_map: TiledMap, name: str ) -> list[TiledObject]:
 def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float, float, Surface]]: 
 	return tmx_map.get_layer_by_name(name).tiles()
 
-def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color: ColorLike, value: int, value_max: int ):
+def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color: ColorLike, value: int, value_max: int, radius=1 ):
 	ratio = rect.width / value_max
 	progress_value = max(0, min(value * ratio, rect.width))
 	progress_rect = pygame.FRect(rect.left, rect.top, progress_value, rect.height)
-	pygame.draw.rect(surface, bg_color, rect, 0, 1)
-	pygame.draw.rect(surface, color, progress_rect, 0, 1)
+	pygame.draw.rect(surface, bg_color, rect, 0, radius)
+	pygame.draw.rect(surface, color, progress_rect, 0, radius)
+	return (rect, progress_rect)
 
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 

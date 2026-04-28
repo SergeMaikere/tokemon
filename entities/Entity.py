@@ -1,11 +1,12 @@
 from settings import *
 from gameobj.Sprite import Sprite
 from pygame import Surface
+from utils.MyGroup import MyGroup
 from pygame.sprite import Group
 from utils.Types import States
 
 class Entity ( Sprite ):
-	def __init__( self, name: str, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: Group ) -> None:
+	def __init__( self, name: str, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: MyGroup ) -> None:
 		super().__init__(name, WORLD_LAYERS['main'], frames['down'][0], *groups, center=pos)
 
 		self.state: States = 'down'

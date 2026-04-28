@@ -6,11 +6,12 @@ from entities.Entity import Entity
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.Timer import Timer
+from utils.MyGroup import MyGroup
 from utils.Helper import pipe
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
-	def __init__ ( self, player: Player, characters: Group, all_sprites: AllSprites ):
+	def __init__ ( self, player: Player, characters: MyGroup, all_sprites: AllSprites ):
 
 		self.player = player
 		self.characters = characters
