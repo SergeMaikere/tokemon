@@ -119,7 +119,7 @@ def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color
 	progress_rect = pygame.FRect(rect.left, rect.top, progress_value, rect.height)
 	pygame.draw.rect(surface, bg_color, rect, 0, radius)
 	pygame.draw.rect(surface, color, progress_rect, 0, radius)
-	return (rect, progress_rect)
+	return rect
 
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 

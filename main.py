@@ -9,7 +9,7 @@ from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict
 
 class Game:
 	def __init__(self) -> None:
@@ -24,6 +24,8 @@ class Game:
 			'small': font_loader('PixeloidSan', 14),
 			'bold': font_loader('dogicapixelbold', 20),
 		}
+
+		self.ui_images = images_loader_dict('assets', 'graphics', 'ui')
 
 		self.all_sprites = AllSprites('all_sprites')
 		self.collision_sprites = MyGroup('collision_sprites')
@@ -40,7 +42,7 @@ class Game:
 
 		self.monster_manager = MonsterManager()
 
-		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts)
+		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts, self.ui_images)
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )

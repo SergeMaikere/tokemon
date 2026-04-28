@@ -12,12 +12,13 @@ from utils.MonsterManager import MonsterManager
 from utils.Types import FontTypes
 
 class MonsterIndex:
-	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ] ) -> None:
+	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ], ui_images: dict[str, Surface] ) -> None:
 		
 		self.player = player
 		self.fonts = fonts
-
 		self.MM = monster_manager
+
+		self.ui_images = ui_images
 
 		self.canvas: Surface = required(pygame.display.get_surface())
 		self.tint_surface = self.__get_tinted_surface()
@@ -30,7 +31,7 @@ class MonsterIndex:
 
 		self.health_bar_rect, self.energy_bar_rect = self.__get_progress_bar_rects()
 
-		self.stats_rect = pygame.FRect(self.health_bar_rect.left, self.health_bar_rect.bottom, self.health_bar_rect.width, self.main_rect.bottom - self.health_bar_rect.bottom).inflate(0, -60)
+		self.stats_rect = pygame.FRect(self.health_bar_rect.left, self.health_bar_rect.bottom, self.health_bar_rect.width, self.main_rect.bottom - self.health_bar_rect.bottom).inflate(0, -60).move(0, 15)
 
 		self.animation_index = 0
 
@@ -98,6 +99,12 @@ class MonsterIndex:
 		self.canvas.blit(text_surface, text_rect)
 		return (text_surface, text_rect)
 
+	def __set_icon ( self, name: str, **position: Point ):
+		icon_image = self.ui_images[name]
+		icon_rect = icon_image.get_frect(**position)
+		self.canvas.blit(icon_image, icon_rect)
+		return (icon_image, icon_rect)
+
 	def __display_monster_level ( self, monster: Monster ):
 		_, rect = self.__set_text( 'regular', f'Lvl: {monster.level}', bottomleft=self.top_rect.bottomleft + vector2(10, -16) )
 		get_progress_bar(
@@ -130,7 +137,7 @@ class MonsterIndex:
 		
 	def __display_progress_bars ( self, monster: Monster ):
 
-		health_rect, _ = get_progress_bar(
+		health_rect = get_progress_bar(
 			surface=self.canvas, 
 			rect=self.health_bar_rect,
 			bg_color=COLORS['black'],
@@ -140,7 +147,7 @@ class MonsterIndex:
 			radius=2
 		)
 
-		energy_rect, _ = get_progress_bar(
+		energy_rect = get_progress_bar(
 			surface=self.canvas,
 			rect=self.energy_bar_rect,
 			bg_color=COLORS['gray'],
@@ -151,26 +158,28 @@ class MonsterIndex:
 		)
 
 		self.__set_text('regular', f'Hp: {int(monster.health)}/{monster.get_stat('max_health')}', midleft=health_rect.midleft + vector2(10, 0))
-		self.__set_text('regular', f'Ep: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
+		self.__set_text('regular', f'Exp: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
 
 		return monster
 		
 
 	def __display_stats ( self, monster: Monster ):
-		self.__set_text('regular', 'Stats', bottomleft=self.stats_rect.topleft)[1].inflate(0, -10)
+		self.__set_text('regular', 'Stats', bottomleft=self.stats_rect.topleft)[1].inflate(0, 100)
 		
 		stats = monster.get_stats()
 		for i, (stat, value) in enumerate(stats.items()):
-			_, text_rect = self.__set_text('regular', stat, topleft=(self.stats_rect.left + 10, self.stats_rect.top + i * self.stats_rect.height/len(stats)))
-
-			get_progress_bar(
+			_, text_rect = self.__set_text('regular', stat, topleft=(self.stats_rect.left + 40, self.stats_rect.top + i * self.stats_rect.height/len(stats)))
+			
+			stat_rect = get_progress_bar(
 				surface=self.canvas,
-				rect=pygame.FRect(text_rect.left, text_rect.bottom + 10, self.stats_rect.width * 0.75, 4),
+				rect=pygame.FRect(text_rect.left, text_rect.bottom, self.stats_rect.width * 0.80, 4),
 				bg_color=COLORS['black'],
 				color=COLORS['white'],
 				value=value,
 				value_max=self.MM.monsters_max_stats[stat] * monster.level,
 			)
+			
+			self.__set_icon(stat, midleft=stat_rect.topleft + vector2(-30, 0))
 
 		return monster
 
