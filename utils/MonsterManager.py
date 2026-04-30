@@ -1,10 +1,11 @@
 from os.path import join
 from random import randint, sample
 
-from assets.data.game_data import MONSTER_DATA
+from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from settings import *
 from entities.Monster import Monster
 from utils.Helper import images_loader_dict, monsters_frames_loader
+from utils.Types import Attacks
 
 class MonsterManager :
 	def __init__(self) -> None:
@@ -19,8 +20,10 @@ class MonsterManager :
 
 
 	def get_random_monsters ( self, n: int ):
-		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 30)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 	
+	def get_attack_data ( self, attack: Attacks, data: str ): return ATTACK_DATA[attack][data]
+
 	def get_max_stats_value ( self ):
 		max_stats = {}
 		for monster in MONSTER_DATA.values():

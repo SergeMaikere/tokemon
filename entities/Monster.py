@@ -7,6 +7,7 @@ class Monster:
 
 		self.base_stats = MONSTER_DATA[name]['stats']
 		self.element = self.base_stats['element']
+		self.abilities = MONSTER_DATA[name]['abilities']
 
 		self.xp = randint(0, 1000)
 		self.level_up = self.level * 150
@@ -19,3 +20,6 @@ class Monster:
 
 	def get_stats ( self ):
 		return { stat.replace('max_', ''): value * self.level for stat, value in {stat: value for stat, value in self.base_stats.items() if stat != 'element'}.items() }
+
+	def get_abilities ( self ):
+		return [ ability for level, ability in self.abilities.items() if self.level >= level ]

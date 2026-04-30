@@ -2,6 +2,7 @@ from functools import partial
 from pygame import Font
 from pygame.key import ScancodeWrapper
 from pygame.typing import Point
+from pytmx.pytmx import ColorLike
 
 from settings import *
 from entities.Monster import Monster
@@ -9,7 +10,7 @@ from entities.Player import Player
 from gameobj.SideList import SideList
 from utils.Helper import get_progress_bar, required, pipe
 from utils.MonsterManager import MonsterManager
-from utils.Types import FontTypes
+from utils.Types import Attacks, FontTypes
 
 class MonsterIndex:
 	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ], ui_images: dict[str, Surface] ) -> None:
@@ -32,6 +33,8 @@ class MonsterIndex:
 		self.health_bar_rect, self.energy_bar_rect = self.__get_progress_bar_rects()
 
 		self.stats_rect = pygame.FRect(self.health_bar_rect.left, self.health_bar_rect.bottom, self.health_bar_rect.width, self.main_rect.bottom - self.health_bar_rect.bottom).inflate(0, -60).move(0, 15)
+
+		self.abilities_rect = self.stats_rect.copy().move_to(right=self.energy_bar_rect.right)
 
 		self.animation_index = 0
 
@@ -164,7 +167,7 @@ class MonsterIndex:
 		
 
 	def __display_stats ( self, monster: Monster ):
-		self.__set_text('regular', 'Stats', bottomleft=self.stats_rect.topleft)[1].inflate(0, 100)
+		self.__set_text('regular', 'Stats', bottomleft=self.stats_rect.topleft)
 		
 		stats = monster.get_stats()
 		for i, (stat, value) in enumerate(stats.items()):
@@ -183,6 +186,37 @@ class MonsterIndex:
 
 		return monster
 
+	def __display_abilities ( self, monster: Monster ):
+		self.__set_text('regular', 'Abilities', bottomleft=self.abilities_rect.topleft)
+
+		for i, ability in enumerate(monster.get_abilities()):
+			pipe(
+				partial(self.__get_ability_card_position, i),
+				self.__create_ability_rect,
+				partial(self.__draw_ability_card, ability)
+			)( self.__create_text_surface('regular', COLORS['black'], ability) )
+			
+		return monster
+
+	def __create_text_surface ( self, font_type: FontTypes, color: ColorLike, text: str ):
+		return self.fonts[font_type].render(text, False, color)
+
+
+	def __get_ability_card_position ( self, i: int, surface: Surface ):
+		x = self.abilities_rect.left + i % 2 * self.abilities_rect.width/2
+		y = self.abilities_rect.top + 20 + int(i/2) * (surface.height + 20)
+		return (surface, (x, y))
+
+	def __create_ability_rect ( self, datas: tuple[Surface, Point] ):
+		surface, pos = datas
+		rect = surface.get_frect(topleft=pos)
+		return ( surface, rect )
+
+	def __draw_ability_card ( self, ability: Attacks, datas: tuple[Surface, FRect] ):
+		surface, rect = datas
+		pygame.draw.rect(self.canvas, COLORS[self.MM.get_attack_data(ability, 'element')], rect.inflate(10, 10), 0, 4 )
+		self.canvas.blit(surface, rect)
+		return  datas
 
 	def __display ( self, dt: float ):
 		if not self.open: return
@@ -194,6 +228,7 @@ class MonsterIndex:
 			partial(self.__display_top, dt),
 			self.__display_progress_bars,
 			self.__display_stats,
+			self.__display_abilities,
 		)(self.MM.monsters[self.side_list.index])
 
 		self.__draw_side_list_shadow()
