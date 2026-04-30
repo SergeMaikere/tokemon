@@ -76,10 +76,11 @@ class SideList:
 				partial(self.__set_icon, item),
 				partial(self.__draw_list_item, int(i))
 			)(i)
+			
 		self.__set_divide()
 
 	def __set_divide ( self ):
-		for i in range( len(self.dict) - 1 if len(self.dict) < self.visible_items else self.visible_items - 1 ):
+		for i in range( min(len(self.dict), self.visible_items) - 1 ):
 			start = (self.main_rect.left, self.main_rect.top + (i + 1) * self.card_height )
 			end = (self.main_rect.left + self.card_width, self.main_rect.top + (i + 1) * self.card_height )
 			pygame.draw.line(self.canvas, COLORS['light-gray'], start, end, 4)

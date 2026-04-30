@@ -175,7 +175,7 @@ class MonsterIndex:
 			
 			stat_rect = get_progress_bar(
 				surface=self.canvas,
-				rect=pygame.FRect(text_rect.left, text_rect.bottom, self.stats_rect.width * 0.80, 4),
+				rect=pygame.FRect(text_rect.left, text_rect.bottom, self.stats_rect.width - (text_rect.left - self.stats_rect.left), 4),
 				bg_color=COLORS['black'],
 				color=COLORS['white'],
 				value=value,
