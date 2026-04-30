@@ -55,18 +55,17 @@ class SideList:
 		card_rect, text_surface, text_rect, icon_surface, icon_rect = datas
 		bg_color = COLORS['light'] if self.index == i else COLORS['gray']
 
-		self.__draw_card(card_rect, bg_color)
+		self.__draw_card(i, card_rect, bg_color)
 		self.canvas.blit(text_surface, text_rect)
 		if self.icons: self.canvas.blit(icon_surface, icon_rect)
 
-	def __draw_card ( self, card_rect: FRect, bg_color: ColorLike ):
+	def __draw_card ( self, i: int, card_rect: FRect, bg_color: ColorLike ):
 		if card_rect.collidepoint(self.main_rect.topleft): 
 			pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 12)
 		elif card_rect.collidepoint(self.main_rect.bottomleft + vector2(1, -1)):
 			pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 12)
 		else: 
 			pygame.draw.rect(self.canvas, bg_color, card_rect)
-		pygame.draw.line(self.canvas, COLORS['light-gray'], card_rect.bottomleft, card_rect.bottomright, 4)
 
 	def display ( self ):
 		for i, item in self.dict.items():
@@ -77,7 +76,13 @@ class SideList:
 				partial(self.__set_icon, item),
 				partial(self.__draw_list_item, int(i))
 			)(i)
+		self.__set_divide()
 
+	def __set_divide ( self ):
+		for i in range( len(self.dict) - 1 if len(self.dict) < self.visible_items else self.visible_items - 1 ):
+			start = (self.main_rect.left, self.main_rect.top + (i + 1) * self.card_height )
+			end = (self.main_rect.left + self.card_width, self.main_rect.top + (i + 1) * self.card_height )
+			pygame.draw.line(self.canvas, COLORS['light-gray'], start, end, 4)
 
 	def __select_item ( self ): self.selected_index = self.index
 

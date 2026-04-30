@@ -71,7 +71,7 @@ class MonsterIndex:
 		if keys[pygame.K_SPACE]: self.side_list.select()
 
 	def __draw_main_rect ( self ):
-		pygame.draw.rect(self.canvas, COLORS['gray'], self.main_rect)
+		pygame.draw.rect(self.canvas, COLORS['gray'], self.main_rect, 0, 12)
 
 	def __draw_side_list_shadow ( self ):
 		shadow_surface = pygame.Surface((4, self.main_rect.height))
@@ -153,7 +153,7 @@ class MonsterIndex:
 		energy_rect = get_progress_bar(
 			surface=self.canvas,
 			rect=self.energy_bar_rect,
-			bg_color=COLORS['gray'],
+			bg_color=COLORS['black'],
 			color=COLORS['blue'],
 			value=monster.energy,
 			value_max=monster.get_stat('max_energy'),
@@ -195,7 +195,7 @@ class MonsterIndex:
 				self.__create_ability_rect,
 				partial(self.__draw_ability_card, ability)
 			)( self.__create_text_surface('regular', COLORS['black'], ability) )
-			
+
 		return monster
 
 	def __create_text_surface ( self, font_type: FontTypes, color: ColorLike, text: str ):
