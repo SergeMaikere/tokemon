@@ -4,6 +4,7 @@ from pytmx import TiledMap
 
 from entities.Player import Player
 from utils.AllSprites import AllSprites
+from utils.BattleManager import BattleManager
 from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
@@ -34,15 +35,18 @@ class Game:
 	
 		self.player = self.get_player(map_loader('world'), 'house')
 
-		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.all_sprites)
+		self.monster_manager = MonsterManager()
+		
+		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts)
+		
+		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
 
 		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
 
-		self.monster_manager = MonsterManager()
-
 		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts, self.ui_images)
+
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -72,6 +76,8 @@ class Game:
 			self.dialog_manager.update()
 
 			self.all_sprites.draw(self.player)
+
+			self.battle_manager.update(dt)
 
 			self.monster_index.update(dt)
 			

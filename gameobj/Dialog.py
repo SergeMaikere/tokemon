@@ -69,5 +69,5 @@ class Dialog:
 		if self.index < len(self.dialogs):
 			self.__create_new_dialog_sprite()
 		else:
-			self.finish_dialog(self)
+			self.finish_dialog(self, self.character)
 		

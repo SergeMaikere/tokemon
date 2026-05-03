@@ -16,3 +16,7 @@ TransitionState = Literal[ 'check_collision', 'fade_to_black', 'load_map', 'fade
 FontTypes = Literal[ 'regular', 'small', 'bold', 'dialog' ]
 
 Attacks = Literal[ 'burn', 'heal', 'battlecry', 'spark', 'scratch', 'splash', 'fire', 'explosion', 'annihilate', 'ice' ]
+
+MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', 'Charmadillo', 'Finsta', 'Gulfin', 'Finiette', 'Atrox', 'Pouch', 'Draem', 'Larvea', 'Cleaf', 'Jacana', 'Friolera' ]
+
+BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]

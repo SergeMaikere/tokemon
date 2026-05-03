@@ -2,6 +2,7 @@ from typing import Callable, Literal
 
 from settings import *
 from entities.Player import Player
+from utils.Helper import required
 from utils.Timer import Timer
 from utils.MapsLoader import MapsLoader
 from utils.MyGroup import MyGroup
@@ -15,7 +16,7 @@ class MapTransition:
 		self.maps_loader = maps_loader
 		self.get_player = get_player
 
-		self.canvas = pygame.display.get_surface()
+		self.canvas = required(pygame.display.get_surface())
 		self.tint = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 		self.transition_sprite = None
@@ -55,9 +56,9 @@ class MapTransition:
 	def __load_new_map ( self ):
 		if not self.transition_sprite: return
 		self.maps_loader.transition_setup(self.maps_loader.maps[self.transition_sprite.target], self.transition_sprite.pos)
-		self.__update_datas_after_map_moaded()
+		self.__update_datas_after_map_loaded()
 
-	def __update_datas_after_map_moaded ( self ):
+	def __update_datas_after_map_loaded ( self ):
 		self.transition_sprite = None # reset transition_sprite so it is ready for next map transition
 		self.state = 'fade_to_light' # set next state
 		self.canvas.fill(0) # cleanse the display surface otherwise it shows ghosts of the old map

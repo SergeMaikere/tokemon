@@ -5,7 +5,7 @@ from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from settings import *
 from entities.Monster import Monster
 from utils.Helper import images_loader_dict, monsters_frames_loader
-from utils.Types import Attacks
+from utils.Types import Attacks, MonsterNames
 
 class MonsterManager :
 	def __init__(self) -> None:
@@ -30,3 +30,8 @@ class MonsterManager :
 			for stat, value in {prop: val for prop, val in monster['stats'].items() if prop != 'element'}.items():
 				max_stats[stat] = value if not stat in max_stats else max(max_stats[stat], value)
 		return { stat.replace('max_', ''): value for stat, value in max_stats.items()}
+
+	def get_player_battle_monsters ( self ): return [ monster for key, monster in self.monsters.items() if key < 3 ]
+
+	def get_opponent_battle_monsters ( self, opponent_monsters: dict[int, tuple[MonsterNames, int]] ): 
+		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ] 
