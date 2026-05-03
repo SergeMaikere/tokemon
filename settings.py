@@ -1,8 +1,9 @@
 import pygame
-from pygame import Surface
-from pygame.sprite import Group
+from pygame import Surface, FRect
+from pygame.typing import Point
 from pygame.math import Vector2 as vector 
 from sys import exit
+
 
 vector2 = pygame.Vector2
 
@@ -24,7 +25,8 @@ COLORS = {
 	'plant': '#64a990', 
 	'black': '#000000', 
 	'red': '#f03131',
-	'blue': '#66d7ee'
+	'blue': '#66d7ee',
+	'normal': '#ffffff'
 }
 
 WORLD_LAYERS = {

@@ -1,8 +1,9 @@
+from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
 from typing import Any, Callable, cast
-from pygame import Surface, Vector2
+from pygame import FRect, Font, Surface, Vector2
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -19,6 +20,14 @@ def voyeur ( x: Any ):
 pipe = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
+
+
+def required ( v: Any ):
+	if v is None:
+		raise ValueError('Value is required')
+	else:
+		return v
+
 
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):
 	obj = {}
@@ -104,13 +113,20 @@ def get_layer_by_name ( tmx_map: TiledMap, name: str ) -> list[TiledObject]:
 def get_layer_by_name_tiles ( tmx_map: TiledMap, name: str ) -> list[tuple[float, float, Surface]]: 
 	return tmx_map.get_layer_by_name(name).tiles()
 
+def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color: ColorLike, value: int, value_max: int, radius=1 ):
+	ratio = rect.width / value_max
+	progress_value = max(0, min(value * ratio, rect.width))
+	progress_rect = pygame.FRect(rect.left, rect.top, progress_value, rect.height)
+	pygame.draw.rect(surface, bg_color, rect, 0, radius)
+	pygame.draw.rect(surface, color, progress_rect, 0, radius)
+	return rect
 
 	
-load_image = lambda path: pygame.image.load(path).convert_alpha() 
+load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 
-load_font = lambda path, size = 30: pygame.font.Font(path, size)
+load_font: Callable[ [int, str], Font ] = lambda size, path: pygame.font.Font(path, size)
 
-font_loader = partial(small_walker, load_font, join('assets', 'graphics', 'fonts'))
+font_loader: Callable[ [str, int], Font ] = lambda name, size: partial(small_walker, partial(load_font, size), join('assets', 'graphics', 'fonts'))(name)
 
 map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, join('assets', 'data', 'maps'))
 
@@ -119,6 +135,10 @@ maps_loader: Callable [ [], dict[str, TiledMap] ] = lambda: big_walker_dict(load
 images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)
+
+load_monster_frame = pipe( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
+
+monsters_frames_loader = partial(big_walker_dict, load_monster_frame)
 
 load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
 

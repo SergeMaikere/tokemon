@@ -1,9 +1,10 @@
 from settings import *
+from utils.MyGroup import MyGroup
 from pygame import FRect
 
 
 class Sprite ( pygame.sprite.Sprite ):
-	def __init__(self, name: str, z: int, image: Surface, *groups: Group, **anchor: tuple[float, float]) -> None:
+	def __init__(self, name: str, z: int, image: Surface, *groups: MyGroup, **anchor: tuple[float, float]) -> None:
 		super().__init__(*groups)
 
 		self.name = name

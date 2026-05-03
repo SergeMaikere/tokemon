@@ -1,10 +1,11 @@
 from settings import *
 from entities.Entity import Entity
 from pygame import Surface
+from utils.MyGroup import MyGroup
 from pygame.sprite import Group
 
 class Player ( Entity ):
-	def __init__(self, frames: dict[str, list[Surface]], pos: tuple[float, float], collisions: Group, *groups: Group) -> None:
+	def __init__(self, frames: dict[str, list[Surface]], pos: tuple[float, float], collisions: Group, *groups: MyGroup) -> None:
 		super().__init__('player', frames, pos, *groups)
 
 		self.collision_sprites = collisions

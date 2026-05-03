@@ -5,15 +5,18 @@ from gameobj.Dialog import Dialog
 from entities.Entity import Entity
 from entities.Player import Player
 from utils.AllSprites import AllSprites
+from utils.BattleManager import BattleManager
 from utils.Timer import Timer
+from utils.MyGroup import MyGroup
 from utils.Helper import pipe
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
-	def __init__ ( self, player: Player, characters: Group, all_sprites: AllSprites ):
+	def __init__ ( self, player: Player, characters: MyGroup, battle_manager: BattleManager, all_sprites: AllSprites ):
 
 		self.player = player
 		self.characters = characters
+		self.BM = battle_manager
 		self.all_sprites = all_sprites
 
 		self.timer = Timer(500)
@@ -62,16 +65,16 @@ class DialogManager:
 
 	def __immobilize_player ( self, character: Entity ): 
 		if not character: return None
-		self.player.is_mobile = False
+		self.player.block()
 		return character
 
-	def finish_dialog ( self, dialog: Dialog ):
+	def finish_dialog ( self, dialog: Dialog, character: Entity ):
 		self.current_dialog = None
-		self.player.is_mobile = True
+		self.BM.start_battle(character.datas['biome'], character.datas['monsters'])
 		del dialog
 
 	def update ( self ):
-		if not self.timer.running: self.input()
+		if not self.timer.running: return self.input()
 		self.timer.update()
 
 
