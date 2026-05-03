@@ -9,6 +9,7 @@ from os.path import basename, join
 from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
+from utils.MyGroup import MyGroup
 from utils.Types import Coasts, States
 
 def voyeur ( x: Any ):
@@ -120,6 +121,9 @@ def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color
 	pygame.draw.rect(surface, bg_color, rect, 0, radius)
 	pygame.draw.rect(surface, color, progress_rect, 0, radius)
 	return rect
+
+def get_group ( groups: tuple[MyGroup, ...], name: str ) -> MyGroup:
+	return required( next((group for group in groups if group.name == name), None) )
 
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 

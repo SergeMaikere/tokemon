@@ -70,6 +70,7 @@ class DialogManager:
 
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
 		self.current_dialog = None
+		print(character.datas['monsters'])
 		self.BM.start_battle(character.datas['biome'], character.datas['monsters'])
 		del dialog
 

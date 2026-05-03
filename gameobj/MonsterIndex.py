@@ -13,7 +13,7 @@ from utils.MonsterManager import MonsterManager
 from utils.Types import Attacks, FontTypes
 
 class MonsterIndex:
-	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[str, Font ], ui_images: dict[str, Surface] ) -> None:
+	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface] ) -> None:
 		
 		self.player = player
 		self.fonts = fonts
