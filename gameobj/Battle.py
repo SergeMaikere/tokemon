@@ -11,6 +11,7 @@ class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
 		
 		self.MM = monster_manager
+		self.opponent_monsters = opponent_monsters
 
 		self.battle_sprites = get_group(groups, 'battle_sprites')
 		self.player_battle_sprites = get_group(groups, 'player_battle_sprites')
@@ -23,7 +24,7 @@ class Battle:
 
 		self.monsters = { 
 			'player': self.MM.get_player_battle_monsters(), 
-			'opponent': self.MM.get_opponent_battle_monsters(opponent_monsters) 
+			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
 		}
 
 		self.player_monster_sprites = self.__get_monster_sprites('player')
@@ -41,8 +42,17 @@ class Battle:
 		groups = ( self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites )
 		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], pos, *groups)
 
-	def update ( self, dt: float ):
-		self.__draw_battle_ground()
-		
+	def __update_monsters ( self ):
+		self.monsters['player'] = self.MM.get_player_battle_monsters()
+		for sprite in self.player_monster_sprites: sprite.kill()
+		self.player_monster_sprites = self.__get_monster_sprites('player')
+
+	def __display_monsters ( self, dt: float ):
 		self.battle_sprites.update(dt)
 		self.battle_sprites.draw(self.canvas)
+
+	def update ( self, dt: float ):
+		self.__draw_battle_ground()
+		self.__update_monsters()
+		self.__display_monsters(dt)
+		

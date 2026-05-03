@@ -26,7 +26,7 @@ class MonsterIndex:
 
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
-		self.side_list = SideList(self.MM.monsters, self.fonts['regular'], self.main_rect, 6, self.MM.monsters_icons)
+		self.side_list = SideList(self.MM, self.fonts['regular'], self.main_rect, 6, self.MM.monsters_icons)
 
 		self.top_rect = pygame.FRect(self.main_rect.left + self.side_list.card_width, self.main_rect.top, self.main_rect.width - self.side_list.card_width, self.main_rect.height * 0.4)
 
