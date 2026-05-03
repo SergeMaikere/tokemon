@@ -34,14 +34,12 @@ class Battle:
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
 	def __get_monster_sprites ( self, entity: Literal[ 'player', 'opponent' ] ):
-		# return [ self.__create_monster_sprite(entity, i, value) for i, value in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) ]
 		return [ self.__create_monster_sprite(monster, entity, i) for i, monster in enumerate(self.monsters[entity]) ]
 
 	def __create_monster_sprite ( self, monster: Monster, entity: Literal[ 'player', 'opponent' ], i: int ):
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
-		print(pos)
 		groups = ( self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites )
-		return MonsterSprite(monster, self.MM.monster_frames[monster.name], pos, *groups)
+		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], pos, *groups)
 
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()
