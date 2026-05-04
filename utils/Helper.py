@@ -3,14 +3,14 @@ from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
 from typing import Any, Callable, cast
-from pygame import FRect, Font, Surface, Vector2
+from pygame import FRect, Font, Surface, Vector2, surface
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
 from utils.MyGroup import MyGroup
-from utils.Types import Coasts, States
+from utils.Types import Coasts, FontTypes, States
 
 def voyeur ( x: Any ):
 	print('\n****VOYEUR****')
@@ -125,6 +125,19 @@ def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color
 def get_group ( groups: tuple[MyGroup, ...], name: str ) -> MyGroup:
 	return required( next((group for group in groups if group.name == name), None) )
 
+def get_text_surface ( font: Font, text: str, color: ColorLike = COLORS['black'] ): return font.render(text, False, color)
+
+def add_background_to_text ( surface: Surface, padding: int = 10, color: ColorLike = COLORS['white'] ):
+	new_surface = pygame.Surface( (surface.width + 2 * padding, surface.height + 2 * padding) )
+	new_surface.fill(color)
+	new_surface.blit(surface, (padding, padding))
+	return new_surface
+
+def get_rect ( surface: Surface, **anchor: Point ): return (surface, surface.get_frect(**anchor))
+
+def display_item ( surface: Surface, datas: tuple[ Surface, FRect ] ): 
+	item_surface, item_rect = datas
+	return surface.blit(item_surface, item_rect)
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 

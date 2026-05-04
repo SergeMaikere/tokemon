@@ -20,7 +20,7 @@ class BattleManager:
 
 
 	def start_battle ( self, battle_ground: Surface, opponent_monsters: dict[int, tuple[MonsterNames, int]] ):
-		self.battle = Battle( self.battle_grounds[battle_ground], self.MM, opponent_monsters, *self.groups )
+		self.battle = Battle( self.battle_grounds[battle_ground], self.MM, self.fonts, opponent_monsters, *self.groups )
 
 
 	def update ( self, dt: float ):

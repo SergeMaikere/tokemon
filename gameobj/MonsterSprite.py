@@ -1,4 +1,5 @@
 from typing import Literal
+
 from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite

@@ -20,3 +20,5 @@ Attacks = Literal[ 'burn', 'heal', 'battlecry', 'spark', 'scratch', 'splash', 'f
 MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', 'Charmadillo', 'Finsta', 'Gulfin', 'Finiette', 'Atrox', 'Pouch', 'Draem', 'Larvea', 'Cleaf', 'Jacana', 'Friolera' ]
 
 BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]
+
+Trainers = Literal['player', 'opponent']
