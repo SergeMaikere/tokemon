@@ -1,6 +1,8 @@
 from functools import partial
 from pygame import Font
 
+from gameobj.MonsterLevelSprite import MonsterLevelSprite
+from gameobj.MonsterNameSprite import MonsterNameSprite
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSprite import MonsterSprite
@@ -50,7 +52,8 @@ class Battle:
 	def __creates_all_battle_sprites ( self, i: int, entity: Trainers, monster: Monster ):
 		pipe(
 			partial(self.__create_monster_sprite, i, entity),
-			self.__display_monster_name
+			self.__display_monster_name,
+			self.__display_monster_level,
 		)( monster )
 
 	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
@@ -59,7 +62,10 @@ class Battle:
 
 
 	def __display_monster_name ( self, monster_sprite: MonsterSprite ):
-		pass
+		return MonsterNameSprite(monster_sprite.entity, monster_sprite.monster, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
+
+	def __display_monster_level ( self, monster_name: MonsterNameSprite ):
+		return MonsterLevelSprite(monster_name.entity, monster_name.monster, monster_name.rect, self.fonts['small'], self.battle_sprites)
 
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()

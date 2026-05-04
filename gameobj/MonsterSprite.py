@@ -5,9 +5,11 @@ from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite
 from utils.MyGroup import MyGroup
+from utils.Types import Trainers
 
 class MonsterSprite ( AnimatedSprite ):
-	def __init__(self, monster: Monster, entity: Literal['player', 'opponent'], frames: dict[str, list[Surface]], pos: Point, *groups: MyGroup) -> None:
+	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], pos: Point, *groups: MyGroup) -> None:
+		
 		self.monster = monster
 		self.entity = entity
 		self.state: Literal['idle', 'attack'] = 'idle'
