@@ -4,7 +4,7 @@ from pygame import Font
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import add_background_to_text, display_item, get_rect, get_text_surface, required, get_group, pipe
+from utils.Helper import add_background_to_text, add_color_to_surface, add_text_to_card, display_item, get_rect, get_sized_surface, get_text_surface, required, get_group, pipe, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Types import FontTypes, MonsterNames, Trainers
@@ -34,6 +34,8 @@ class Battle:
 			'opponent': self.__get_monster_sprites('opponent')
 		}
 
+		self.level_surface = pygame.Surface((60, 26))
+
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
@@ -54,6 +56,7 @@ class Battle:
 			for sprite in sprites:
 				pipe(
 					partial(self.__display_name, entity),
+					partial(self.__display_level, entity, sprite)
 				)( sprite )
 
 	def __display_name ( self, entity: Trainers, sprite: MonsterSprite ):
@@ -64,8 +67,30 @@ class Battle:
 		)( get_text_surface(self.fonts['regular'], sprite.monster.name) )
 
 	def __get_text_rect ( self, entity: Trainers, sprite: MonsterSprite, text_surface: Surface ):
-		if entity == 'player': return get_rect(text_surface, midbottom=sprite.rect.midleft + vector( 16, -70))
-		if entity == 'opponent': return get_rect(text_surface, midbottom=sprite.rect.midright + vector( -16, -70))
+		if entity == 'player': return get_rect(text_surface, midtop=sprite.rect.midleft + vector( 16, -70))
+		if entity == 'opponent': return get_rect(text_surface, midtop=sprite.rect.midright + vector( -16, -70))
+
+	def __display_level ( self, entity: Trainers, sprite: MonsterSprite, name_rect: FRect ):
+		pipe(
+			partial(self.__create_level_card, entity, sprite)
+		)(name_rect)
+
+	def __create_level_card ( self, entity: Trainers, sprite: MonsterSprite, name_rect: FRect ):
+		pipe(
+			add_color_to_surface,
+			partial(self.__place_level_card, entity, name_rect),
+			partial(self.__add_text_to_card, sprite),
+			partial(display_item, self.canvas)
+		)( self.level_surface )
+
+	def __place_level_card ( self, entity: Trainers, name_rect: FRect, level_surface: Surface ):
+		if entity == 'player': return get_rect(level_surface, topleft=name_rect.bottomleft)
+		if entity == 'opponent': return get_rect(level_surface, topright=name_rect.bottomright)
+
+	def __add_text_to_card ( self, sprite: MonsterSprite, datas: tuple[ Surface, FRect ] ):
+		card_surface, card_rect = datas
+		text_surface = get_text_surface(self.fonts['small'], f'Lvl: {sprite.monster.level}') 
+		return (add_text_to_card(card_surface, text_surface), card_rect)
 
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()

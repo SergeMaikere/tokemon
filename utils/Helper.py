@@ -3,7 +3,7 @@ from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
 from typing import Any, Callable, cast
-from pygame import FRect, Font, Surface, Vector2, surface
+from pygame import FRect, Font, Surface
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
@@ -132,6 +132,17 @@ def add_background_to_text ( surface: Surface, padding: int = 10, color: ColorLi
 	new_surface.fill(color)
 	new_surface.blit(surface, (padding, padding))
 	return new_surface
+
+def add_text_to_card ( card_surface: Surface, text_surface: Surface ):
+	text_rect = text_surface.get_frect(center=(card_surface.width/2, card_surface.height/2))
+	card_surface.blit(text_surface, text_rect)
+	return card_surface
+
+def add_color_to_surface ( surface: Surface, color: ColorLike = COLORS['white'] ):
+	surface.fill(color)
+	return surface
+
+def get_sized_surface ( width: float, height: float ): return pygame.Surface((width, height))
 
 def get_rect ( surface: Surface, **anchor: Point ): return (surface, surface.get_frect(**anchor))
 
