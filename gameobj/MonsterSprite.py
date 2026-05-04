@@ -1,3 +1,4 @@
+from random import uniform
 from typing import Literal
 
 from settings import *
@@ -9,13 +10,14 @@ class MonsterSprite ( AnimatedSprite ):
 	def __init__(self, monster: Monster, entity: Literal['player', 'opponent'], frames: dict[str, list[Surface]], pos: Point, *groups: MyGroup) -> None:
 		self.monster = monster
 		self.entity = entity
-		self.monster_frames = self.__flip_frames(frames)
-
 		self.state: Literal['idle', 'attack'] = 'idle'
+
+		self.monster_frames = self.__flip_frames(frames)
 		self.frames = self.monster_frames[self.state]
-		
+
 		super().__init__('monster_sprite', WORLD_LAYERS['top'], self.frames, *groups, center=pos)
 
+		self.speed = ANIMATION_SPEED + uniform(-1, 1)
 
 
 	def __flip_frames ( self, frames: dict[str, list[Surface]] ):
