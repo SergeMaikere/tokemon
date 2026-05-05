@@ -44,7 +44,7 @@ class Battle:
 
 	def update_battle_sprites ( self, dt: float ):
 		self.battle_sprites.update(dt)
-		self.battle_sprites.draw(self.canvas)
+		self.battle_sprites.draw()
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)

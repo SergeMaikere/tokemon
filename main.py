@@ -6,6 +6,7 @@ from pytmx import TiledMap
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
+from utils.BattleSprites import BattleSprites
 from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
@@ -34,7 +35,7 @@ class Game:
 		self.collision_sprites = MyGroup('collision_sprites')
 		self.character_sprites = MyGroup('character_sprites')
 		self.transition_sprites = MyGroup('transition_sprites')
-		self.battle_sprites = MyGroup('battle_sprites')
+		self.battle_sprites = BattleSprites()
 		self.player_battle_sprites = MyGroup('player_battle_sprites')
 		self.opponent_battle_sprites = MyGroup('opponent_battle_sprites')
 	

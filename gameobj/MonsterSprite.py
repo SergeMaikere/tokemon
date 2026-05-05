@@ -19,7 +19,9 @@ class MonsterSprite ( AnimatedSprite ):
 
 		super().__init__('monster_sprite', WORLD_LAYERS['top'], self.frames, *groups, center=pos)
 
+		self.z = 'monster'
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
+
 
 
 	def __flip_frames ( self, frames: dict[str, list[Surface]] ):

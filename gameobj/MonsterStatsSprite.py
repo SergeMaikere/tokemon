@@ -1,9 +1,8 @@
 from functools import partial
-from pygame import Font, display
-from pygame.scrap import get_text
+from pygame import Font
 
 from settings import *
-from utils.Helper import add_color_to_surface, display_item, get_progress_bar, get_rect, get_text_surface, pipe, required
+from utils.Helper import add_color_to_surface, display_item, get_progress_bar, get_rect, get_text_surface, pipe
 from utils.MyGroup import MyGroup
 from gameobj.MonsterSprite import MonsterSprite
 
@@ -11,7 +10,7 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 
 	def __init__( self, monster_sprite: MonsterSprite, font: Font, *groups: MyGroup ) -> None:
 		super().__init__(*groups)
-
+		self.z = 'overlay'
 		self.font = font
 		self.monster_rect = monster_sprite.rect
 		self.monster = monster_sprite.monster
@@ -38,9 +37,9 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 
 	def __display_initiative ( self, i: int, value: float, max_value: float ):
 		if i < 2: return
-		initiative_rect = pygame.FRect(0, self.image.height - 1, self.image.width, 1)
+		initiative_rect = pygame.FRect(0, self.image.height - 2, self.image.width, 2)
 		colors = self.progress_bars_colors[i]
-		get_progress_bar(self.image, initiative_rect, colors[1], colors[0], int(value), int(max_value))
+		get_progress_bar(self.image, initiative_rect, colors[1], colors[0], int(value), int(max_value), 0)
 
 	def update ( self, _ ):
 		add_color_to_surface(self.image)	

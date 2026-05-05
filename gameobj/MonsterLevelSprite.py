@@ -11,6 +11,7 @@ class MonsterLevelSprite ( pygame.sprite.Sprite ):
 
 	def __init__( self, entity: Trainers, monster: Monster, name_rect: FRect, font: Font, *groups: MyGroup  ) -> None:
 		super().__init__(*groups)
+		self.z = 'name'
 
 		self.entity = entity
 		self.monster = monster
