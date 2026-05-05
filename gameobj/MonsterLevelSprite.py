@@ -24,12 +24,9 @@ class MonsterLevelSprite ( pygame.sprite.Sprite ):
 		self.xp_bar_rect = pygame.FRect(0, self.rect.height - 2, self.rect.width, 2)
 
 	def __set_image_rect (  self ) -> tuple[ Surface, FRect ]:
-		return pipe(
-			add_color_to_surface,
-			self.__get_card_rect,
-		)( self.card_surface )
+		return pipe( add_color_to_surface, self.__get_card_rect )( self.card_surface )
 
-	def __get_card_rect ( self, card_surface: Surface ):
+	def __get_card_rect ( self, card_surface: Surface ) -> tuple[ Surface, FRect ]:
 		if self.entity == 'player': return get_rect(card_surface, topleft=self.name_rect.bottomleft)
 		return get_rect(card_surface, topright=self.name_rect.bottomright)
 

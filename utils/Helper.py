@@ -2,7 +2,7 @@ from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
 from settings import *
 from entities.Entity import Entity
-from typing import Any, Callable, cast
+from typing import Any, Callable, Optional, TypeVar, cast
 from pygame import FRect, Font, Surface
 from os import walk
 from os.path import basename, join
@@ -11,6 +11,8 @@ from pytmx.util_pygame import load_pygame
 
 from utils.MyGroup import MyGroup
 from utils.Types import Coasts, FontTypes, States
+
+T = TypeVar('T')
 
 def voyeur ( x: Any ):
 	print('\n****VOYEUR****')
@@ -23,11 +25,11 @@ pipe = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
 
-def required ( v: Any ):
+def required ( v: Optional[T]) -> T:
 	if v is None:
 		raise ValueError('Value is required')
 	else:
-		return v
+		return cast(T, v)
 
 
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):

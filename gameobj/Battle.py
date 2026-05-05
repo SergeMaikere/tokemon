@@ -3,10 +3,11 @@ from pygame import Font
 
 from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
+from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import add_background_to_text, add_color_to_surface, add_text_to_card, display_item, get_rect, get_sized_surface, get_text_surface, required, get_group, pipe, voyeur
+from utils.Helper import required, get_group, pipe
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Types import FontTypes, MonsterNames, Trainers
@@ -52,6 +53,7 @@ class Battle:
 	def __creates_all_battle_sprites ( self, i: int, entity: Trainers, monster: Monster ):
 		pipe(
 			partial(self.__create_monster_sprite, i, entity),
+			self.__display_monster_stats,
 			self.__display_monster_name,
 			self.__display_monster_level,
 		)( monster )
@@ -60,12 +62,15 @@ class Battle:
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
 		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], pos, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
-
 	def __display_monster_name ( self, monster_sprite: MonsterSprite ):
 		return MonsterNameSprite(monster_sprite.entity, monster_sprite.monster, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
 
 	def __display_monster_level ( self, monster_name: MonsterNameSprite ):
 		return MonsterLevelSprite(monster_name.entity, monster_name.monster, monster_name.rect, self.fonts['small'], self.battle_sprites)
+
+	def __display_monster_stats ( self, monster_sprite: MonsterSprite ):
+		MonsterStatsSprite(monster_sprite, self.fonts['small'], self.battle_sprites)
+		return monster_sprite
 
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()
