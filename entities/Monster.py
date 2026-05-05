@@ -11,7 +11,7 @@ class Monster:
 
 		self.xp = randint(0, 1000)
 		self.level_up = self.level * 150
-		self.initiative = 0
+		self.initiative = randint(0, 100)
 
 		self.health = max(0, self.get_stat('max_health') - randint(10, 100))
 		self.energy = max(0, self.get_stat('max_energy') - randint(10, 100))
