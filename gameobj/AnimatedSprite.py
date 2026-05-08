@@ -8,10 +8,10 @@ class AnimatedSprite ( Sprite ):
 
 		self.index, self.frames = 0, frames
 		self.image = self.frames[self.index]
+		self.speed = ANIMATION_SPEED
 
 	def _animate ( self, dt: float ):
-		if self.name == 'monster': print(int(self.index))
-		self.index += ANIMATION_SPEED * dt
+		self.index += self.speed * dt
 		self.image = self.frames[ int(self.index) % len(self.frames) ]
 
 	def update ( self, dt: float ):

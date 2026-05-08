@@ -5,12 +5,13 @@ from pygame.typing import ColorLike
 
 from settings import *
 from utils.Helper import pipe, required
+from utils.MonsterManager import MonsterManager
 
 class SideList:
-	def __init__( self, my_dict: dict[Any, Any], font: Font, main_rect: FRect, visible_items: int, icons: dict[str, Surface] | None = None  ) -> None:
+	def __init__( self, monster_manager: MonsterManager, font: Font, main_rect: FRect, visible_items: int, icons: dict[str, Surface] | None = None  ) -> None:
 		
 		self.main_rect = main_rect
-		self.dict = my_dict
+		self.MM = monster_manager
 		self.icons = icons
 		self.font = font
 		self.visible_items = visible_items
@@ -68,7 +69,7 @@ class SideList:
 			pygame.draw.rect(self.canvas, bg_color, card_rect)
 
 	def display ( self ):
-		for i, item in self.dict.items():
+		for i, item in self.MM.monsters.items():
 			pipe(
 				self.__set_card,
 				self.__is_card_visible,
@@ -80,7 +81,7 @@ class SideList:
 		self.__set_divide()
 
 	def __set_divide ( self ):
-		for i in range( min(len(self.dict), self.visible_items) - 1 ):
+		for i in range( min(len(self.MM.monsters), self.visible_items) - 1 ):
 			start = (self.main_rect.left, self.main_rect.top + (i + 1) * self.card_height )
 			end = (self.main_rect.left + self.card_width, self.main_rect.top + (i + 1) * self.card_height )
 			pygame.draw.line(self.canvas, COLORS['light-gray'], start, end, 4)
@@ -89,12 +90,13 @@ class SideList:
 
 	def __swith_item_with_selected ( self ):
 		if self.selected_index == self.index: return
+		i = required(self.selected_index)
 		
-		selected_item = self.dict[self.selected_index]
-		current_item = self.dict[self.index]
+		selected_item = self.MM.monsters[i]
+		current_item = self.MM.monsters[self.index]
 		
-		self.dict[self.index] = selected_item
-		self.dict[self.selected_index] = current_item
+		self.MM.monsters[self.index] = selected_item
+		self.MM.monsters[i] = current_item
 		
 		self.selected_index = None
 

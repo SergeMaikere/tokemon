@@ -1,3 +1,4 @@
+from pygame import Font
 from gameobj.MonsterIndex import MonsterIndex
 from settings import *
 from pytmx import TiledMap
@@ -5,12 +6,14 @@ from pytmx import TiledMap
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
+from utils.BattleSprites import BattleSprites
 from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
 from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict
+from utils.Types import FontTypes
 
 class Game:
 	def __init__(self) -> None:
@@ -20,7 +23,7 @@ class Game:
 		self.clock = pygame.time.Clock()
 		self.canvas = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-		self.fonts = {
+		self.fonts: dict[FontTypes, Font] = {
 			'regular': font_loader('PixeloidSan', 18),
 			'small': font_loader('PixeloidSan', 14),
 			'bold': font_loader('dogicapixelbold', 20),
@@ -32,12 +35,15 @@ class Game:
 		self.collision_sprites = MyGroup('collision_sprites')
 		self.character_sprites = MyGroup('character_sprites')
 		self.transition_sprites = MyGroup('transition_sprites')
+		self.battle_sprites = BattleSprites()
+		self.player_battle_sprites = MyGroup('player_battle_sprites')
+		self.opponent_battle_sprites = MyGroup('opponent_battle_sprites')
 	
 		self.player = self.get_player(map_loader('world'), 'house')
 
 		self.monster_manager = MonsterManager()
 		
-		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts)
+		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 

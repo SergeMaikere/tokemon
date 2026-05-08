@@ -31,7 +31,8 @@ class MonsterManager :
 				max_stats[stat] = value if not stat in max_stats else max(max_stats[stat], value)
 		return { stat.replace('max_', ''): value for stat, value in max_stats.items()}
 
-	def get_player_battle_monsters ( self ): return [ monster for key, monster in self.monsters.items() if key < 3 ]
+	def get_player_battle_monsters ( self ): 
+		return [ monster for key, monster in self.monsters.items() if key < 3 ]
 
 	def get_opponent_battle_monsters ( self, opponent_monsters: dict[int, tuple[MonsterNames, int]] ): 
-		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ] 
+		return [ Monster(data[0], data[1]) for i, data in  opponent_monsters.items() if i < 3 ] 
