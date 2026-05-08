@@ -16,7 +16,6 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 		self.monster = monster_sprite.monster
 
 		self.progress_bars_colors = ( (COLORS['red'], COLORS['black']), (COLORS['blue'], COLORS['black']), (COLORS['black'], COLORS['white']) )
-		self.infos = self.monster.get_battle_infos()
 
 		self.image: Surface = pygame.Surface((150, 48))
 		self.rect: FRect = self.image.get_frect(midtop=self.monster_rect.midbottom)
@@ -44,6 +43,6 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 	def update ( self, _ ):
 		add_color_to_surface(self.image)	
 
-		for i, (value, max_value) in enumerate(self.infos):
+		for i, (value, max_value) in enumerate(self.monster.get_battle_infos()):
 			self.__display_health_and_energy(i, value, max_value)
 			self.__display_initiative(i, value, max_value)

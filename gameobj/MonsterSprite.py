@@ -21,9 +21,17 @@ class MonsterSprite ( AnimatedSprite ):
 
 		self.z = 'monster'
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
+		self.paused = False
 
 
 
 	def __flip_frames ( self, frames: dict[str, list[Surface]] ):
 		if self.entity != 'player': return frames
 		return { k: [pygame.transform.flip(surface, True, False) for surface in surfaces] for k, surfaces in frames.items() }
+
+	
+	def update ( self, dt: float ):
+		if self.paused: return
+		self._animate(dt)
+		self.monster.increment_initiative(dt)
+		

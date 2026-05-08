@@ -4,7 +4,7 @@ from pygame import Font
 from entities.Player import Player
 from gameobj.Battle import Battle
 from utils.MonsterManager import MonsterManager
-from utils.Helper import images_loader_dict, get_group
+from utils.Helper import images_loader_dict
 from utils.MyGroup import MyGroup
 from utils.Types import FontTypes, MonsterNames
 
