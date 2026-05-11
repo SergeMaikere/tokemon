@@ -13,10 +13,10 @@ class MonsterNameSprite ( pygame.sprite.Sprite ):
 	def __init__( self, entity: Trainers, monster: Monster, monster_rect: FRect, font: Font, *groups: MyGroup ) -> None:
 		super().__init__(*groups)
 		self.z = 'name'
-		self.entity = entity
+		self.entity: Trainers = entity
 		self.monster = monster
 
 		self.image = pipe( partial(get_text_surface, font), add_background_to_text )(self.monster.name)
-		self.rect = self.image.get_frect(midright=monster_rect.midleft + vector(40, -60)) if self.entity == 'player' else self.image.get_frect(midleft=monster_rect.midright + vector(-40, -60))
+		self.rect: FRect = self.image.get_frect(midright=monster_rect.midleft + vector(40, -60)) if self.entity == 'player' else self.image.get_frect(midleft=monster_rect.midright + vector(-40, -60))
 
 	

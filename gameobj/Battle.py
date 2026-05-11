@@ -1,5 +1,6 @@
 from functools import partial
 from pygame import Font
+from pygame.sprite import Sprite
 
 from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
@@ -72,6 +73,15 @@ class Battle:
 		MonsterStatsSprite(monster_sprite, self.fonts['small'], self.battle_sprites)
 		return monster_sprite
 
+	def __get_initiative ( self ):
+		for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites():
+			if sprite.monster.initiative >= 100:
+				self.__freeze_all_monsters()
+
+	def __freeze_all_monsters ( self ): 
+		[ sprite.set_paused(True) for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites() ]
+
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()
 		self.update_battle_sprites(dt)
+		self.__get_initiative()
