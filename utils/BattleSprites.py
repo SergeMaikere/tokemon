@@ -12,5 +12,8 @@ class BattleSprites ( MyGroup ):
 		self.canvas = required(pygame.display.get_surface())
 
 	def draw ( self ):
-		for sprite in sorted(self, key=lambda sprite: BATTLE_LAYERS[sprite.z]):
+		for sprite in sorted(self, key=lambda sprite: sprite.z):
+			if sprite.z == BATTLE_LAYERS['outline']:	
+				self.canvas.blit(sprite.image, sprite.rect)
+
 			self.canvas.blit(sprite.image, sprite.rect)

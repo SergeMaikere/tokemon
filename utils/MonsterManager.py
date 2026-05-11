@@ -4,7 +4,7 @@ from random import randint, sample
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from settings import *
 from entities.Monster import Monster
-from utils.Helper import images_loader_dict, monsters_frames_loader
+from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader
 from utils.Types import Attacks, MonsterNames
 
 class MonsterManager :
@@ -13,6 +13,8 @@ class MonsterManager :
 		self.monsters = self.get_random_monsters(8)
 
 		self.monster_frames = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
+
+		self.monster_frames_outlines = get_frame_outline(self.monster_frames, 4)
 
 		self.monsters_icons = images_loader_dict('assets', 'graphics', 'icons')
 

@@ -2,11 +2,12 @@ from functools import partial
 from pygame import Font
 from pygame.sprite import Sprite
 
+from settings import *
+from entities.Monster import Monster
+from gameobj.MonsterSpriteOutline import MonsterSpriteOutline
 from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
-from settings import *
-from entities.Monster import Monster
 from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import required, get_group, pipe
 from utils.MonsterManager import MonsterManager
@@ -33,7 +34,8 @@ class Battle:
 			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
 		}
 
-	
+		self.mode = None	
+
 		self.level_surface = pygame.Surface((60, 26))
 
 		self.initiate_battle()
@@ -74,12 +76,17 @@ class Battle:
 		return monster_sprite
 
 	def __get_initiative ( self ):
-		for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites():
-			if sprite.monster.initiative >= 100:
-				self.__freeze_all_monsters()
+		if self.mode == 'selection': return
+		sprites = self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+		sprite = next( (sprite for sprite in sprites if sprite.monster.initiative >= 100), None )
 
-	def __freeze_all_monsters ( self ): 
-		[ sprite.set_paused(True) for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites() ]
+		if sprite:
+			sprite.monster.initiative = 0
+			self.mode = 'selection'
+			self.__freeze_all_monsters(sprites)
+			MonsterSpriteOutline(sprite, self.MM.monster_frames_outlines[sprite.monster.name], self.battle_sprites)
+
+	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
 
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()

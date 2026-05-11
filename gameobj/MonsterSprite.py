@@ -17,9 +17,8 @@ class MonsterSprite ( AnimatedSprite ):
 		self.monster_frames = self.__flip_frames(frames)
 		self.frames = self.monster_frames[self.state]
 
-		super().__init__('monster_sprite', WORLD_LAYERS['top'], self.frames, *groups, center=pos)
+		super().__init__('monster_sprite', BATTLE_LAYERS['monster'], self.frames, *groups, center=pos)
 
-		self.z = 'monster'
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
 		self._paused = False
 
@@ -32,7 +31,7 @@ class MonsterSprite ( AnimatedSprite ):
 	def set_paused ( self, paused: bool ): self._paused = paused
 	
 	def update ( self, dt: float ):
-		if self._paused: return
 		self._animate(dt)
-		self.monster.increment_initiative(dt)
+		if not self._paused:
+			self.monster.increment_initiative(dt)
 		
