@@ -10,7 +10,7 @@ from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
 from utils.MyGroup import MyGroup
-from utils.Types import Coasts, FontTypes, States
+from utils.Types import Coasts, FontTypes, MonsterNames, States
 
 T = TypeVar('T')
 
@@ -151,6 +151,26 @@ def get_rect ( surface: Surface, **anchor: Point ): return (surface, surface.get
 def display_item ( surface: Surface, datas: tuple[ Surface, FRect ] ): 
 	item_surface, item_rect = datas
 	return surface.blit(item_surface, item_rect)
+
+def get_frame_outline ( frames: dict[Any, dict[Any, list[Surface]]], width: int ):
+	return { name: {state: [create_frame_outline(frame, width) for frame in frames] for state, frames in datas.items()} for name, datas in frames.items() }
+
+def create_frame_outline ( frame: Surface, width: int ):
+	new_surface = pygame.Surface( vector2(frame.get_size()) + vector2(width * 2), pygame.SRCALPHA )
+	mask_surface = pygame.mask.from_surface(frame).to_surface()
+
+	mask_surface.set_colorkey('black')
+
+	new_surface.blit(mask_surface, (0, 0))
+	new_surface.blit(mask_surface, (width, 0))
+	new_surface.blit(mask_surface, (width*2, 0))
+	new_surface.blit(mask_surface, (width*2, width))
+	new_surface.blit(mask_surface, (width*2, width*2))
+	new_surface.blit(mask_surface, (width, width*2))
+	new_surface.blit(mask_surface, (0, width*2))
+	new_surface.blit(mask_surface, (0, width))
+
+	return new_surface
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 

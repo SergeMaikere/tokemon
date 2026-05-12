@@ -4,24 +4,27 @@ from typing import Literal
 from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite
+from utils.Helper import required, pipe
 from utils.MyGroup import MyGroup
+from utils.Timer import Timer
 from utils.Types import Trainers
 
 class MonsterSprite ( AnimatedSprite ):
 	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], pos: Point, *groups: MyGroup) -> None:
 		
 		self.monster = monster
-		self.entity = entity
+		self.entity: Trainers = entity
 		self.state: Literal['idle', 'attack'] = 'idle'
 
 		self.monster_frames = self.__flip_frames(frames)
 		self.frames = self.monster_frames[self.state]
 
-		super().__init__('monster_sprite', WORLD_LAYERS['top'], self.frames, *groups, center=pos)
+		super().__init__('monster_sprite', BATTLE_LAYERS['monster'], self.frames, *groups, center=pos)
 
-		self.z = 'monster'
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
-		self.paused = False
+		self._paused = False
+		self.flash = False
+		self.flash_timer = Timer(200, lambda: self.set_flash(False))
 
 
 
@@ -29,9 +32,32 @@ class MonsterSprite ( AnimatedSprite ):
 		if self.entity != 'player': return frames
 		return { k: [pygame.transform.flip(surface, True, False) for surface in surfaces] for k, surfaces in frames.items() }
 
+	def set_paused ( self, paused: bool ): self._paused = paused
+
+	def set_flash ( self, flash: bool ): self.flash = flash
 	
+	def start_flash ( self ):
+		self.set_flash(True)
+		self.flash_timer.start()		
+
+	def _animate ( self, dt: float ):
+		self.image = pipe(
+			self._get_image,
+			self.__flash_silhouette
+		)( dt )
+	
+	def __flash_silhouette ( self, image: Surface ):
+		if not self.flash: return image
+		silhouette = pygame.mask.from_surface(required(image)).to_surface()
+		silhouette.set_colorkey('black')
+		return silhouette
+
+
 	def update ( self, dt: float ):
-		if self.paused: return
 		self._animate(dt)
-		self.monster.increment_initiative(dt)
+
+		if self.flash_timer.running: self.flash_timer.update()
+
+		if not self._paused:
+			self.monster.increment_initiative(dt)
 		

@@ -10,7 +10,7 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 
 	def __init__( self, monster_sprite: MonsterSprite, font: Font, *groups: MyGroup ) -> None:
 		super().__init__(*groups)
-		self.z = 'overlay'
+		self.z = BATTLE_LAYERS['overlay']
 		self.font = font
 		self.monster_rect = monster_sprite.rect
 		self.monster = monster_sprite.monster
