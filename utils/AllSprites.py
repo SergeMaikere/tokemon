@@ -29,17 +29,13 @@ class AllSprites ( MyGroup ):
 		top = [ sprite for sprite in self if sprite.z > WORLD_LAYERS['main'] ]
 		return ( bg, main, top )
 
-	def draw ( self, player: Player ):
+	def draw_all ( self, player: Player ):
 		self.__get_offset(player)
 
 		for layer in self.__get_layers():
 			for sprite in layer:
 				if isinstance(sprite, Entity): 
 					self.canvas.blit(self.shadow, sprite.rect.topleft + self.offset + self.shadow_offset)
-
-				if sprite.name == 'monster_sprite':
-					print(sprite.rect.topleft)
-					print(sprite.rect.topleft + self.offset)
 
 				self.canvas.blit(sprite.image, sprite.rect.topleft + self.offset)
 				

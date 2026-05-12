@@ -9,17 +9,18 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import required, get_group, pipe
+from utils.Helper import display_item, get_rect, required, get_group, pipe
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
-from utils.Types import FontTypes, MonsterNames, Trainers
+from utils.Types import FontTypes, Menu, MonsterNames, Trainers
 
 class Battle:
-	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
+	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
 		
 		self.MM = monster_manager
 		self.opponent_monsters = opponent_monsters
 		self.fonts = fonts
+		self.ui_images = ui_images
 		self.battle_ground_surface = battle_ground
 		self.battle_ground_rect = self.battle_ground_surface.get_frect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 		
@@ -32,6 +33,14 @@ class Battle:
 		self.monsters: dict[Trainers, list[Monster]] = { 
 			'player': self.MM.get_player_battle_monsters(), 
 			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
+		}
+
+		self.indexes = {
+			'general': 0,
+			'monster': 0,
+			'attack': 0,
+			'switch': 0,
+			'target': 0,
 		}
 
 		self.mode = self.current_monster = None	
@@ -76,7 +85,7 @@ class Battle:
 		return monster_sprite
 
 	def __get_initiative ( self ):
-		if self.mode == 'selection': return
+		if self.mode == 'general': return
 
 		sprites, sprite = self.__give_me_sprites()
 		if sprite:
@@ -92,7 +101,7 @@ class Battle:
 	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
-		self.mode = 'selection'
+		self.mode = 'general'
 		self.current_monster = sprite
 		sprite.monster.initiative = 0
 		sprite.start_flash()
@@ -102,7 +111,32 @@ class Battle:
 		MonsterSpriteOutline(sprite, self.MM.monster_frames_outlines[sprite.monster.name], self.battle_sprites)
 		return sprite
 
+	def __display_menus ( self ):
+		match self.mode:
+			case 'general': self.__display_general()
+			case _: return
+
+
+	def __display_general ( self ):
+		for i, (key, data) in enumerate(BATTLE_CHOICES['full'].items()):
+			pipe(
+				partial(self.__get_general_menu_icon, i),
+				partial(self.__set_grayscale_transformation, i),
+				partial(get_rect, center=(required(self.current_monster).rect.center) + data['pos']),
+				partial(display_item, self.canvas)
+			)(data)
+			
+	def __get_general_menu_icon ( self, i: int, data: Menu ):
+		return self.ui_images[f'{data['icon']}_highlight' if self.__is_selected(i) else data['icon']]
+
+	def __set_grayscale_transformation ( self, i: int, icon: Surface ):
+		if self.__is_selected(i): return icon 
+		return pygame.transform.grayscale(icon)
+
+	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
+
 	def update ( self, dt: float ):
 		self.__draw_battle_ground()
 		self.update_battle_sprites(dt)
 		self.__get_initiative()
+		self.__display_menus()

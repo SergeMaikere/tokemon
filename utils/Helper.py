@@ -146,7 +146,7 @@ def add_color_to_surface ( surface: Surface, color: ColorLike = COLORS['white'] 
 
 def get_sized_surface ( width: float, height: float ): return pygame.Surface((width, height))
 
-def get_rect ( surface: Surface, **anchor: Point ): return (surface, surface.get_frect(**anchor))
+def get_rect ( surface: Surface, **anchor: Point ): return (surface, required(surface.get_frect(**anchor)))
 
 def display_item ( surface: Surface, datas: tuple[ Surface, FRect ] ): 
 	item_surface, item_rect = datas

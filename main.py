@@ -43,7 +43,7 @@ class Game:
 
 		self.monster_manager = MonsterManager()
 		
-		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -81,7 +81,7 @@ class Game:
 
 			self.dialog_manager.update()
 
-			self.all_sprites.draw(self.player)
+			self.all_sprites.draw_all(self.player)
 
 			self.battle_manager.update(dt)
 

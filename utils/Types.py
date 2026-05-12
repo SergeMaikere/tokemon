@@ -1,9 +1,8 @@
 
 from typing import Literal, TypedDict
 
-class Size ( TypedDict ):
-	width: float
-	height: float
+from pygame import Vector2
+
 
 States = Literal[ 'down', 'left', 'right', 'up' ]
 
@@ -22,3 +21,13 @@ MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', '
 BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]
 
 Trainers = Literal['player', 'opponent']
+
+Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
+
+class Size ( TypedDict ):
+	width: float
+	height: float
+
+class Menu ( TypedDict ):
+	pos: Vector2
+	icon: Icons

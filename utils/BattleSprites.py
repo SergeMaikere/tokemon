@@ -14,8 +14,7 @@ class BattleSprites ( MyGroup ):
 
 	def draw_all ( self, current_monster: MonsterSprite ):
 		for sprite in sorted(self, key=lambda sprite: sprite.z):
-			if sprite.z == BATTLE_LAYERS['outline']:
-				if sprite.monster_sprite == current_monster:	
-					self.canvas.blit(sprite.image, sprite.rect)
+			if sprite.z == BATTLE_LAYERS['outline'] and sprite.monster_sprite == current_monster:
+				self.canvas.blit(sprite.image, sprite.rect)
 
 			self.canvas.blit(sprite.image, sprite.rect)
