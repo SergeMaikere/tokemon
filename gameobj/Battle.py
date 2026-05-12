@@ -12,7 +12,7 @@ from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import display_item, get_rect, required, get_group, pipe
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
-from utils.Types import FontTypes, Menu, MonsterNames, Trainers
+from utils.Types import BatlleMode, FontTypes, Menu, MonsterNames, Trainers
 
 class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
@@ -43,24 +43,17 @@ class Battle:
 			'target': 0,
 		}
 
-		self.mode = self.current_monster = None	
+		self.mode, self.current_monster = None, None	
 
 		self.level_surface = pygame.Surface((60, 26))
 
 		self.initiate_battle()
 
+
 	def initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
 			for i, monster in enumerate(monsters):
 				self.__creates_all_battle_sprites(i, entity, monster)
-
-	def update_battle_sprites ( self, dt: float ):
-		self.battle_sprites.update(dt)
-		self.battle_sprites.draw_all(self.current_monster)
-
-	def __draw_battle_ground ( self ):
-		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
-
 
 	def __creates_all_battle_sprites ( self, i: int, entity: Trainers, monster: Monster ):
 		pipe(
@@ -83,6 +76,29 @@ class Battle:
 	def __display_monster_stats ( self, monster_sprite: MonsterSprite ):
 		MonsterStatsSprite(monster_sprite, self.fonts['small'], self.battle_sprites)
 		return monster_sprite
+
+	def update_battle_sprites ( self, dt: float ):
+		self.battle_sprites.update(dt)
+		self.battle_sprites.draw_all(self.current_monster)
+
+	def __input ( self ):
+		if not self.current_monster or not self.mode: return
+
+		keys = pygame.key.get_just_pressed()
+		limiter = self.__get_limiter()
+
+		if keys[pygame.K_UP]: 
+			self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
+		if keys[pygame.K_DOWN]: 
+			self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
+
+	def __get_limiter ( self ):
+		match self.mode:
+			case 'general': return len(BATTLE_CHOICES['full'])
+			case _: return 0
+
+	def __draw_battle_ground ( self ):
+		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
 	def __get_initiative ( self ):
 		if self.mode == 'general': return
@@ -116,7 +132,6 @@ class Battle:
 			case 'general': self.__display_general()
 			case _: return
 
-
 	def __display_general ( self ):
 		for i, (key, data) in enumerate(BATTLE_CHOICES['full'].items()):
 			pipe(
@@ -136,6 +151,7 @@ class Battle:
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
 
 	def update ( self, dt: float ):
+		self.__input()
 		self.__draw_battle_ground()
 		self.update_battle_sprites(dt)
 		self.__get_initiative()
