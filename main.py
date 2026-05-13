@@ -81,7 +81,7 @@ class Game:
 
 			self.dialog_manager.update()
 
-			self.all_sprites.draw_all(self.player)
+			self.all_sprites.draw(self.player)
 
 			self.battle_manager.update(dt)
 

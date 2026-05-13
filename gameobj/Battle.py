@@ -79,7 +79,7 @@ class Battle:
 
 	def update_battle_sprites ( self, dt: float ):
 		self.battle_sprites.update(dt)
-		self.battle_sprites.draw_all(self.current_monster)
+		self.battle_sprites.draw(self.current_monster)
 
 	def __input ( self ):
 		if not self.current_monster or not self.mode: return
@@ -91,11 +91,32 @@ class Battle:
 			self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
 		if keys[pygame.K_DOWN]: 
 			self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
+		if keys[pygame.K_SPACE]:
+			match self.mode:
+				case 'general': self.__general_selector()
+				case _: return
 
 	def __get_limiter ( self ):
 		match self.mode:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case _: return 0
+
+	def __general_selector ( self ):
+		match self.indexes['general']:
+			case 0: 
+				# self.mode = 'attack'
+				print('attack')
+			case 1: 
+				self.current_monster, self.mode = None, None
+				self.indexes['general'] = 0
+				self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
+				print('defend')
+			case 2: 
+				# self.mode = 'switch'
+				print('switch')
+			case 3: 
+				# self.mode = 'monster'
+				print('catch')
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
@@ -115,6 +136,8 @@ class Battle:
 		return ( sprites, sprite )
 
 	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
+
+	def __unfreeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(False) for sprite in sprites ]
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		self.mode = 'general'

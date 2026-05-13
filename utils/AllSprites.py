@@ -29,7 +29,7 @@ class AllSprites ( MyGroup ):
 		top = [ sprite for sprite in self if sprite.z > WORLD_LAYERS['main'] ]
 		return ( bg, main, top )
 
-	def draw_all ( self, player: Player ):
+	def draw ( self, player: Player ):
 		self.__get_offset(player)
 
 		for layer in self.__get_layers():

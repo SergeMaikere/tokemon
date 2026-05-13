@@ -63,11 +63,13 @@ class MonsterIndex:
 			self.open = not self.open
 
 	def __up_and_down ( self, keys: ScancodeWrapper ):
+		if not self.open: return
 		if keys[pygame.K_UP]: self.side_list.index -= 1
 		if keys[pygame.K_DOWN]: self.side_list.index += 1
 		self.side_list.index = self.side_list.index % len(self.MM.monsters)
 
 	def __select ( self, keys: ScancodeWrapper ):
+		if not self.open: return
 		if keys[pygame.K_SPACE]: self.side_list.select()
 
 	def __draw_main_rect ( self ):

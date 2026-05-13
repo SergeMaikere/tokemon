@@ -21,9 +21,11 @@ class DialogManager:
 
 		self.timer = Timer(500)
 		self.current_dialog = None
+		self.in_battle = False
 		
 
 	def input ( self ):
+		if self.in_battle: return
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
 			if self.current_dialog:
@@ -69,6 +71,7 @@ class DialogManager:
 		return character
 
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
+		self.in_battle = True
 		self.current_dialog = None
 		self.BM.start_battle(character.datas['biome'], character.datas['monsters'])
 		del dialog

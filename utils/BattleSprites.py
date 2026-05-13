@@ -12,9 +12,9 @@ class BattleSprites ( MyGroup ):
 
 		self.canvas = required(pygame.display.get_surface())
 
-	def draw_all ( self, current_monster: MonsterSprite ):
+	def draw ( self, current_monster: MonsterSprite ):
 		for sprite in sorted(self, key=lambda sprite: sprite.z):
 			if sprite.z == BATTLE_LAYERS['outline'] and sprite.monster_sprite == current_monster:
 				self.canvas.blit(sprite.image, sprite.rect)
-
-			self.canvas.blit(sprite.image, sprite.rect)
+			else:
+				self.canvas.blit(sprite.image, sprite.rect)
