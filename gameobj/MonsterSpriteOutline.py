@@ -1,19 +1,20 @@
-from typing import Literal
-
-from gameobj.MonsterSprite import MonsterSprite
+from typing import Callable, Literal
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
+from gameobj.MonsterSprite import MonsterSprite
 from utils.MyGroup import MyGroup
 from utils.Types import Trainers
 
 class MonsterSpriteOutline ( AnimatedSprite ):
-	def __init__(self, monster_sprite: MonsterSprite, frames: dict[str, list[Surface]], *groups: MyGroup) -> None:
-		
+	def __init__(self, monster_sprite: MonsterSprite, *groups: MyGroup) -> None:
 		self.monster_sprite = monster_sprite
-		self.entity: Trainers = self.monster_sprite.entity
+		
+		self.entity = self.monster_sprite.entity
+		self.get_index = self.monster_sprite.get_index
+
 		self.state: Literal['idle', 'attack'] = 'idle'
 
-		self.monster_frames = self.__flip_frames(frames)
+		self.monster_frames = self.__flip_frames(self.monster_sprite.outline_frames)
 		self.frames = self.monster_frames[self.state]
 
 		super().__init__('monster_sprite_outline', BATTLE_LAYERS['outline'], self.frames, *groups, center=self.monster_sprite.rect.center)
@@ -24,5 +25,5 @@ class MonsterSpriteOutline ( AnimatedSprite ):
 		return { k: [pygame.transform.flip(surface, True, False) for surface in surfaces] for k, surfaces in frames.items() }
 	
 	def _animate ( self, dt: float ):
-		self.index = self.monster_sprite.index
+		self.index = self.get_index()
 		self.image = self.frames[ int(self.index) % len(self.frames) ]

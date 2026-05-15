@@ -72,7 +72,7 @@ class Game:
 		while True:
 			dt = self.clock.tick(60) / 1000
 
-			self.canvas.fill('black')
+			self.canvas.fill((0, 0, 0, 0))
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: self.__quit_game()
@@ -90,7 +90,6 @@ class Game:
 			self.transition_manager.handle_transitions(dt)
 
 			pygame.display.update( )
-
 
 
 if __name__ == '__main__':

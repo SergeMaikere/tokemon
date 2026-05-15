@@ -1,6 +1,5 @@
 from functools import partial
-from pygame import Font, sprite
-from pygame.sprite import Sprite
+from pygame import Font
 
 from settings import *
 from entities.Monster import Monster
@@ -65,7 +64,7 @@ class Battle:
 
 	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
-		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], pos, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
+		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
 	def __display_monster_name ( self, monster_sprite: MonsterSprite ):
 		return MonsterNameSprite(monster_sprite.entity, monster_sprite.monster, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
@@ -107,6 +106,7 @@ class Battle:
 				# self.mode = 'attack'
 				print('attack')
 			case 1: 
+				required(self.current_monster).outline = None
 				self.current_monster, self.mode = None, None
 				self.indexes['general'] = 0
 				self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
@@ -122,13 +122,13 @@ class Battle:
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
 	def __get_initiative ( self ):
-		if self.mode == 'general': return
+		if self.mode: return
 
 		sprites, sprite = self.__give_me_sprites()
 		if sprite:
 			self.__freeze_all_monsters(sprites)
 			self.__update_datas(sprite)
-			self.__highlite_monster(sprite)
+			self.__highlight_monster(sprite)
 
 	def __give_me_sprites ( self ):
 		sprites = self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
@@ -140,14 +140,14 @@ class Battle:
 	def __unfreeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(False) for sprite in sprites ]
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
+		sprite.monster.initiative = 0
 		self.mode = 'general'
 		self.current_monster = sprite
-		sprite.monster.initiative = 0
 		sprite.start_flash()
 		return sprite
 
-	def __highlite_monster ( self, sprite: MonsterSprite ):
-		MonsterSpriteOutline(sprite, self.MM.monster_frames_outlines[sprite.monster.name], self.battle_sprites)
+	def __highlight_monster ( self, sprite: MonsterSprite ):
+		MonsterSpriteOutline(sprite, self.battle_sprites)
 		return sprite
 
 	def __display_menus ( self ):
@@ -176,6 +176,6 @@ class Battle:
 	def update ( self, dt: float ):
 		self.__input()
 		self.__draw_battle_ground()
-		self.update_battle_sprites(dt)
 		self.__get_initiative()
+		self.update_battle_sprites(dt)
 		self.__display_menus()
