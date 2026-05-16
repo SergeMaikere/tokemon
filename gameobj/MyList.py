@@ -1,12 +1,10 @@
 
-from pytmx.pytmx import ColorLike
 from functools import partial
 from typing import Any, Callable
-
-from pygame import Font, display, key
+from pygame import Font
 
 from settings import *
-from utils.Helper import add_color_to_surface, display_item, get_rect, get_text_surface, compose, required
+from utils.Helper import display_item, get_rect, get_text_surface, compose, required
 from utils.Types import Colors, Size
 
 my_colors: Colors = {
@@ -42,7 +40,7 @@ class MyList:
 
 	def __get_card_rect ( self, i: int ):
 		v_offset = self.__set_v_offset()
-		return pygame.FRect(self.main_rect.left, self.main_rect.top + i * self.height + v_offset, self.width, self.height)
+		return pygame.FRect(self.main_rect.left, self.main_rect.top + (i - v_offset) * self.height , self.width, self.height)
 
 	def __is_card_visible ( self, card_rect: FRect ):
 		if not card_rect.colliderect(self.main_rect): return
@@ -54,8 +52,6 @@ class MyList:
 
 	def __set_text ( self, text: str, card_rect: FRect ):
 		if not card_rect: return
-		# text_surface = get_text_surface(self.font, text, self.colors['text'])
-		# return get_rect(text_surface, center=card_rect.center)
 		return compose(
 			lambda text: get_text_surface(self.font, text, self.colors['text']), 
 			partial(get_rect, center=card_rect.center)
@@ -70,6 +66,7 @@ class MyList:
 		for i ,text in enumerate(self.my_list):
 			compose(	
 				self.__get_card_rect,
+				self.__is_card_visible,
 				partial(self.__draw_card_text, i),
 				partial(self.__set_text, text),
 				self.__blit_text
