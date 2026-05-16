@@ -109,7 +109,7 @@ class Battle:
 				self.mode = 'attack'
 				print('attack')
 			case 1: 
-				self.current_monster = None
+				self.current_monster, self.mode = None, None
 				self.indexes['general'] = 0
 				self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
 				print('defend')
