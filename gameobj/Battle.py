@@ -8,6 +8,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
+from gameobj.MyList import MyList
 from utils.Helper import display_item, get_rect, required, get_group, pipe
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
@@ -42,7 +43,7 @@ class Battle:
 			'target': 0,
 		}
 
-		self.mode, self.current_monster = None, None	
+		self.mode, self.current_monster, self.attack_list = None, None, None
 
 		self.level_surface = pygame.Surface((60, 26))
 
@@ -93,30 +94,34 @@ class Battle:
 		if keys[pygame.K_SPACE]:
 			match self.mode:
 				case 'general': self.__general_selector()
+				case 'attack': self.__attack_selector()
 				case _: return
 
 	def __get_limiter ( self ):
 		match self.mode:
 			case 'general': return len(BATTLE_CHOICES['full'])
+			case 'attack': return len(self.current_monster.monster.get_abilities())
 			case _: return 0
 
 	def __general_selector ( self ):
 		match self.indexes['general']:
 			case 0: 
-				# self.mode = 'attack'
+				self.mode = 'attack'
 				print('attack')
 			case 1: 
-				required(self.current_monster).outline = None
-				self.current_monster, self.mode = None, None
+				self.current_monster = None
 				self.indexes['general'] = 0
 				self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
 				print('defend')
 			case 2: 
-				# self.mode = 'switch'
+				self.mode = 'switch'
 				print('switch')
 			case 3: 
 				# self.mode = 'monster'
 				print('catch')
+
+	def __attack_selector ( self ):
+		pass
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
@@ -153,6 +158,7 @@ class Battle:
 	def __display_menus ( self ):
 		match self.mode:
 			case 'general': self.__display_general()
+			case 'attack': self.__display_attack()
 			case _: return
 
 	def __display_general ( self ):
@@ -163,7 +169,18 @@ class Battle:
 				partial(get_rect, center=(required(self.current_monster).rect.center) + data['pos']),
 				partial(display_item, self.canvas)
 			)(data)
-			
+	
+	def __display_attack ( self ):
+		if self.attack_list: self.attack_list.draw_list()
+
+		self.attack_list = MyList( 
+			my_list=self.current_monster.monster.get_abilities(), 
+			size={'width': 150, 'height': 200}, 
+			visible_items=4, 
+			font=self.fonts['regular'],
+			pos=self.current_monster.rect.midright, 
+		)
+
 	def __get_general_menu_icon ( self, i: int, data: Menu ):
 		return self.ui_images[f'{data['icon']}_highlight' if self.__is_selected(i) else data['icon']]
 

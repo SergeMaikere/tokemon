@@ -2,6 +2,7 @@
 from typing import Literal, TypedDict
 
 from pygame import Vector2
+from pytmx.pytmx import ColorLike
 
 
 States = Literal[ 'down', 'left', 'right', 'up' ]
@@ -26,6 +27,7 @@ Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
 
 BatlleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
+
 class Size ( TypedDict ):
 	width: float
 	height: float
@@ -33,3 +35,9 @@ class Size ( TypedDict ):
 class Menu ( TypedDict ):
 	pos: Vector2
 	icon: Icons
+
+class Colors ( TypedDict ):
+	bg: ColorLike
+	text: ColorLike
+	bg_selected: ColorLike
+	text_selected: ColorLike
