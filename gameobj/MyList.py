@@ -1,12 +1,12 @@
 
 from pytmx.pytmx import ColorLike
 from functools import partial
-from typing import Any
+from typing import Any, Callable
 
-from pygame import Font
+from pygame import Font, display, key
 
 from settings import *
-from utils.Helper import add_color_to_surface, display_item, get_rect, get_text_surface, pipe, required
+from utils.Helper import add_color_to_surface, display_item, get_rect, get_text_surface, compose, required
 from utils.Types import Colors, Size
 
 my_colors: Colors = {
@@ -17,15 +17,16 @@ my_colors: Colors = {
 }
 
 class MyList:
-	def __init__( self, my_list: list[Any], size: Size, visible_items: int, font: Font, pos: Point, colors: Colors = my_colors ) -> None:
+	def __init__( self, my_list: list[Any], size: Size, visible_items: int, font: Font, pos: Point, get_index: Callable, colors: Colors = my_colors ) -> None:
 		self.my_list = my_list
 		self.size = size
 		self.visible_items = visible_items
 		self.font = font
+		self.get_index = get_index
 		self.colors = colors
 
+		self.padding = 15 
 		self.canvas = required(pygame.display.get_surface())
-		self.index = 0
 		self.width, self.height = self.__get_card_dimensions()
 		self.main_rect = self.__get_main_rect(pos)
 
@@ -33,29 +34,47 @@ class MyList:
 	def __get_card_dimensions ( self ): return ( self.size['width'], self.size['height'] / self.visible_items )
 
 	def __get_main_rect ( self, pos: Point ):
-		return pygame.FRect((0, 0), (self.width, self.size['height'])).move_to(midleft=pos + vector2(20, 0))
+		return pygame.FRect((0, 0), (self.width, self.size['height'])).move_to(midleft=pos + vector2(self.padding, 0))
 
 
 	def __set_v_offset ( self ): 
-		return 0 if self.index < self.visible_items else (self.index - self.visible_items + 1)
+		return 0 if self.get_index() < self.visible_items else (self.get_index() - self.visible_items + 1)
 
 	def __get_card_rect ( self, i: int ):
 		v_offset = self.__set_v_offset()
 		return pygame.FRect(self.main_rect.left, self.main_rect.top + i * self.height + v_offset, self.width, self.height)
 
-	def __draw_card_text ( self, card_rect: FRect ):
-		return pygame.draw.rect(self.canvas, self.colors['bg'], card_rect)
+	def __is_card_visible ( self, card_rect: FRect ):
+		if not card_rect.colliderect(self.main_rect): return
+		return card_rect
+
+	def __draw_card_text ( self, i: int, card_rect: FRect ):
+		if not card_rect: return
+		return pygame.draw.rect(self.canvas, self.colors['bg_selected' if self.get_index() == i else 'bg'], card_rect)
 
 	def __set_text ( self, text: str, card_rect: FRect ):
-		text_surface = get_text_surface(self.font, text, self.colors['text'])
-		text_rect = text_surface.get_frect(center=card_rect.center)
-		return (text_surface, text_rect)
+		if not card_rect: return
+		# text_surface = get_text_surface(self.font, text, self.colors['text'])
+		# return get_rect(text_surface, center=card_rect.center)
+		return compose(
+			lambda text: get_text_surface(self.font, text, self.colors['text']), 
+			partial(get_rect, center=card_rect.center)
+		)(text)
+		
 
-	def draw_list ( self ):
+	def __blit_text ( self, datas: tuple[Surface, FRect] ):
+		if not datas: return
+		return display_item(self.canvas, datas)
+
+	def __draw_list ( self ):
 		for i ,text in enumerate(self.my_list):
-			pipe(	
+			compose(	
 				self.__get_card_rect,
-				self.__draw_card_text,
+				partial(self.__draw_card_text, i),
 				partial(self.__set_text, text),
-				partial(display_item, self.canvas)
+				self.__blit_text
 			)(i)
+
+
+	def update ( self ):
+		self.__draw_list()

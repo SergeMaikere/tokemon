@@ -1,4 +1,3 @@
-from typing import Any
 from pygame.sprite import Sprite
 
 from gameobj.MonsterSprite import MonsterSprite
@@ -16,7 +15,7 @@ class BattleSprites ( MyGroup ):
 
 
 	def __blit_general ( self, sprite: Sprite ):
-		if sprite.z == BATTLE_LAYERS['outline']: return
+		if hasattr(sprite, 'z') and sprite.z == BATTLE_LAYERS['outline']: return
 		self.canvas.blit(sprite.image, sprite.rect)
 
 	def __blit_monster_outline ( self, sprite: Sprite, current_monster: MonsterSprite | None ):
@@ -27,7 +26,7 @@ class BattleSprites ( MyGroup ):
 
 
 
-	def draw ( self, current_monster: MonsterSprite | None ):
+	def draw_all ( self, current_monster: MonsterSprite | None ):
 		for sprite in sorted(self, key=lambda sprite: sprite.z):
 			self.__blit_general(sprite)
 			self.__blit_monster_outline(sprite, current_monster)

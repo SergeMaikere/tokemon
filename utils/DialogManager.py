@@ -8,7 +8,7 @@ from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
 from utils.MyGroup import MyGroup
-from utils.Helper import pipe
+from utils.Helper import compose
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
@@ -41,7 +41,7 @@ class DialogManager:
 	def __initiate_dialog ( self ):
 		if self.current_dialog: return
 		for character in self.characters:
-			pipe(
+			compose(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
 				self._create_dialog,

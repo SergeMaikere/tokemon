@@ -3,7 +3,7 @@ from pygame import Font
 
 from settings import *
 from entities.Monster import Monster
-from utils.Helper import add_background_to_text, pipe, get_text_surface
+from utils.Helper import add_background_to_text, compose, get_text_surface
 from utils.MyGroup import MyGroup
 from utils.Types import Trainers
 
@@ -16,7 +16,7 @@ class MonsterNameSprite ( pygame.sprite.Sprite ):
 		self.entity: Trainers = entity
 		self.monster = monster
 
-		self.image = pipe( partial(get_text_surface, font), add_background_to_text )(self.monster.name)
+		self.image = compose( partial(get_text_surface, font), add_background_to_text )(self.monster.name)
 		self.rect: FRect = self.image.get_frect(midright=monster_rect.midleft + vector(40, -60)) if self.entity == 'player' else self.image.get_frect(midleft=monster_rect.midright + vector(-40, -60))
 
 	

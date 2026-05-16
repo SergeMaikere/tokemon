@@ -8,7 +8,7 @@ from settings import *
 from entities.Monster import Monster
 from entities.Player import Player
 from gameobj.SideList import SideList
-from utils.Helper import get_progress_bar, required, pipe
+from utils.Helper import get_progress_bar, required, compose
 from utils.MonsterManager import MonsterManager
 from utils.Types import Attacks, FontTypes
 
@@ -132,7 +132,7 @@ class MonsterIndex:
 
 
 	def __display_top ( self, dt: float, monster: Monster ):
-		return pipe(
+		return compose(
 			self.__draw_top_rect,
 			partial(self.__display_monster, dt),
 			self.__display_monster_name,
@@ -192,7 +192,7 @@ class MonsterIndex:
 		self.__set_text('regular', 'Abilities', bottomleft=self.abilities_rect.topleft)
 
 		for i, ability in enumerate(monster.get_abilities()):
-			pipe(
+			compose(
 				partial(self.__get_ability_card_position, i),
 				self.__create_ability_rect,
 				partial(self.__draw_ability_card, ability)
@@ -226,7 +226,7 @@ class MonsterIndex:
 		self.__draw_main_rect()
 		self.side_list.display()
 
-		pipe(
+		compose(
 			partial(self.__display_top, dt),
 			self.__display_progress_bars,
 			self.__display_stats,

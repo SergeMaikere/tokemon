@@ -4,7 +4,7 @@ from pygame import FRect, Font
 from pygame.typing import ColorLike
 
 from settings import *
-from utils.Helper import pipe, required
+from utils.Helper import compose, required
 from utils.MonsterManager import MonsterManager
 
 class SideList:
@@ -70,7 +70,7 @@ class SideList:
 
 	def display ( self ):
 		for i, item in self.MM.monsters.items():
-			pipe(
+			compose(
 				self.__set_card,
 				self.__is_card_visible,
 				partial(self.__set_text, i, item),

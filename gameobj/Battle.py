@@ -9,7 +9,7 @@ from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
 from gameobj.MyList import MyList
-from utils.Helper import display_item, get_rect, required, get_group, pipe
+from utils.Helper import display_item, get_rect, required, get_group, compose
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Types import BatlleMode, FontTypes, Menu, MonsterNames, Trainers
@@ -56,7 +56,7 @@ class Battle:
 				self.__creates_all_battle_sprites(i, entity, monster)
 
 	def __creates_all_battle_sprites ( self, i: int, entity: Trainers, monster: Monster ):
-		pipe(
+		compose(
 			partial(self.__create_monster_sprite, i, entity),
 			self.__display_monster_stats,
 			self.__display_monster_name,
@@ -79,49 +79,8 @@ class Battle:
 
 	def update_battle_sprites ( self, dt: float ):
 		self.battle_sprites.update(dt)
-		self.battle_sprites.draw(self.current_monster)
+		self.battle_sprites.draw_all(self.current_monster)
 
-	def __input ( self ):
-		if not self.current_monster or not self.mode: return
-
-		keys = pygame.key.get_just_pressed()
-		limiter = self.__get_limiter()
-
-		if keys[pygame.K_UP]: 
-			self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
-		if keys[pygame.K_DOWN]: 
-			self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
-		if keys[pygame.K_SPACE]:
-			match self.mode:
-				case 'general': self.__general_selector()
-				case 'attack': self.__attack_selector()
-				case _: return
-
-	def __get_limiter ( self ):
-		match self.mode:
-			case 'general': return len(BATTLE_CHOICES['full'])
-			case 'attack': return len(self.current_monster.monster.get_abilities())
-			case _: return 0
-
-	def __general_selector ( self ):
-		match self.indexes['general']:
-			case 0: 
-				self.mode = 'attack'
-				print('attack')
-			case 1: 
-				self.current_monster, self.mode = None, None
-				self.indexes['general'] = 0
-				self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
-				print('defend')
-			case 2: 
-				self.mode = 'switch'
-				print('switch')
-			case 3: 
-				# self.mode = 'monster'
-				print('catch')
-
-	def __attack_selector ( self ):
-		pass
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
@@ -162,8 +121,8 @@ class Battle:
 			case _: return
 
 	def __display_general ( self ):
-		for i, (key, data) in enumerate(BATTLE_CHOICES['full'].items()):
-			pipe(
+		for i, (_, data) in enumerate(BATTLE_CHOICES['full'].items()):
+			compose(
 				partial(self.__get_general_menu_icon, i),
 				partial(self.__set_grayscale_transformation, i),
 				partial(get_rect, center=(required(self.current_monster).rect.center) + data['pos']),
@@ -171,14 +130,16 @@ class Battle:
 			)(data)
 	
 	def __display_attack ( self ):
-		if self.attack_list: self.attack_list.draw_list()
-
-		self.attack_list = MyList( 
-			my_list=self.current_monster.monster.get_abilities(), 
+		if self.attack_list: 
+			self.attack_list.update()
+		else:
+			self.attack_list = MyList( 
+			my_list=required(self.current_monster).monster.get_abilities(), 
 			size={'width': 150, 'height': 200}, 
 			visible_items=4, 
 			font=self.fonts['regular'],
-			pos=self.current_monster.rect.midright, 
+			pos=required(self.current_monster).rect.midright, 
+			get_index=lambda: self.indexes['attack']
 		)
 
 	def __get_general_menu_icon ( self, i: int, data: Menu ):
@@ -189,6 +150,52 @@ class Battle:
 		return pygame.transform.grayscale(icon)
 
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
+
+	def __input ( self ):
+		if not self.current_monster or not self.mode: return
+
+		keys = pygame.key.get_just_pressed()
+		limiter = self.__get_limiter()
+
+		if keys[pygame.K_UP]: 
+			self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
+		if keys[pygame.K_DOWN]: 
+			self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
+		if keys[pygame.K_SPACE]:
+			match self.mode:
+				case 'general': self.__general_selector()
+				case 'attack': self.__attack_selector()
+				case _: return
+
+	def __get_limiter ( self ):
+		match self.mode:
+			case 'general': return len(BATTLE_CHOICES['full'])
+			case 'attack': return len(required(self.current_monster).monster.get_abilities())
+			case _: return 0
+
+	def __general_selector ( self ):
+		match self.indexes['general']:
+			case 0: 
+				self.mode = 'attack'
+				print('attack')
+			case 1: 
+				self.__defend()
+				print('defend')
+			case 2: 
+				self.mode = 'switch'
+				print('switch')
+			case 3: 
+				# self.mode = 'monster'
+				print('catch')
+
+	def __defend ( self ):
+		self.current_monster, self.mode = None, None
+		self.indexes['general'] = 0
+		self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
+
+	def __attack_selector ( self ):
+		pass
+
 
 	def update ( self, dt: float ):
 		self.__input()

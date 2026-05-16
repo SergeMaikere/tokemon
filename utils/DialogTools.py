@@ -4,7 +4,7 @@ from typing import Callable
 from pygame import Vector2
 
 from entities.Entity import Entity
-from utils.Helper import pipe
+from utils.Helper import compose
 
 
 
@@ -28,7 +28,7 @@ def is_subject_facing_character_y ( subject: Entity, relation: Vector2 ):
 	return (subject.state == 'up' and relation.y < 0) or (subject.state == 'down' and relation.y > 0)
 
 def turn_toward_entity (  subject: Entity, entity: Entity ):
-	return pipe( 
+	return compose( 
 		partial(get_subject_direction, entity=entity), 
 		round_subject_direction, 
 		change_subject_state 

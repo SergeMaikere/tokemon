@@ -4,7 +4,7 @@ from typing import Literal
 from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite
-from utils.Helper import get_group, required, pipe
+from utils.Helper import get_group, required, compose
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import Trainers
@@ -41,7 +41,7 @@ class MonsterSprite ( AnimatedSprite ):
 		self.flash_timer.start()		
 
 	def _animate ( self, dt: float ):
-		self.image = pipe(
+		self.image = compose(
 			self._get_image,
 			self.__flash_silhouette
 		)( dt )
