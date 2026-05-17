@@ -46,6 +46,8 @@ class Battle:
 
 		self.mode, self.current_monster, self.attack_list, self.switch_list = None, None, None, None
 
+		self.attacker: Trainers = 'player'
+
 		self.level_surface = pygame.Surface((60, 26))
 
 		self.initiate_battle()
@@ -107,6 +109,7 @@ class Battle:
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
 		self.mode = 'general'
+		self.attacker = 'player' if self.player_battle_sprites.has(sprite) else 'opponent'
 		self.current_monster = sprite
 		sprite.start_flash()
 		return sprite
@@ -116,6 +119,7 @@ class Battle:
 		return sprite
 
 	def __display_menus ( self ):
+		if self.attacker == 'opponent': return
 		match self.mode:
 			case 'general': self.__display_general()
 			case 'attack': self.__display_attack()
@@ -133,10 +137,10 @@ class Battle:
 	
 	def __display_attack ( self ):
 		if self.attack_list:
-		 self.attack_list.update()
+			self.attack_list.update()
 		else:
 			self.attack_list = AttackList( 
-			my_list=required(self.current_monster).monster.get_abilities(), 
+			my_list=required(self.current_monster).monster.get_abilities(all_of_them=False), 
 			font=self.fonts['regular'],
 			pos=required(self.current_monster).rect.midright, 
 			get_index=lambda: self.indexes['attack']

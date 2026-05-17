@@ -17,7 +17,7 @@ colors: Colors = {
 
 class SwitchList ( MyList ):
 	def __init__(self, monster_manager: MonsterManager, font: Font, pos: Point, get_index: Callable, colors: Colors = colors ) -> None:
-		super().__init__([monster for monster in monster_manager.monsters.values()], {'width': 300, 'height': 400}, 4, font, pos, get_index, colors)
+		super().__init__([monster for monster in monster_manager.monsters.values()], {'width': 300, 'height': 350}, 4, font, pos, get_index, colors)
 
 		self.MM = monster_manager
 		self.bg_padding = 90
