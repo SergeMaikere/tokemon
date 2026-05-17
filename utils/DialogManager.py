@@ -8,7 +8,7 @@ from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
 from utils.MyGroup import MyGroup
-from utils.Helper import pipe
+from utils.Helper import compose
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
@@ -21,9 +21,11 @@ class DialogManager:
 
 		self.timer = Timer(500)
 		self.current_dialog = None
+		self.in_battle = False
 		
 
 	def input ( self ):
+		if self.in_battle: return
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
 			if self.current_dialog:
@@ -39,7 +41,7 @@ class DialogManager:
 	def __initiate_dialog ( self ):
 		if self.current_dialog: return
 		for character in self.characters:
-			pipe(
+			compose(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
 				self._create_dialog,
@@ -69,6 +71,7 @@ class DialogManager:
 		return character
 
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
+		self.in_battle = True
 		self.current_dialog = None
 		self.BM.start_battle(character.datas['biome'], character.datas['monsters'])
 		del dialog

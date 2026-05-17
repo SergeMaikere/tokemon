@@ -2,7 +2,7 @@ from functools import partial
 from pygame import Font
 
 from settings import *
-from utils.Helper import add_color_to_surface, display_item, get_progress_bar, get_rect, get_text_surface, pipe
+from utils.Helper import add_color_to_surface, display_item, get_progress_bar, get_rect, get_text_surface, compose
 from utils.MyGroup import MyGroup
 from gameobj.MonsterSprite import MonsterSprite
 
@@ -23,7 +23,7 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 
 	def __display_health_and_energy ( self, i: int, value: float, max_value: float ):	
 		if i > 1: return	
-		return pipe(
+		return compose(
 			partial(get_rect, midleft=(5, 10 + i * self.image.height/2)),
 			partial(display_item, self.image),
 			partial(self.__display_progress_bar, i, value, max_value)

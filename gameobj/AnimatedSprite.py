@@ -17,5 +17,7 @@ class AnimatedSprite ( Sprite ):
 		self.index += self.speed * dt
 		return self.frames[ int(self.index) % len(self.frames) ]
 
+	def get_index ( self ): return self.index
+
 	def update ( self, dt: float ):
 		self._animate(dt)

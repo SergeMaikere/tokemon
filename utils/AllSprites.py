@@ -37,10 +37,6 @@ class AllSprites ( MyGroup ):
 				if isinstance(sprite, Entity): 
 					self.canvas.blit(self.shadow, sprite.rect.topleft + self.offset + self.shadow_offset)
 
-				if sprite.name == 'monster_sprite':
-					print(sprite.rect.topleft)
-					print(sprite.rect.topleft + self.offset)
-
 				self.canvas.blit(sprite.image, sprite.rect.topleft + self.offset)
 				
 				if sprite == player and player.is_noticed:

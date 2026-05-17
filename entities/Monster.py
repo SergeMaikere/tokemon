@@ -1,5 +1,5 @@
 from random import randint
-from assets.data.game_data import MONSTER_DATA
+from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -29,8 +29,9 @@ class Monster:
 			( self.initiative, 100 )
 		)
 
-	def get_abilities ( self ):
-		return [ ability for level, ability in self.abilities.items() if self.level >= level ]
+	def get_abilities ( self, all_of_them: bool = True ):
+		if all_of_them: return [ ability for level, ability in self.abilities.items() if self.level >= level ]
+		return [ ability for level, ability in self.abilities.items() if self.level >= level and self.energy > ATTACK_DATA[ability]['cost'] ]
 
 	def increment_initiative ( self, dt: float ):
 		self.initiative += self.get_stat('speed') * dt

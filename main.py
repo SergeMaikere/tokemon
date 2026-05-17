@@ -43,7 +43,7 @@ class Game:
 
 		self.monster_manager = MonsterManager()
 		
-		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -72,7 +72,7 @@ class Game:
 		while True:
 			dt = self.clock.tick(60) / 1000
 
-			self.canvas.fill('black')
+			self.canvas.fill((0, 0, 0, 0))
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: self.__quit_game()
@@ -90,7 +90,6 @@ class Game:
 			self.transition_manager.handle_transitions(dt)
 
 			pygame.display.update( )
-
 
 
 if __name__ == '__main__':

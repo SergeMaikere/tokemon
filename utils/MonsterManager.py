@@ -7,6 +7,8 @@ from entities.Monster import Monster
 from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader
 from utils.Types import Attacks, MonsterNames
 
+
+
 class MonsterManager :
 	def __init__(self) -> None:
 		

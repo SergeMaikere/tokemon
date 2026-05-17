@@ -26,7 +26,8 @@ COLORS = {
 	'black': '#000000', 
 	'red': '#f03131',
 	'blue': '#66d7ee',
-	'normal': '#ffffff'
+	'normal': '#ffffff',
+	'dark-white': '#f0f0f0'
 }
 
 WORLD_LAYERS = {
@@ -52,13 +53,13 @@ BATTLE_LAYERS =  {
 
 BATTLE_CHOICES = {
 	'full': {
-		'fight':  {'pos' : vector(30, -60), 'icon': 'sword'},
-		'defend': {'pos' : vector(40, -20), 'icon': 'shield'},
-		'switch': {'pos' : vector(40, 20), 'icon': 'arrows'},
-		'catch':  {'pos' : vector(30, 60), 'icon': 'hand'}},
+		'fight':  {'pos' : vector2(30, -60), 'icon': 'sword'},
+		'defend': {'pos' : vector2(40, -20), 'icon': 'shield'},
+		'switch': {'pos' : vector2(40, 20), 'icon': 'arrows'},
+		'catch':  {'pos' : vector2(30, 60), 'icon': 'hand'}},
 	
 	'limited': {
-		'fight':  {'pos' : vector(30, -40), 'icon': 'sword'},
-		'defend': {'pos' : vector(40, 0), 'icon': 'shield'},
-		'switch': {'pos' : vector(30, 40), 'icon': 'arrows'}}
+		'fight':  {'pos' : vector2(30, -40), 'icon': 'sword'},
+		'defend': {'pos' : vector2(40, 0), 'icon': 'shield'},
+		'switch': {'pos' : vector2(30, 40), 'icon': 'arrows'}}
 }

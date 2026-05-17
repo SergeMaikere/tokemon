@@ -20,7 +20,7 @@ def voyeur ( x: Any ):
 	print('************\n')
 	return x
 
-pipe = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
+compose = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
@@ -104,7 +104,7 @@ def get_coast_frames_cols (  ):
 	return partial(col_cut, (1, len(coasts)), coasts)(small_walker(load_image, join('assets', 'graphics', 'tilesets'), 'coast'))
 
 def coasts_image_cutter ():
-	return pipe( 
+	return compose( 
 		fill_coast_frames_obj, 
 		set_coast_frames_obj, 
 	)(get_coast_frames_cols())
@@ -146,7 +146,7 @@ def add_color_to_surface ( surface: Surface, color: ColorLike = COLORS['white'] 
 
 def get_sized_surface ( width: float, height: float ): return pygame.Surface((width, height))
 
-def get_rect ( surface: Surface, **anchor: Point ): return (surface, surface.get_frect(**anchor))
+def get_rect ( surface: Surface, **anchor: Point ): return (surface, required(surface.get_frect(**anchor)))
 
 def display_item ( surface: Surface, datas: tuple[ Surface, FRect ] ): 
 	item_surface, item_rect = datas
@@ -186,11 +186,11 @@ images_loader_dict = partial(big_walker_dict, load_image)
 
 images_loader_list = partial(big_walker_list, load_image)
 
-load_monster_frame = pipe( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
+load_monster_frame = compose( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
 
 monsters_frames_loader = partial(big_walker_dict, load_monster_frame)
 
-load_frames = pipe(load_image, partial(row_cut, (4, 4), States.__args__))
+load_frames = compose(load_image, partial(row_cut, (4, 4), States.__args__))
 
 frames_loader = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
 

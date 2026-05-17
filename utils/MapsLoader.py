@@ -12,7 +12,7 @@ from gameobj.Sprite import Sprite
 from gameobj.AnimatedSprite import AnimatedSprite
 from gameobj.CollisionSprite import CollisionSprite
 from utils.DialogManager import DialogManager
-from utils.Helper import pipe, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader
+from utils.Helper import compose, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader
 from utils.MyGroup import MyGroup
 
 class MapsLoader:
@@ -87,7 +87,7 @@ class MapsLoader:
 		return obj
 
 	def __set_entities ( self, player_spawn_pos: str, obj: TiledObject ):
-		pipe(
+		compose(
 			partial(self.__set_player, player_spawn_pos),
 			self.__set_character,
 		)(obj)
@@ -96,7 +96,7 @@ class MapsLoader:
 		for group in self.groups: group.empty()
 
 	def setup( self, tmx_map: TiledMap ) -> TiledMap:
-		return pipe(
+		return compose(
 			partial(self.__set_terrain, 'Terrain'),
 			partial(self.__set_terrain, 'Terrain Top'),
 			partial(self.__get_layer, 'Water', self.__set_water),
@@ -110,7 +110,7 @@ class MapsLoader:
 
 	def transition_setup( self, tmx_map: TiledMap, player_spawn_pos: str ):
 		self.__kill_all_sprites()
-		return pipe(
+		return compose(
 			partial(self.__set_terrain, 'Terrain'),
 			partial(self.__set_terrain, 'Terrain Top'),
 			partial(self.__get_layer, 'Water', self.__set_water),

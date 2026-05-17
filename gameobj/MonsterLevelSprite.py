@@ -4,7 +4,7 @@ from settings import *
 from entities.Monster import Monster
 from utils.MyGroup import MyGroup
 from utils.Types import Trainers
-from utils.Helper import add_color_to_surface, add_text_to_card, get_progress_bar, get_rect, get_text_surface, pipe
+from utils.Helper import add_color_to_surface, add_text_to_card, get_progress_bar, get_rect, get_text_surface, compose
 
 
 class MonsterLevelSprite ( pygame.sprite.Sprite ):
@@ -25,7 +25,7 @@ class MonsterLevelSprite ( pygame.sprite.Sprite ):
 		self.xp_bar_rect = pygame.FRect(0, self.rect.height - 2, self.rect.width, 2)
 
 	def __set_image_rect (  self ) -> tuple[ Surface, FRect ]:
-		return pipe( add_color_to_surface, self.__get_card_rect )( self.card_surface )
+		return compose( add_color_to_surface, self.__get_card_rect )( self.card_surface )
 
 	def __get_card_rect ( self, card_surface: Surface ) -> tuple[ Surface, FRect ]:
 		if self.entity == 'player': return get_rect(card_surface, topleft=self.name_rect.bottomleft)

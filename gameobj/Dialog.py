@@ -5,7 +5,7 @@ from pygame import Font
 from gameobj.Sprite import Sprite
 from entities.Entity import Entity
 from utils.AllSprites import AllSprites
-from utils.Helper import font_loader, pipe
+from utils.Helper import font_loader, compose
 from utils.Types import Size
 
 
@@ -26,7 +26,7 @@ class Dialog:
 
 	
 	def __create_dialog_sprite ( self ):
-		return pipe(
+		return compose(
 			self.__get_dims,
 			self.__make_bg,
 			self.__make_bulle_surf,
