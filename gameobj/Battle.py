@@ -2,6 +2,7 @@ from functools import partial
 from pygame import Font
 
 from gameobj.AttackList import AttackList
+from gameobj.SwitchList import SwitchList
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSpriteOutline import MonsterSpriteOutline
@@ -9,11 +10,10 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from gameobj.MyList import MyList
 from utils.Helper import display_item, get_rect, required, get_group, compose
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
-from utils.Types import BatlleMode, FontTypes, Menu, MonsterNames, Trainers
+from utils.Types import FontTypes, Menu, MonsterNames, Trainers
 
 class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
@@ -44,7 +44,7 @@ class Battle:
 			'target': 0,
 		}
 
-		self.mode, self.current_monster, self.attack_list = None, None, None
+		self.mode, self.current_monster, self.attack_list, self.switch_list = None, None, None, None
 
 		self.level_surface = pygame.Surface((60, 26))
 
@@ -119,6 +119,7 @@ class Battle:
 		match self.mode:
 			case 'general': self.__display_general()
 			case 'attack': self.__display_attack()
+			case 'switch': self.__display_switch()
 			case _: return
 
 	def __display_general ( self ):
@@ -131,8 +132,8 @@ class Battle:
 			)(data)
 	
 	def __display_attack ( self ):
-		if self.attack_list: 
-			self.attack_list.update()
+		if self.attack_list:
+		 self.attack_list.update()
 		else:
 			self.attack_list = AttackList( 
 			my_list=required(self.current_monster).monster.get_abilities(), 
@@ -140,6 +141,18 @@ class Battle:
 			pos=required(self.current_monster).rect.midright, 
 			get_index=lambda: self.indexes['attack']
 		)
+
+	def __display_switch ( self ):
+		if self.switch_list:
+			self.switch_list.update()
+		else:
+			self.switch_list = SwitchList(
+				monster_manager=self.MM,
+				font=self.fonts['regular'],
+				pos=required(self.current_monster).rect.midright,
+				get_index=lambda: self.indexes['switch']
+			)
+
 
 	def __get_general_menu_icon ( self, i: int, data: Menu ):
 		return self.ui_images[f'{data['icon']}_highlight' if self.__is_selected(i) else data['icon']]
@@ -170,6 +183,7 @@ class Battle:
 		match self.mode:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case 'attack': return len(required(self.current_monster).monster.get_abilities())
+			case 'switch': return len(self.MM.monsters)
 			case _: return 0
 
 	def __general_selector ( self ):

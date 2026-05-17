@@ -7,15 +7,15 @@ from settings import *
 from utils.Helper import display_item, get_rect, get_text_surface, compose, required
 from utils.Types import Colors, Size
 
-my_colors: Colors = {
+colors: Colors = {
 	'bg': COLORS['white'],
-	'text': 'black',
-	'bg_selected': 'gray',
-	'text_selected': 'pure white' 
+	'text': COLORS['light'],
+	'bg_selected': COLORS['dark-white'],
+	'text_selected': COLORS['black']
 }
 
 class MyList:
-	def __init__( self, my_list: list[Any], size: Size, visible_items: int, font: Font, pos: Point, get_index: Callable, colors: Colors = my_colors ) -> None:
+	def __init__( self, my_list: list[Any], size: Size, visible_items: int, font: Font, pos: Point, get_index: Callable, colors: Colors = colors ) -> None:
 		self.my_list = my_list
 		self.size = size
 		self.visible_items = visible_items
@@ -55,6 +55,7 @@ class MyList:
 		if card_rect.collidepoint(self.main_rect.midbottom + vector2(1, -1)):
 			return pygame.draw.rect(self.canvas, bg_color, card_rect, 0, 0, 0, 0, 5, 5)
 		return pygame.draw.rect(self.canvas, bg_color, card_rect)
+
 
 	def _set_text ( self, i: int, text: str, card_rect: FRect ):
 		if not card_rect: return
