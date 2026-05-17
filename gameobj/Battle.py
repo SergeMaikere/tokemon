@@ -1,6 +1,7 @@
 from functools import partial
 from pygame import Font
 
+from gameobj.AttackList import AttackList
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSpriteOutline import MonsterSpriteOutline
@@ -133,10 +134,8 @@ class Battle:
 		if self.attack_list: 
 			self.attack_list.update()
 		else:
-			self.attack_list = MyList( 
+			self.attack_list = AttackList( 
 			my_list=required(self.current_monster).monster.get_abilities(), 
-			size={'width': 150, 'height': 200}, 
-			visible_items=4, 
 			font=self.fonts['regular'],
 			pos=required(self.current_monster).rect.midright, 
 			get_index=lambda: self.indexes['attack']
