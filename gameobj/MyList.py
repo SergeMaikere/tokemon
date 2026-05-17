@@ -48,6 +48,10 @@ class MyList:
 
 	def __draw_card_text ( self, i: int, card_rect: FRect ):
 		if not card_rect: return
+		if card_rect.collidepoint(self.main_rect.midtop):
+			return pygame.draw.rect(self.canvas, self.colors['bg_selected' if self.get_index() == i else 'bg'], card_rect, 0, 0, 5, 5)
+		if card_rect.collidepoint(self.main_rect.midbottom + vector2(1, -1)):
+			return pygame.draw.rect(self.canvas, self.colors['bg_selected' if self.get_index() == i else 'bg'], card_rect, 0, 0, 0, 0, 5, 5)
 		return pygame.draw.rect(self.canvas, self.colors['bg_selected' if self.get_index() == i else 'bg'], card_rect)
 
 	def __set_text ( self, text: str, card_rect: FRect ):
