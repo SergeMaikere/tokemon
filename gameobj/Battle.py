@@ -1,6 +1,7 @@
 from functools import partial
 from pygame import Font
 
+from assets.data.game_data import ATTACK_DATA
 from gameobj.AttackList import AttackList
 from gameobj.SwitchList import SwitchList
 from settings import *
@@ -44,7 +45,7 @@ class Battle:
 			'target': 0,
 		}
 
-		self.mode, self.current_monster, self.attack_list, self.switch_list = None, None, None, None
+		self.mode, self.current_monster, self.attack, self.target, self.targeted_monster, self.attack_list, self.switch_list = None, None, None, None, None, None, None
 
 		self.attacker: Trainers = 'player'
 
@@ -62,6 +63,7 @@ class Battle:
 		compose(
 			partial(self.__create_monster_sprite, i, entity),
 			self.__display_monster_stats,
+			lambda sprite: self.__create_monster_outline(sprite),
 			self.__display_monster_name,
 			self.__display_monster_level,
 		)( monster )
@@ -69,6 +71,10 @@ class Battle:
 	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
 		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
+
+	def __create_monster_outline ( self, sprite: MonsterSprite ):
+		MonsterSpriteOutline(sprite, self.battle_sprites)
+		return sprite
 
 	def __display_monster_name ( self, monster_sprite: MonsterSprite ):
 		return MonsterNameSprite(monster_sprite.entity, monster_sprite.monster, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
@@ -82,8 +88,7 @@ class Battle:
 
 	def update_battle_sprites ( self, dt: float ):
 		self.battle_sprites.update(dt)
-		self.battle_sprites.draw_all(self.current_monster)
-
+		self.battle_sprites.draw_all(self.current_monster, self.targeted_monster, self.is_player_targeted)
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
@@ -95,7 +100,6 @@ class Battle:
 		if sprite:
 			self.__freeze_all_monsters(sprites)
 			self.__update_datas(sprite)
-			self.__highlight_monster(sprite)
 
 	def __give_me_sprites ( self ):
 		sprites = self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
@@ -114,9 +118,6 @@ class Battle:
 		sprite.start_flash()
 		return sprite
 
-	def __highlight_monster ( self, sprite: MonsterSprite ):
-		MonsterSpriteOutline(sprite, self.battle_sprites)
-		return sprite
 
 	def __display_menus ( self ):
 		if self.attacker == 'opponent': return
@@ -181,6 +182,7 @@ class Battle:
 			match self.mode:
 				case 'general': self.__general_selector()
 				case 'attack': self.__attack_selector()
+				case 'target': self.__target_selector()
 				case _: return
 
 	def __get_limiter ( self ):
@@ -188,6 +190,7 @@ class Battle:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case 'attack': return len(required(self.current_monster).monster.get_abilities())
 			case 'switch': return len(self.MM.monsters)
+			case 'target': return len(self.monsters['player' if self.target == 'player' else 'opponent'])
 			case _: return 0
 
 	def __general_selector ( self ):
@@ -211,12 +214,25 @@ class Battle:
 		self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
 
 	def __attack_selector ( self ):
+		self.mode = 'target'
+		self.attack = required(self.current_monster).monster.get_abilities(all_of_them=False)[self.indexes['attack']]
+		self.target = ATTACK_DATA[self.attack]['target']
+		print(self.attack)
+
+	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
+
+	def __target_selector ( self ):
 		pass
 
+	def __hilghlight_target ( self ):
+		if self.mode != 'target': return
+		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
+		self.targeted_monster = sprites.sprites()[self.indexes['target']]
 
 	def update ( self, dt: float ):
 		self.__input()
 		self.__draw_battle_ground()
 		self.__get_initiative()
+		self.__hilghlight_target()
 		self.update_battle_sprites(dt)
 		self.__display_menus()
