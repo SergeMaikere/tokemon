@@ -5,7 +5,7 @@ from assets.data.game_data import ATTACK_DATA
 from settings import *
 from gameobj.MyList import MyList
 from utils.Helper import compose, get_rect, get_text_surface
-from utils.Types import Colors
+from utils.Types import Attacks, Colors
 
 colors: Colors = {
 	'bg': COLORS['white'],
@@ -15,7 +15,7 @@ colors: Colors = {
 }
 
 class AttackList ( MyList ):
-	def __init__(self, my_list: list[str], font: Font, pos: Point, get_index: Callable, colors: Colors = colors) -> None:
+	def __init__(self, my_list: list[Attacks], font: Font, pos: Point, get_index: Callable, colors: Colors = colors) -> None:
 		super().__init__(my_list, {'width': 150, 'height': 200}, 4, font, pos, get_index, colors)
 
 

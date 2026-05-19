@@ -1,8 +1,11 @@
 from functools import partial
+from os.path import join
 from pygame import Font
 
 from assets.data.game_data import ATTACK_DATA
+from gameobj.AttackAnimation import AttackAnimation
 from gameobj.AttackList import AttackList
+from gameobj.MyList import MyList
 from gameobj.SwitchList import SwitchList
 from settings import *
 from entities.Monster import Monster
@@ -11,11 +14,10 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, required, get_group, compose
+from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
-from utils.AttackManager import AttackManager
-from utils.Types import FontTypes, Menu, MonsterNames, Trainers
+from utils.Types import FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
 
 class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
@@ -38,7 +40,10 @@ class Battle:
 			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
 		}
 
-		self.attack_manager = AttackManager(self.MM, self.battle_sprites)
+		self.attack_frames = compose(
+			images_loader_dict,
+			lambda frames: { attack: [cut(image, 0, col, image.width/4, image.height) for col in range(4)] for attack, image in frames.items() }
+		)( join('assets', 'graphics', 'attacks') )
 
 		self.indexes = {
 			'general': 0,
@@ -48,7 +53,13 @@ class Battle:
 			'target': 0,
 		}
 
-		self.mode, self.current_monster, self.attack, self.target, self.targeted_monster, self.attack_list, self.switch_list = None, None, None, None, None, None, None
+		self.mode: BattleMode | None = None 
+		self.current_monster: MonsterSprite | None = None 
+		self.attack: Attacks | None = None 
+		self.target: Trainers | None = None 
+		self.targeted_monster: MonsterSprite | None = None 
+		self.attack_list: MyList | None = None 
+		self.switch_list: MyList | None = None
 
 		self.attacker: Trainers = 'player'
 
@@ -93,6 +104,8 @@ class Battle:
 		self.battle_sprites.update(dt)
 		self.battle_sprites.draw_all(self.current_monster, self.targeted_monster, self.is_player_targeted)
 
+	def __reinitialize_all_indexes ( self ): self.indexes = { mode: 0 for mode in self.indexes.keys() }
+
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
@@ -111,7 +124,8 @@ class Battle:
 
 	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
 
-	def __unfreeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(False) for sprite in sprites ]
+	def __unfreeze_all_monsters ( self ): 
+		[ sprite.set_paused(False) for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites() ]
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
@@ -214,7 +228,7 @@ class Battle:
 	def __defend ( self ):
 		self.current_monster, self.mode = None, None
 		self.indexes['general'] = 0
-		self.__unfreeze_all_monsters(self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites())
+		self.__unfreeze_all_monsters()
 
 	def __attack_selector ( self ):
 		self.mode = 'target'
@@ -225,8 +239,10 @@ class Battle:
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
 	def __target_selector ( self ):
-		self.attack_manager.animate_attack(self.current_monster, self.targeted_monster, self.attack)
-		self.mode, self.current_monster, self.attack = None, None, None
+		AttackAnimation(self.attack_frames[self.attack], self.targeted_monster.rect.center, self.battle_sprites)
+		self.mode, self.current_monster, self.targeted_monster, self.attack, self.target = None, None, None, None, None
+		self.__unfreeze_all_monsters()
+		self.__reinitialize_all_indexes()
 
 	def __hilghlight_target ( self ):
 		if self.mode != 'target': return
