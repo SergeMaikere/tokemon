@@ -14,6 +14,7 @@ from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import display_item, get_rect, required, get_group, compose
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
+from utils.AttackManager import AttackManager
 from utils.Types import FontTypes, Menu, MonsterNames, Trainers
 
 class Battle:
@@ -36,6 +37,8 @@ class Battle:
 			'player': self.MM.get_player_battle_monsters(), 
 			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
 		}
+
+		self.attack_manager = AttackManager(self.MM, self.battle_sprites)
 
 		self.indexes = {
 			'general': 0,
@@ -222,7 +225,8 @@ class Battle:
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
 	def __target_selector ( self ):
-		pass
+		self.attack_manager.animate_attack(self.current_monster, self.targeted_monster, self.attack)
+		self.mode, self.current_monster, self.attack = None, None, None
 
 	def __hilghlight_target ( self ):
 		if self.mode != 'target': return

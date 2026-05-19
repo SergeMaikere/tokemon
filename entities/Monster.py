@@ -1,5 +1,6 @@
 from random import randint
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
+from utils.Types import Attacks
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -29,7 +30,7 @@ class Monster:
 			( self.initiative, 100 )
 		)
 
-	def get_abilities ( self, all_of_them: bool = True ):
+	def get_abilities ( self, all_of_them: bool = True ) -> list[Attacks]:
 		if all_of_them: return [ ability for level, ability in self.abilities.items() if self.level >= level ]
 		return [ ability for level, ability in self.abilities.items() if self.level >= level and self.energy > ATTACK_DATA[ability]['cost'] ]
 

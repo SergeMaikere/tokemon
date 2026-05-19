@@ -4,10 +4,10 @@ from typing import Literal
 from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite
-from utils.Helper import get_group, required, compose
+from utils.Helper import required, compose
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
-from utils.Types import Trainers
+from utils.Types import Attacks, Trainers
 
 class MonsterSprite ( AnimatedSprite ):
 	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline: dict[str, list[Surface]], pos: Point, *groups: MyGroup) -> None:

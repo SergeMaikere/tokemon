@@ -20,7 +20,7 @@ def voyeur ( x: Any ):
 	print('************\n')
 	return x
 
-compose = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
+compose: Callable = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
@@ -182,16 +182,16 @@ map_loader: Callable[ [str], TiledMap ] = partial(small_walker, load_pygame, joi
 
 maps_loader: Callable [ [], dict[str, TiledMap] ] = lambda: big_walker_dict(load_pygame, join('assets', 'data', 'maps'))
 
-images_loader_dict = partial(big_walker_dict, load_image)
+images_loader_dict: Callable = partial(big_walker_dict, load_image)
 
-images_loader_list = partial(big_walker_list, load_image)
+images_loader_list: Callable = partial(big_walker_list, load_image)
 
-load_monster_frame = compose( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
+load_monster_frame: Callable = compose( load_image, partial(row_cut, (2, 4), ('idle', 'attack')) )
 
-monsters_frames_loader = partial(big_walker_dict, load_monster_frame)
+monsters_frames_loader: Callable = partial(big_walker_dict, load_monster_frame)
 
-load_frames = compose(load_image, partial(row_cut, (4, 4), States.__args__))
+load_frames: Callable = compose(load_image, partial(row_cut, (4, 4), States.__args__))
 
-frames_loader = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
+frames_loader: Callable = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
 
 
