@@ -84,7 +84,7 @@ class Battle:
 
 	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
-		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
+		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__animate_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
 	def __create_monster_outline ( self, sprite: MonsterSprite ):
 		MonsterSpriteOutline(sprite, self.battle_sprites)
@@ -116,6 +116,7 @@ class Battle:
 		if sprite:
 			self.__freeze_all_monsters(sprites)
 			self.__update_datas(sprite)
+			self.__opponent_play()
 
 	def __give_me_sprites ( self ):
 		sprites = self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
@@ -135,6 +136,12 @@ class Battle:
 		sprite.start_flash()
 		return sprite
 
+	def __opponent_play ( self ):
+		if self.attacker == 'player': return
+		self.mode = None
+		self.current_monster = None
+		self.attacker = 'player'
+		self.__unfreeze_all_monsters()
 
 	def __display_menus ( self ):
 		if self.attacker == 'opponent': return
@@ -186,7 +193,7 @@ class Battle:
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
 
 	def __input ( self ):
-		if not self.current_monster or not self.mode: return
+		if not self.current_monster or not self.mode or self.attacker == 'opponent': return
 
 		keys = pygame.key.get_just_pressed()
 		limiter = self.__get_limiter()
@@ -239,8 +246,12 @@ class Battle:
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
 	def __target_selector ( self ):
-		AttackAnimation(self.attack_frames[self.attack], self.targeted_monster.rect.center, self.battle_sprites)
-		self.mode, self.current_monster, self.targeted_monster, self.attack, self.target = None, None, None, None, None
+		self.current_monster.index = 0
+		self.current_monster.set_state('attack')
+
+	def __animate_attack ( self ):
+		AttackAnimation(self.attack_frames[self.attack if self.attack not in ['heal', 'battlecry', 'spark'] else 'green'], self.targeted_monster.rect.center, self.battle_sprites)
+		self.mode, self.current_monster, self.targeted_monster, self.attack, self.target, self.attack_list, self.switch_list = None, None, None, None, None, None, None
 		self.__unfreeze_all_monsters()
 		self.__reinitialize_all_indexes()
 

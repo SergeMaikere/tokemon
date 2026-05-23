@@ -12,13 +12,19 @@ class MonsterSpriteOutline ( AnimatedSprite ):
 		self.entity = self.monster_sprite.entity
 		self.get_index = self.monster_sprite.get_index
 
-		self.state: Literal['idle', 'attack'] = 'idle'
-
 		self.monster_frames = self.__flip_frames(self.monster_sprite.outline_frames)
-		self.frames = self.monster_frames[self.state]
+		self._frames = self.monster_frames[self.monster_sprite.state]
 
 		super().__init__('monster_sprite_outline', BATTLE_LAYERS['outline'], self.frames, *groups, center=self.monster_sprite.rect.center)
 
+
+	@property
+	def frames ( self ): 
+		return self.monster_frames[self.monster_sprite.state]
+
+	@frames.setter
+	def frames ( self, value ):
+		self._frames = value
 
 	def __flip_frames ( self, frames: dict[str, list[Surface]] ):
 		if self.entity != 'player': return frames
