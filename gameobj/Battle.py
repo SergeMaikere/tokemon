@@ -14,10 +14,10 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut
+from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
-from utils.Types import FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
+from utils.Types import Elements, FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
 
 class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
@@ -254,6 +254,7 @@ class Battle:
 
 	def __handle_attack ( self ):
 		self.__animate_attack()
+		self.__update_health()
 		self.__reset_variables_to_none()
 		self.__unfreeze_all_monsters()
 		self.__reinitialize_all_indexes()
@@ -261,10 +262,36 @@ class Battle:
 	def __animate_attack ( self ):
 		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
 
+	
+	def __update_health ( self ):
+		elememt_datas = ( ATTACK_DATA[self.attack]['element'], self.targeted_monster.monster.base_stats['element'] )
+		compose(
+			lambda attack: self.targeted_monster.monster.get_attack_amount(attack),
+			lambda amount: self.__halve(elememt_datas, amount),
+			lambda amount: self.__double(elememt_datas, amount),
+			self.targeted_monster.monster.take_damage
+		)(self.attack)
+
+	def __halve ( self, element_datas: tuple[Elements, Elements], amount: float ):
+		attack, monster = element_datas
+		if attack == 'fire' and monster == 'water' or \
+		   attack == 'water' and monster == 'plant' or \
+		   attack == 'plant' and monster == 'fire':
+			return amount * 0.5
+		return amount
+
+	def __double ( self, element_datas: tuple[Elements, Elements], amount: float ):
+		attack, monster = element_datas
+		if attack == 'fire' and monster == 'plant' or \
+		   attack == 'plant' and monster == 'water' or \
+		   attack == 'water' and monster == 'fire':
+			return amount * 2
+		return amount
+
+
 	def __reset_variables_to_none ( self ):
 		for name in self.variables_none: setattr(self, name, None)
 		
-
 	def __hilghlight_target ( self ):
 		if self.mode != 'target': return
 		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites

@@ -27,6 +27,8 @@ Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
 
 BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
+Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
+
 
 class Size ( TypedDict ):
 	width: float

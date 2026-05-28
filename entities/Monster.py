@@ -1,6 +1,9 @@
 from random import randint
+
+from settings import *
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
-from utils.Types import Attacks
+from utils.Types import Attacks, Elements
+from utils.Helper import compose
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -30,12 +33,17 @@ class Monster:
 			( self.initiative, 100 )
 		)
 
-	def get_attack_amount ( self ):
-		pass
-
+	def get_attack_amount ( self, attack: Attacks ):
+		return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
+			
 	def get_abilities ( self, all_of_them: bool = True ) -> list[Attacks]:
 		if all_of_them: return [ ability for level, ability in self.abilities.items() if self.level >= level ]
 		return [ ability for level, ability in self.abilities.items() if self.level >= level and self.energy > ATTACK_DATA[ability]['cost'] ]
 
 	def increment_initiative ( self, dt: float ):
 		self.initiative += self.get_stat('speed') * dt
+
+	def take_damage ( self, amount: float ):
+		defense = max( 0, min(1, 1 - self.get_stat('defense') / 2000) )
+		self.health -= amount * defense
+		
