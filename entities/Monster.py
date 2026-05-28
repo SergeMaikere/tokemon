@@ -30,6 +30,9 @@ class Monster:
 			( self.initiative, 100 )
 		)
 
+	def get_attack_amount ( self ):
+		pass
+
 	def get_abilities ( self, all_of_them: bool = True ) -> list[Attacks]:
 		if all_of_them: return [ ability for level, ability in self.abilities.items() if self.level >= level ]
 		return [ ability for level, ability in self.abilities.items() if self.level >= level and self.energy > ATTACK_DATA[ability]['cost'] ]

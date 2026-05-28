@@ -10,12 +10,12 @@ from utils.Timer import Timer
 from utils.Types import Attacks, States, Trainers
 
 class MonsterSprite ( AnimatedSprite ):
-	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline_frames: dict[str, list[Surface]], pos: Point, animate_attack: Callable, *groups: MyGroup) -> None:
+	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline_frames: dict[str, list[Surface]], pos: Point, handle_attack: Callable, *groups: MyGroup) -> None:
 		
 		self.monster = monster
 		self.entity: Trainers = entity
 		self.outline_frames = outline_frames
-		self.animate_attack = animate_attack
+		self.handle_attack = handle_attack
 		self.my_groups = groups
 		
 		self.state: Literal['idle', 'attack'] = 'idle'
@@ -57,7 +57,7 @@ class MonsterSprite ( AnimatedSprite ):
 	
 		if self.state == 'attack' and self.index >= len(self.frames):
 			self.set_state('idle')
-			self.animate_attack()
+			self.handle_attack()
 
 		self.index += self.speed * dt
 		return self.frames[ int(self.index) % len(self.frames) ]

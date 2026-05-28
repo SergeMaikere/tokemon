@@ -1,9 +1,7 @@
-from typing import Callable, Literal
 from settings import *
 from gameobj.AnimatedSprite import AnimatedSprite
 from gameobj.MonsterSprite import MonsterSprite
 from utils.MyGroup import MyGroup
-from utils.Types import Trainers
 
 class MonsterSpriteOutline ( AnimatedSprite ):
 	def __init__(self, monster_sprite: MonsterSprite, *groups: MyGroup) -> None:

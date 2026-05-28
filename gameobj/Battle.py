@@ -53,6 +53,7 @@ class Battle:
 			'target': 0,
 		}
 
+
 		self.mode: BattleMode | None = None 
 		self.current_monster: MonsterSprite | None = None 
 		self.attack: Attacks | None = None 
@@ -60,6 +61,8 @@ class Battle:
 		self.targeted_monster: MonsterSprite | None = None 
 		self.attack_list: MyList | None = None 
 		self.switch_list: MyList | None = None
+
+		self.variables_none = [ 'mode', 'current_monster', 'attack', 'target', 'targeted_monster', 'attack_list', 'switch_list' ]
 
 		self.attacker: Trainers = 'player'
 
@@ -84,7 +87,7 @@ class Battle:
 
 	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
 		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
-		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__animate_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
+		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__handle_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
 	def __create_monster_outline ( self, sprite: MonsterSprite ):
 		MonsterSpriteOutline(sprite, self.battle_sprites)
@@ -249,11 +252,18 @@ class Battle:
 		self.current_monster.index = 0
 		self.current_monster.set_state('attack')
 
-	def __animate_attack ( self ):
-		AttackAnimation(self.attack_frames[self.attack if self.attack not in ['heal', 'battlecry', 'spark'] else 'green'], self.targeted_monster.rect.center, self.battle_sprites)
-		self.mode, self.current_monster, self.targeted_monster, self.attack, self.target, self.attack_list, self.switch_list = None, None, None, None, None, None, None
+	def __handle_attack ( self ):
+		self.__animate_attack()
+		self.__reset_variables_to_none()
 		self.__unfreeze_all_monsters()
 		self.__reinitialize_all_indexes()
+
+	def __animate_attack ( self ):
+		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
+
+	def __reset_variables_to_none ( self ):
+		for name in self.variables_none: setattr(self, name, None)
+		
 
 	def __hilghlight_target ( self ):
 		if self.mode != 'target': return
