@@ -2,8 +2,8 @@ from random import randint
 
 from settings import *
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
-from utils.Types import Attacks, Elements
-from utils.Helper import compose
+from utils.Types import Attacks
+from utils.Helper import min_number
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -17,9 +17,18 @@ class Monster:
 		self.level_up = self.level * 150
 		self.initiative = 0
 
-		self.health = max(0, self.get_stat('max_health') - randint(10, 100))
-		self.energy = max(0, self.get_stat('max_energy') - randint(10, 100))
+		self._health = max(0, self.get_stat('max_health'))
+		self._energy = max(0, self.get_stat('max_energy'))
 
+	@property
+	def health ( self ): return min_number(0, self._health)
+	@health.setter
+	def health ( self, v: float ): self._health = v
+
+	@property
+	def energy ( self ): return min_number(0, self._energy)
+	@energy.setter
+	def energy ( self, v: float ): self._energy = v
 
 	def get_stat ( self, stat: str ): return self.base_stats[stat] * self.level
 

@@ -24,6 +24,9 @@ compose: Callable = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, 
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
+def min_number ( m: float, n: float ): return max( m, n )
+
+def max_number ( m: float, n: float ): return min( m, n )
 
 def required ( v: Optional[T]) -> T:
 	if v is None:

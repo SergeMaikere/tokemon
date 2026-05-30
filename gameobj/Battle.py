@@ -94,10 +94,12 @@ class Battle:
 		return sprite
 
 	def __display_monster_name ( self, monster_sprite: MonsterSprite ):
-		return MonsterNameSprite(monster_sprite.entity, monster_sprite.monster, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
+		monster_name_sprite = MonsterNameSprite(monster_sprite, monster_sprite.rect, self.fonts['regular'], self.battle_sprites)
+		return ( monster_sprite, monster_name_sprite )
 
-	def __display_monster_level ( self, monster_name: MonsterNameSprite ):
-		return MonsterLevelSprite(monster_name.entity, monster_name.monster, monster_name.rect, self.fonts['small'], self.battle_sprites)
+	def __display_monster_level ( self, datas: tuple[MonsterSprite, MonsterNameSprite] ):
+		monster_sprite, monster_name_sprite = datas
+		return MonsterLevelSprite(monster_sprite, monster_name_sprite.rect, self.fonts['small'], self.battle_sprites)
 
 	def __display_monster_stats ( self, monster_sprite: MonsterSprite ):
 		MonsterStatsSprite(monster_sprite, self.fonts['small'], self.battle_sprites)
@@ -262,7 +264,6 @@ class Battle:
 	def __animate_attack ( self ):
 		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
 
-	
 	def __update_health ( self ):
 		elememt_datas = ( ATTACK_DATA[self.attack]['element'], self.targeted_monster.monster.base_stats['element'] )
 		compose(
@@ -297,8 +298,18 @@ class Battle:
 		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
 		self.targeted_monster = sprites.sprites()[self.indexes['target']]
 
+	def __check_death ( self ):
+		dying = [ sprite for sprite in self.opponent_battle_sprites.sprites() + self.player_battle_sprites.sprites() if sprite.monster.health <= 0 ]
+		if not dying: return
+		self.__bury_the_dying(dying[0])
+
+	def __bury_the_dying ( self, dying: MonsterSprite ):
+		if self.opponent_battle_sprites not in dying.groups(): return
+		dying.kill()
+
 	def update ( self, dt: float ):
 		self.__input()
+		self.__check_death()
 		self.__draw_battle_ground()
 		self.__get_initiative()
 		self.__hilghlight_target()
