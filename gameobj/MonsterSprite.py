@@ -15,6 +15,7 @@ class MonsterSprite ( AnimatedSprite ):
 		self.monster = monster
 		self.entity: Trainers = entity
 		self.outline_frames = outline_frames
+		self.pos = pos
 		self.handle_attack = handle_attack
 		self.my_groups = groups
 		
@@ -22,7 +23,7 @@ class MonsterSprite ( AnimatedSprite ):
 		self.monster_frames = self.__flip_frames(frames)
 		self._frames = self.monster_frames[self.state]
 
-		super().__init__('monster_sprite', BATTLE_LAYERS['monster'], self.frames, *groups, center=pos)
+		super().__init__('monster_sprite', BATTLE_LAYERS['monster'], self.frames, *groups, center=self.pos)
 
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
 		self._paused, self.flash = False, False

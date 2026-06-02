@@ -68,25 +68,34 @@ class Battle:
 
 		self.level_surface = pygame.Surface((60, 26))
 
+		self.max_fighting_monsters = 3
+
 		self.initiate_battle()
 
 
 	def initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
 			for i, monster in enumerate(monsters):
-				self.__creates_all_battle_sprites(i, entity, monster)
+				if i < self.max_fighting_monsters: 
+					compose(
+						lambda i: self.__get_position(i, entity),
+						lambda pos: self.__creates_battle_sprites(pos, entity, monster)
+					)( i )
 
-	def __creates_all_battle_sprites ( self, i: int, entity: Trainers, monster: Monster ):
+
+	def __creates_battle_sprites ( self, pos: Point, entity: Trainers, monster: Monster ):
 		compose(
-			partial(self.__create_monster_sprite, i, entity),
+			partial(self.__create_monster_sprite, pos, entity),
 			self.__display_monster_stats,
 			lambda sprite: self.__create_monster_outline(sprite),
 			self.__display_monster_name,
 			self.__display_monster_level,
 		)( monster )
 
-	def __create_monster_sprite ( self, i: int, entity: Trainers, monster: Monster ):
-		pos = { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
+	def __get_position ( self, i: int, entity: Trainers ):
+		return { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
+
+	def __create_monster_sprite ( self, pos: Point, entity: Trainers, monster: Monster ):
 		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__handle_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
 	def __create_monster_outline ( self, sprite: MonsterSprite ):
@@ -219,7 +228,7 @@ class Battle:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case 'attack': return len(required(self.current_monster).monster.get_abilities())
 			case 'switch': return len(self.MM.monsters)
-			case 'target': return len(self.monsters['player' if self.target == 'player' else 'opponent'])
+			case 'target': return self.max_fighting_monsters
 			case _: return 0
 
 	def __general_selector ( self ):
@@ -301,11 +310,26 @@ class Battle:
 	def __check_death ( self ):
 		dying = [ sprite for sprite in self.opponent_battle_sprites.sprites() + self.player_battle_sprites.sprites() if sprite.monster.health <= 0 ]
 		if not dying: return
-		self.__bury_the_dying(dying[0])
+		self.__bury_the_opponent_monster(dying[0])
 
-	def __bury_the_dying ( self, dying: MonsterSprite ):
+	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
 		if self.opponent_battle_sprites not in dying.groups(): return
+		self.__add_opponent_monster(dying)
+		self.__remove_opponent_monster(dying.monster)
 		dying.kill()
+		
+	def __remove_opponent_monster ( self, dying: Monster ):
+		self.monsters['opponent'] = [ monster for monster in self.monsters['opponent'] if monster != dying ]
+		return dying
+
+	def __add_opponent_monster ( self, dying: MonsterSprite ):
+		if len(self.monsters['opponent']) <= 3: return
+		monster = self.__get_next_opponent_monster()
+		self.__creates_battle_sprites(dying.pos, 'opponent', monster)
+
+	def __get_next_opponent_monster ( self ):
+		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
+
 
 	def update ( self, dt: float ):
 		self.__input()

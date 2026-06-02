@@ -5,7 +5,7 @@ from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from settings import *
 from entities.Monster import Monster
 from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader
-from utils.Types import Attacks, MonsterNames
+from utils.Types import Attacks, MonsterNames, Trainers
 
 
 
@@ -24,8 +24,8 @@ class MonsterManager :
 
 
 	def get_random_monsters ( self, n: int ):
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
 	def get_attack_data ( self, attack: Attacks, data: str ): return ATTACK_DATA[attack][data]
 
@@ -36,8 +36,10 @@ class MonsterManager :
 				max_stats[stat] = value if not stat in max_stats else max(max_stats[stat], value)
 		return { stat.replace('max_', ''): value for stat, value in max_stats.items()}
 
-	def get_player_battle_monsters ( self ): 
-		return [ monster for key, monster in self.monsters.items() if key < 3 ]
-
+	def get_player_battle_monsters ( self ): return [ monster for monster in self.monsters.values() ]
+	
 	def get_opponent_battle_monsters ( self, opponent_monsters: dict[int, tuple[MonsterNames, int]] ): 
-		return [ Monster(data[0], data[1]) for i, data in  opponent_monsters.items() if i < 3 ] 
+		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ]
+
+	def remove_monster ( self, trainer: Trainers, monster: Monster ):
+		pass
