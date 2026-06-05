@@ -47,7 +47,7 @@ class MonsterSprite ( AnimatedSprite ):
 
 	def set_flash ( self, flash: bool ): self.flash = flash
 
-	def set_state ( self, state: Literal['idle', 'attack'] ): self.state = state
+	def set_state ( self, state: Literal['idle', 'attack', 'frozen'] ): self.state = state
 	
 	def start_flash ( self ):
 		self.set_flash(True)
@@ -55,10 +55,11 @@ class MonsterSprite ( AnimatedSprite ):
 
 
 	def _get_image ( self, dt: float ):
-	
 		if self.state == 'attack' and self.index >= len(self.frames):
 			self.set_state('idle')
 			self.handle_attack()
+
+		if self.state == 'frozen': return self.frames[0]
 
 		self.index += self.speed * dt
 		return self.frames[ int(self.index) % len(self.frames) ]

@@ -17,6 +17,7 @@ from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
+from utils.Timer import Timer
 from utils.Types import Elements, FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
 
 class Battle:
@@ -53,6 +54,9 @@ class Battle:
 			'target': 0,
 		}
 
+		self.timers = {
+			'delayed death': Timer(600, func=self.__bury_monster)
+		}
 
 		self.mode: BattleMode | None = None 
 		self.current_monster: MonsterSprite | None = None 
@@ -70,10 +74,15 @@ class Battle:
 
 		self.max_fighting_monsters = 3
 
-		self.initiate_battle()
+		self.__initiate_battle()
 
 
-	def initiate_battle ( self ):
+	def __update_timers ( self ):
+		for timer in self.timers.values(): timer.update()
+
+	def __get_all_fighters_sprites ( self ): return self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+
+	def __initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
 			for i, monster in enumerate(monsters):
 				if i < self.max_fighting_monsters: 
@@ -133,14 +142,14 @@ class Battle:
 			self.__opponent_play()
 
 	def __give_me_sprites ( self ):
-		sprites = self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+		sprites = self.__get_all_fighters_sprites()
 		sprite = next( (sprite for sprite in sprites if sprite.monster.initiative >= 100), None )
 		return ( sprites, sprite )
 
 	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
 
 	def __unfreeze_all_monsters ( self ): 
-		[ sprite.set_paused(False) for sprite in self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites() ]
+		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
@@ -308,24 +317,40 @@ class Battle:
 		self.targeted_monster = sprites.sprites()[self.indexes['target']]
 
 	def __check_death ( self ):
-		dying = [ sprite for sprite in self.opponent_battle_sprites.sprites() + self.player_battle_sprites.sprites() if sprite.monster.health <= 0 ]
-		if not dying: return
-		self.__bury_the_opponent_monster(dying[0])
+		if self.timers['delayed death'].running or \
+		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
+			return
+		self.timers['delayed death'].start()
+
+	def __bury_monster ( self ):
+		dying = next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0) )
+		if self.opponent_battle_sprites in dying.groups(): return self.__bury_the_opponent_monster(dying)
+		return self.__bury_the_player_monster(dying)
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
-		if self.opponent_battle_sprites not in dying.groups(): return
-		self.__add_opponent_monster(dying)
-		self.__remove_opponent_monster(dying.monster)
-		dying.kill()
+		compose(
+			self.__death_pause,
+			self.__add_opponent_monster,
+			self.__remove_opponent_monster,
+			lambda dying: dying.kill()
+		)( dying )
+
+	def __death_pause ( self, dying: MonsterSprite ):
+		dying.set_state('frozen')
+		return dying
+
+	def __bury_the_player_monster ( self, dying: MonsterSprite ):
+		if self.player_battle_sprites not in dying.groups(): return
 		
-	def __remove_opponent_monster ( self, dying: Monster ):
-		self.monsters['opponent'] = [ monster for monster in self.monsters['opponent'] if monster != dying ]
+	def __remove_opponent_monster ( self, dying: MonsterSprite ):
+		self.monsters['opponent'] = [ monster for monster in self.monsters['opponent'] if monster != dying.monster ]
 		return dying
 
 	def __add_opponent_monster ( self, dying: MonsterSprite ):
-		if len(self.monsters['opponent']) <= 3: return
+		if len(self.monsters['opponent']) <= self.max_fighting_monsters: return dying
 		monster = self.__get_next_opponent_monster()
 		self.__creates_battle_sprites(dying.pos, 'opponent', monster)
+		return dying
 
 	def __get_next_opponent_monster ( self ):
 		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
@@ -333,6 +358,7 @@ class Battle:
 
 	def update ( self, dt: float ):
 		self.__input()
+		self.__update_timers()
 		self.__check_death()
 		self.__draw_battle_ground()
 		self.__get_initiative()
