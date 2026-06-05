@@ -7,7 +7,7 @@ from gameobj.AnimatedSprite import AnimatedSprite
 from utils.Helper import required, compose
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
-from utils.Types import Attacks, States, Trainers
+from utils.Types import Trainers
 
 class MonsterSprite ( AnimatedSprite ):
 	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline_frames: dict[str, list[Surface]], pos: Point, handle_attack: Callable, *groups: MyGroup) -> None:
@@ -26,7 +26,7 @@ class MonsterSprite ( AnimatedSprite ):
 		super().__init__('monster_sprite', BATTLE_LAYERS['monster'], self.frames, *groups, center=self.pos)
 
 		self.speed = ANIMATION_SPEED + uniform(-1, 1)
-		self._paused, self.flash = False, False
+		self._paused, self.flash, self.dead = False, False, False
 		self.flash_timer = Timer(200, lambda: self.set_flash(False))
 
 	@property
@@ -47,7 +47,7 @@ class MonsterSprite ( AnimatedSprite ):
 
 	def set_flash ( self, flash: bool ): self.flash = flash
 
-	def set_state ( self, state: Literal['idle', 'attack', 'frozen'] ): self.state = state
+	def set_state ( self, state: Literal['idle', 'attack'] ): self.state = state
 	
 	def start_flash ( self ):
 		self.set_flash(True)
@@ -58,9 +58,8 @@ class MonsterSprite ( AnimatedSprite ):
 		if self.state == 'attack' and self.index >= len(self.frames):
 			self.set_state('idle')
 			self.handle_attack()
-
-		if self.state == 'frozen': return self.frames[0]
-
+		if self.dead: return self.frames[0]
+		
 		self.index += self.speed * dt
 		return self.frames[ int(self.index) % len(self.frames) ]
 

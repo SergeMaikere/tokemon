@@ -55,7 +55,7 @@ class Battle:
 		}
 
 		self.timers = {
-			'delayed death': Timer(600, func=self.__bury_monster)
+			'delayed death': Timer(900, func=self.__bury_monster)
 		}
 
 		self.mode: BattleMode | None = None 
@@ -320,24 +320,23 @@ class Battle:
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
+		self.__get_dead_monster().dead = True
 		self.timers['delayed death'].start()
 
+	def __get_dead_monster ( self ):
+		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0) )
+
 	def __bury_monster ( self ):
-		dying = next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0) )
+		dying = self.__get_dead_monster()
 		if self.opponent_battle_sprites in dying.groups(): return self.__bury_the_opponent_monster(dying)
 		return self.__bury_the_player_monster(dying)
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
 		compose(
-			self.__death_pause,
 			self.__add_opponent_monster,
 			self.__remove_opponent_monster,
 			lambda dying: dying.kill()
 		)( dying )
-
-	def __death_pause ( self, dying: MonsterSprite ):
-		dying.set_state('frozen')
-		return dying
 
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
 		if self.player_battle_sprites not in dying.groups(): return
