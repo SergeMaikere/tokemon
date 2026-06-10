@@ -237,6 +237,12 @@ class Battle:
 				case 'attack': self.__attack_selector()
 				case 'target': self.__target_selector()
 				case _: return
+		if keys[pygame.K_ESCAPE]:
+			match self.mode:
+				case 'switch': self.mode = 'general'
+				case 'attack': self.mode = 'general'
+				case 'target': self.mode = 'attack'
+				case _: return
 
 	def __get_limiter ( self ):
 		match self.mode:
@@ -248,18 +254,10 @@ class Battle:
 
 	def __general_selector ( self ):
 		match self.indexes['general']:
-			case 0: 
-				self.mode = 'attack'
-				print('attack')
-			case 1: 
-				self.__defend()
-				print('defend')
-			case 2: 
-				self.mode = 'switch'
-				print('switch')
-			case 3: 
-				# self.mode = 'monster'
-				print('catch')
+			case 0: self.mode = 'attack'
+			case 1: self.__defend()
+			case 2: self.mode = 'switch'
+			case 3: return
 
 	def __defend ( self ):
 		self.current_monster, self.mode = None, None
