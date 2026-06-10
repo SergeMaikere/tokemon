@@ -1,3 +1,5 @@
+from random import sample
+
 from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
 from settings import *
@@ -10,6 +12,7 @@ from functools import partial, reduce
 from pytmx.util_pygame import load_pygame
 
 from utils.MyGroup import MyGroup
+from utils.Timer import Timer
 from utils.Types import Coasts, FontTypes, MonsterNames, States
 
 T = TypeVar('T')
@@ -28,12 +31,14 @@ def min_number ( m: float, n: float ): return max( m, n )
 
 def max_number ( m: float, n: float ): return min( m, n )
 
+def start_timer ( timer: Timer ): 
+	if not timer.running: timer.start()
+
 def required ( v: Optional[T]) -> T:
 	if v is None:
 		raise ValueError('Value is required')
 	else:
 		return cast(T, v)
-
 
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):
 	obj = {}

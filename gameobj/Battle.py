@@ -1,5 +1,6 @@
 from functools import partial
 from os.path import join
+from random import choice
 from pygame import Font
 
 from assets.data.game_data import ATTACK_DATA
@@ -14,7 +15,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut, voyeur
+from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut, start_timer, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -55,7 +56,8 @@ class Battle:
 		}
 
 		self.timers = {
-			'delayed death': Timer(900, func=self.__bury_monster)
+			'delayed death': Timer(900, func=self.__bury_monster),
+			'delayed attack': Timer(900, func=self.__target_selector)
 		}
 
 		self.mode: BattleMode | None = None 
@@ -139,7 +141,7 @@ class Battle:
 		if sprite:
 			self.__freeze_all_monsters(sprites)
 			self.__update_datas(sprite)
-			self.__opponent_play()
+			self.__opponent_play(sprite)
 
 	def __give_me_sprites ( self ):
 		sprites = self.__get_all_fighters_sprites()
@@ -159,12 +161,16 @@ class Battle:
 		sprite.start_flash()
 		return sprite
 
-	def __opponent_play ( self ):
+	def __opponent_play ( self, sprite: MonsterSprite ):
 		if self.attacker == 'player': return
-		self.mode = None
-		self.current_monster = None
-		self.attacker = 'player'
-		self.__unfreeze_all_monsters()
+		self.__target_player_monster(sprite)
+		start_timer(self.timers['delayed attack'])
+
+	def __target_player_monster ( self, sprite: MonsterSprite ):
+		self.target = 'player'
+		self.targeted_monster = choice(self.player_battle_sprites.sprites())
+		self.attack = choice(sprite.monster.get_abilities(False))
+		return sprite
 
 	def __display_menus ( self ):
 		if self.attacker == 'opponent': return
