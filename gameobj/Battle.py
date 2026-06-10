@@ -65,8 +65,8 @@ class Battle:
 		self.attack: Attacks | None = None 
 		self.target: Trainers | None = None 
 		self.targeted_monster: MonsterSprite | None = None 
-		self.attack_list: MyList | None = None 
-		self.switch_list: MyList | None = None
+		self.attack_list: AttackList | None = None 
+		self.switch_list: SwitchList | None = None
 
 		self.variables_none = [ 'mode', 'current_monster', 'attack', 'target', 'targeted_monster', 'attack_list', 'switch_list' ]
 
@@ -86,12 +86,16 @@ class Battle:
 
 	def __initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
-			for i, monster in enumerate(monsters):
-				if i < self.max_fighting_monsters: 
-					compose(
-						lambda i: self.__get_position(i, entity),
-						lambda pos: self.__creates_battle_sprites(pos, entity, monster)
-					)( i )
+			self.__draw_trainer_monsters(entity, monsters)
+
+	def __draw_trainer_monsters ( self, entity: Trainers, monsters: list[Monster] ):
+		for i, monster in enumerate(monsters):
+			if i < self.max_fighting_monsters: 
+				compose(
+					lambda i: self.__get_position(i, entity),
+					lambda pos: self.__creates_battle_sprites(pos, entity, monster)
+				)( i )
+
 
 
 	def __creates_battle_sprites ( self, pos: Point, entity: Trainers, monster: Monster ):
@@ -236,6 +240,7 @@ class Battle:
 				case 'general': self.__general_selector()
 				case 'attack': self.__attack_selector()
 				case 'target': self.__target_selector()
+				case 'switch': self.__switch_selector()
 				case _: return
 		if keys[pygame.K_ESCAPE]:
 			match self.mode:
@@ -273,6 +278,7 @@ class Battle:
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
 	def __target_selector ( self ):
+		if not self.current_monster: return
 		self.current_monster.index = 0
 		self.current_monster.set_state('attack')
 
@@ -314,6 +320,10 @@ class Battle:
 
 	def __reset_variables_to_none ( self ):
 		for name in self.variables_none: setattr(self, name, None)
+
+	def __switch_selector ( self ): 
+		if not self.switch_list: return
+		self.switch_list.select()
 		
 	def __hilghlight_target ( self ):
 		if self.mode != 'target': return
@@ -358,12 +368,20 @@ class Battle:
 	def __get_next_opponent_monster ( self ):
 		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
 
+	def __check_for_switch ( self ):
+		if not self.switch_list or not self.switch_list.switched: return
+		for sprite in self.player_battle_sprites.sprites(): sprite.kill()
+		self.monsters['player'] = self.MM.get_monster_list()
+		self.__draw_trainer_monsters('player', self.monsters['player'])
+		self.switch_list.switched, self.mode = None, None
+		self.__unfreeze_all_monsters()
 
 	def update ( self, dt: float ):
 		self.__input()
 		self.__update_timers()
 		self.__check_death()
 		self.__draw_battle_ground()
+		self.__check_for_switch()
 		self.__get_initiative()
 		self.__hilghlight_target()
 		self.update_battle_sprites(dt)

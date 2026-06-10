@@ -27,6 +27,8 @@ class MonsterManager :
 		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
+	def get_monster_list ( self ): return [ monster for monster in self.monsters.values() ]
+
 	def get_attack_data ( self, attack: Attacks, data: str ): return ATTACK_DATA[attack][data]
 
 	def get_max_stats_value ( self ):
