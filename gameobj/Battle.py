@@ -129,7 +129,7 @@ class Battle:
 		MonsterStatsSprite(monster_sprite, self.fonts['small'], self.battle_sprites)
 		return monster_sprite
 
-	def update_battle_sprites ( self, dt: float ):
+	def __update_battle_sprites ( self, dt: float ):
 		self.battle_sprites.update(dt)
 		self.battle_sprites.draw_all(self.current_monster, self.targeted_monster, self.is_player_targeted)
 
@@ -241,7 +241,7 @@ class Battle:
 				case 'attack': self.__attack_selector()
 				case 'target': self.__target_selector()
 				case 'switch': self.__switch_selector()
-				case _: return
+			self.__reset_indexes()
 		if keys[pygame.K_ESCAPE]:
 			match self.mode:
 				case 'switch': self.mode = 'general'
@@ -256,6 +256,9 @@ class Battle:
 			case 'switch': return len(self.MM.monsters)
 			case 'target': return self.max_fighting_monsters
 			case _: return 0
+
+	def __reset_indexes ( self ): 
+		self.indexes = { k: 0 for k in self.indexes.keys() }
 
 	def __general_selector ( self ):
 		match self.indexes['general']:
@@ -384,5 +387,5 @@ class Battle:
 		self.__check_for_switch()
 		self.__get_initiative()
 		self.__hilghlight_target()
-		self.update_battle_sprites(dt)
+		self.__update_battle_sprites(dt)
 		self.__display_menus()
