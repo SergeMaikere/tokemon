@@ -68,6 +68,8 @@ class Battle:
 		self.attack_list: AttackList | None = None 
 		self.switch_list: SwitchList | None = None
 
+		self.catch = False
+
 		self.variables_none = [ 'mode', 'current_monster', 'attack', 'target', 'targeted_monster', 'attack_list', 'switch_list' ]
 
 		self.attacker: Trainers = 'player'
@@ -242,6 +244,7 @@ class Battle:
 				case 'target': self.__target_selector()
 				case 'switch': self.__switch_selector()
 			self.__reset_indexes()
+
 		if keys[pygame.K_ESCAPE]:
 			match self.mode:
 				case 'switch': self.mode = 'general'
@@ -265,7 +268,9 @@ class Battle:
 			case 0: self.mode = 'attack'
 			case 1: self.__defend()
 			case 2: self.mode = 'switch'
-			case 3: return
+			case 3: 
+				self.mode = 'target'
+				self.catch = True
 
 	def __defend ( self ):
 		self.current_monster, self.mode = None, None
@@ -283,7 +288,21 @@ class Battle:
 	def __target_selector ( self ):
 		if not self.current_monster: return
 		self.current_monster.index = 0
-		self.current_monster.set_state('attack')
+		if self.catch: return self.__catch_a_monster()
+		if not self.catch: return self.current_monster.set_state('attack')
+
+	def __catch_a_monster ( self ):
+		if not self.targeted_monster: return
+		if self.targeted_monster.monster.is_catchable():
+			compose(
+				self.__add_player_monster,
+				self.__remove_opponent_monster,
+				lambda sprite: sprite.kill()
+			)(self.targeted_monster)
+		else:
+			print('Not catchable')
+		self.targeted_monster = None
+		self.__unfreeze_all_monsters()
 
 	def __handle_attack ( self ):
 		self.__animate_attack()
@@ -328,7 +347,7 @@ class Battle:
 		if not self.switch_list: return
 		self.switch_list.select()
 		
-	def __hilghlight_target ( self ):
+	def __select_target ( self ):
 		if self.mode != 'target': return
 		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
 		self.targeted_monster = sprites.sprites()[self.indexes['target']]
@@ -368,6 +387,11 @@ class Battle:
 		self.__creates_battle_sprites(dying.pos, 'opponent', monster)
 		return dying
 
+	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
+		self.MM.monsters[ next(reversed(self.MM.monsters)) + 1 ] = monster_sprite.monster
+		self.player_battle_sprites.add(monster_sprite)
+		return monster_sprite
+
 	def __get_next_opponent_monster ( self ):
 		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
 
@@ -386,6 +410,6 @@ class Battle:
 		self.__draw_battle_ground()
 		self.__check_for_switch()
 		self.__get_initiative()
-		self.__hilghlight_target()
+		self.__select_target()
 		self.__update_battle_sprites(dt)
 		self.__display_menus()
