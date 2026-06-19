@@ -135,7 +135,6 @@ class Battle:
 		self.battle_sprites.update(dt)
 		self.battle_sprites.draw_all(self.current_monster, self.targeted_monster, self.is_player_targeted)
 
-	def __reinitialize_all_indexes ( self ): self.indexes = { mode: 0 for mode in self.indexes.keys() }
 
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
@@ -301,15 +300,15 @@ class Battle:
 			)(self.targeted_monster)
 		else:
 			print('Not catchable')
-		self.targeted_monster = None
+		self.catch = False
+		self.__reset_variables_to_none(self.variables_none)
 		self.__unfreeze_all_monsters()
 
 	def __handle_attack ( self ):
 		self.__animate_attack()
 		self.__update_health()
-		self.__reset_variables_to_none()
+		self.__reset_variables_to_none(self.variables_none)
 		self.__unfreeze_all_monsters()
-		self.__reinitialize_all_indexes()
 
 	def __animate_attack ( self ):
 		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
@@ -340,8 +339,8 @@ class Battle:
 		return amount
 
 
-	def __reset_variables_to_none ( self ):
-		for name in self.variables_none: setattr(self, name, None)
+	def __reset_variables_to_none ( self, names: list[str] ):
+		for name in names: setattr(self, name, None)
 
 	def __switch_selector ( self ): 
 		if not self.switch_list: return
@@ -389,7 +388,9 @@ class Battle:
 
 	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
 		self.MM.monsters[ next(reversed(self.MM.monsters)) + 1 ] = monster_sprite.monster
-		self.player_battle_sprites.add(monster_sprite)
+		if len(self.player_battle_sprites.sprites()) < self.max_fighting_monsters:
+			pos = { i: pos for i, pos in enumerate(BATTLE_POSITIONS['left'].values()) }[len(self.player_battle_sprites.sprites())]
+			self.__creates_battle_sprites(pos, 'player', monster_sprite.monster)
 		return monster_sprite
 
 	def __get_next_opponent_monster ( self ):

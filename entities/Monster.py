@@ -56,5 +56,5 @@ class Monster:
 		defense = max( 0, min(1, 1 - self.get_stat('defense') / 2000) )
 		self.health -= amount * defense
 
-	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
+	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.9
 		
