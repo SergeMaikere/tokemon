@@ -72,8 +72,6 @@ class Battle:
 
 		self.variables_none = [ 'mode', 'current_monster', 'attack', 'target', 'targeted_monster', 'attack_list', 'switch_list' ]
 
-		self.attacker: Trainers = 'player'
-
 		self.level_surface = pygame.Surface((60, 26))
 
 		self.max_fighting_monsters = 3
@@ -85,6 +83,9 @@ class Battle:
 		for timer in self.timers.values(): timer.update()
 
 	def __get_all_fighters_sprites ( self ): return self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+
+	def __get_group_size ( self, entity: Trainers ): 
+		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )
 
 	def __initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
@@ -161,13 +162,13 @@ class Battle:
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
 		self.mode = 'general'
-		self.attacker = 'player' if self.player_battle_sprites.has(sprite) else 'opponent'
+		self.target = 'opponent' if self.player_battle_sprites.has(sprite) else 'player'
 		self.current_monster = sprite
 		sprite.start_flash()
 		return sprite
 
 	def __opponent_play ( self, sprite: MonsterSprite ):
-		if self.attacker == 'player': return
+		if self.target == 'opponent': return
 		self.__target_player_monster(sprite)
 		start_timer(self.timers['delayed attack'])
 
@@ -178,7 +179,7 @@ class Battle:
 		return sprite
 
 	def __display_menus ( self ):
-		if self.attacker == 'opponent': return
+		if self.target == 'player': return
 		match self.mode:
 			case 'general': self.__display_general()
 			case 'attack': self.__display_attack()
@@ -227,7 +228,7 @@ class Battle:
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
 
 	def __input ( self ):
-		if not self.current_monster or not self.mode or self.attacker == 'opponent': return
+		if not self.current_monster or not self.mode or self.target == 'player': return
 
 		keys = pygame.key.get_just_pressed()
 		limiter = self.__get_limiter()
@@ -242,21 +243,26 @@ class Battle:
 				case 'attack': self.__attack_selector()
 				case 'target': self.__target_selector()
 				case 'switch': self.__switch_selector()
-			self.__reset_indexes()
 
 		if keys[pygame.K_ESCAPE]:
 			match self.mode:
 				case 'switch': self.mode = 'general'
 				case 'attack': self.mode = 'general'
-				case 'target': self.mode = 'attack'
+				case 'target': 
+					if self.catch: 
+						self.mode = 'general'
+					else: 
+						self.mode = 'attack'
+						self.catch = False
 				case _: return
+			self.__reset_indexes()
 
 	def __get_limiter ( self ):
 		match self.mode:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case 'attack': return len(required(self.current_monster).monster.get_abilities())
 			case 'switch': return len(self.MM.monsters)
-			case 'target': return self.max_fighting_monsters
+			case 'target': return self.__get_group_size(required(self.target))
 			case _: return 0
 
 	def __reset_indexes ( self ): 
@@ -270,10 +276,11 @@ class Battle:
 			case 3: 
 				self.mode = 'target'
 				self.catch = True
+		self.__reset_indexes()
 
 	def __defend ( self ):
-		self.current_monster, self.mode = None, None
-		self.indexes['general'] = 0
+		self.__reset_variables_to_none(self.variables_none)
+		self.__reset_indexes()
 		self.__unfreeze_all_monsters()
 
 	def __attack_selector ( self ):
@@ -301,6 +308,7 @@ class Battle:
 		else:
 			print('Not catchable')
 		self.catch = False
+		self.__reset_indexes()
 		self.__reset_variables_to_none(self.variables_none)
 		self.__unfreeze_all_monsters()
 
@@ -308,6 +316,7 @@ class Battle:
 		self.__animate_attack()
 		self.__update_health()
 		self.__reset_variables_to_none(self.variables_none)
+		self.__reset_indexes()
 		self.__unfreeze_all_monsters()
 
 	def __animate_attack ( self ):
@@ -345,9 +354,10 @@ class Battle:
 	def __switch_selector ( self ): 
 		if not self.switch_list: return
 		self.switch_list.select()
+		self.__reset_indexes()
 		
 	def __select_target ( self ):
-		if self.mode != 'target': return
+		if self.mode != 'target' or not self.target: return
 		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
 		self.targeted_monster = sprites.sprites()[self.indexes['target']]
 
@@ -388,7 +398,7 @@ class Battle:
 
 	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
 		self.MM.monsters[ next(reversed(self.MM.monsters)) + 1 ] = monster_sprite.monster
-		if len(self.player_battle_sprites.sprites()) < self.max_fighting_monsters:
+		if self.__get_group_size('player') < self.max_fighting_monsters:
 			pos = { i: pos for i, pos in enumerate(BATTLE_POSITIONS['left'].values()) }[len(self.player_battle_sprites.sprites())]
 			self.__creates_battle_sprites(pos, 'player', monster_sprite.monster)
 		return monster_sprite
