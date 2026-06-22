@@ -8,6 +8,7 @@ from gameobj.AttackAnimation import AttackAnimation
 from gameobj.AttackList import AttackList
 from gameobj.MyList import MyList
 from gameobj.SwitchList import SwitchList
+from gameobj.TimedSprite import TimedSprite
 from settings import *
 from entities.Monster import Monster
 from gameobj.MonsterSpriteOutline import MonsterSpriteOutline
@@ -305,8 +306,9 @@ class Battle:
 				self.__remove_opponent_monster,
 				lambda sprite: sprite.kill()
 			)(self.targeted_monster)
-		else:
-			print('Not catchable')
+		else: 
+			TimedSprite(1000, self.ui_images['cross'], self.battle_sprites, center=self.targeted_monster.rect.center)
+
 		self.catch = False
 		self.__reset_indexes()
 		self.__reset_variables_to_none(self.variables_none)
@@ -320,9 +322,11 @@ class Battle:
 		self.__unfreeze_all_monsters()
 
 	def __animate_attack ( self ):
+		if not self.attack or not self.targeted_monster: return
 		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
 
 	def __update_health ( self ):
+		if not self.attack or not self.targeted_monster: return
 		elememt_datas = ( ATTACK_DATA[self.attack]['element'], self.targeted_monster.monster.base_stats['element'] )
 		compose(
 			lambda attack: self.targeted_monster.monster.get_attack_amount(attack),
