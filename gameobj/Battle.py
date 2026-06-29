@@ -1,6 +1,8 @@
 from functools import partial
+from os import kill
 from os.path import join
 from random import choice
+from typing import Literal
 from pygame import Font
 
 from assets.data.game_data import ATTACK_DATA
@@ -16,7 +18,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, required, get_group, compose, images_loader_dict, cut, start_timer, voyeur
+from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, start_timer, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -99,8 +101,6 @@ class Battle:
 					lambda i: self.__get_position(i, entity),
 					lambda pos: self.__creates_battle_sprites(pos, entity, monster)
 				)( i )
-
-
 
 	def __creates_battle_sprites ( self, pos: Point, entity: Trainers, monster: Monster ):
 		compose(
@@ -229,34 +229,19 @@ class Battle:
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
 
 	def __input ( self ):
-		if not self.current_monster or not self.mode or self.target == 'player': return
-
+		if not self.current_monster or not self.mode: return
 		keys = pygame.key.get_just_pressed()
 		limiter = self.__get_limiter()
 
-		if keys[pygame.K_UP]: 
-			self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
-		if keys[pygame.K_DOWN]: 
-			self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
-		if keys[pygame.K_SPACE]:
-			match self.mode:
-				case 'general': self.__general_selector()
-				case 'attack': self.__attack_selector()
-				case 'target': self.__target_selector()
-				case 'switch': self.__switch_selector()
+		if keys[pygame.K_UP]: return self.__set_indexes('up', limiter) 
+		if keys[pygame.K_DOWN]: return self.__set_indexes('down', limiter) 
+		if keys[pygame.K_SPACE]: return self.__action_input()
+		if keys[pygame.K_ESCAPE]: return self.__back_input()
 
-		if keys[pygame.K_ESCAPE]:
-			match self.mode:
-				case 'switch': self.mode = 'general'
-				case 'attack': self.mode = 'general'
-				case 'target': 
-					if self.catch: 
-						self.mode = 'general'
-					else: 
-						self.mode = 'attack'
-						self.catch = False
-				case _: return
-			self.__reset_indexes()
+	def __set_indexes ( self, direction: Literal['up', 'down'], limiter: int ):
+		if not self.mode: return
+		if direction == 'up': self.indexes[self.mode] = (self.indexes[self.mode] - 1) % limiter
+		if direction == 'down': self.indexes[self.mode] = (self.indexes[self.mode] + 1) % limiter
 
 	def __get_limiter ( self ):
 		match self.mode:
@@ -265,6 +250,29 @@ class Battle:
 			case 'switch': return len(self.MM.monsters)
 			case 'target': return self.__get_group_size(required(self.target))
 			case _: return 0
+
+	def __action_input ( self ):
+		match self.mode:
+			case 'general': return self.__general_selector()
+			case 'attack': return self.__attack_selector()
+			case 'target': return self.__target_selector()
+			case 'switch': return self.__switch_selector()
+			case _: return
+
+	def __back_input ( self ):
+		match self.mode:
+			case 'switch': self.mode = 'general'
+			case 'attack': self.mode = 'general'
+			case 'target': self.__attack_or_catch()
+			case _: return
+		self.__reset_indexes()
+
+	def __attack_or_catch ( self ):
+		if self.catch: 
+			self.mode = 'general'
+		else: 
+			self.mode = 'attack'
+			self.catch = False
 
 	def __reset_indexes ( self ): 
 		self.indexes = { k: 0 for k in self.indexes.keys() }
@@ -288,7 +296,7 @@ class Battle:
 		self.mode = 'target'
 		self.attack = required(self.current_monster).monster.get_abilities(all_of_them=False)[self.indexes['attack']]
 		self.target = ATTACK_DATA[self.attack]['target']
-		print(self.attack)
+		print(self.attack, self.target)
 
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
@@ -303,8 +311,8 @@ class Battle:
 		if self.targeted_monster.monster.is_catchable():
 			compose(
 				self.__add_player_monster,
-				self.__remove_opponent_monster,
-				lambda sprite: sprite.kill()
+				lambda dying: self.__remove_monster(dying, 'opponent'),
+				lambda sprite: kill_sprite(sprite)
 			)(self.targeted_monster)
 		else: 
 			TimedSprite(1000, self.ui_images['cross'], self.battle_sprites, center=self.targeted_monster.rect.center)
@@ -315,6 +323,7 @@ class Battle:
 		self.__unfreeze_all_monsters()
 
 	def __handle_attack ( self ):
+		print(self.attack)
 		self.__animate_attack()
 		self.__update_health()
 		self.__reset_variables_to_none(self.variables_none)
@@ -369,29 +378,35 @@ class Battle:
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
-		self.__get_dead_monster().dead = True
+		print('Seeeeeerge !!!')
 		self.timers['delayed death'].start()
 
 	def __get_dead_monster ( self ):
-		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0) )
+		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0), None )
 
 	def __bury_monster ( self ):
 		dying = self.__get_dead_monster()
+		if not dying: return
 		if self.opponent_battle_sprites in dying.groups(): return self.__bury_the_opponent_monster(dying)
 		return self.__bury_the_player_monster(dying)
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
-		compose(
+		return compose(
 			self.__add_opponent_monster,
-			self.__remove_opponent_monster,
-			lambda dying: dying.kill()
+			lambda dying: self.__remove_monster(dying, 'opponent'),
+			lambda dying: kill_sprite(dying)
 		)( dying )
 
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
-		if self.player_battle_sprites not in dying.groups(): return
+		print('Serge -->', dying.monster.name)
+		return compose( 
+			lambda dying: self.__remove_monster(dying, 'player'), 
+			lambda dying: self.MM.remove_monster(dying),
+			lambda dying: kill_sprite(dying)
+		)( dying )
 		
-	def __remove_opponent_monster ( self, dying: MonsterSprite ):
-		self.monsters['opponent'] = [ monster for monster in self.monsters['opponent'] if monster != dying.monster ]
+	def __remove_monster ( self, dying: MonsterSprite, entity: Trainers ):
+		self.monsters[entity] = [ monster for monster in self.monsters[entity] if monster != dying.monster ]
 		return dying
 
 	def __add_opponent_monster ( self, dying: MonsterSprite ):

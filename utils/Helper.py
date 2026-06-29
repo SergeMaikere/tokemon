@@ -1,5 +1,6 @@
 from random import sample
 
+from pygame.sprite import Sprite
 from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
 from settings import *
@@ -31,8 +32,13 @@ def min_number ( m: float, n: float ): return max( m, n )
 
 def max_number ( m: float, n: float ): return min( m, n )
 
+def kill_sprite ( sprite: Sprite ):
+	sprite.kill()
+	return sprite
+
 def start_timer ( timer: Timer ): 
 	if not timer.running: timer.start()
+	return timer
 
 def required ( v: Optional[T]) -> T:
 	if v is None:

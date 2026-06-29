@@ -2,6 +2,7 @@ from os.path import join
 from random import randint, sample
 
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
+from gameobj.MonsterSprite import MonsterSprite
 from settings import *
 from entities.Monster import Monster
 from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader
@@ -12,7 +13,7 @@ from utils.Types import Attacks, MonsterNames, Trainers
 class MonsterManager :
 	def __init__(self) -> None:
 		
-		self.monsters = self.get_random_monsters(8)
+		self.monsters = self.get_random_monsters(1)
 
 		self.monster_frames = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -24,8 +25,9 @@ class MonsterManager :
 
 
 	def get_random_monsters ( self, n: int ):
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 5)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
 	def get_monster_list ( self ): return [ monster for monster in self.monsters.values() ]
 
@@ -43,5 +45,6 @@ class MonsterManager :
 	def get_opponent_battle_monsters ( self, opponent_monsters: dict[int, tuple[MonsterNames, int]] ): 
 		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ]
 
-	def remove_monster ( self, trainer: Trainers, monster: Monster ):
-		pass
+	def remove_monster ( self, sprite: MonsterSprite ):
+		self.monsters = { i: m for i, m in self.monsters.items() if m != sprite.monster }
+		return sprite
