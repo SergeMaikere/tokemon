@@ -378,7 +378,7 @@ class Battle:
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
-		print('Seeeeeerge !!!')
+		self.__freeze_all_monsters(self.__get_all_fighters_sprites())
 		self.timers['delayed death'].start()
 
 	def __get_dead_monster ( self ):
@@ -387,8 +387,11 @@ class Battle:
 	def __bury_monster ( self ):
 		dying = self.__get_dead_monster()
 		if not dying: return
-		if self.opponent_battle_sprites in dying.groups(): return self.__bury_the_opponent_monster(dying)
-		return self.__bury_the_player_monster(dying)
+		if self.opponent_battle_sprites in dying.groups(): 
+			self.__bury_the_opponent_monster(dying)
+		else: 
+			self.__bury_the_player_monster(dying)
+		self.__unfreeze_all_monsters()
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
 		return compose(
@@ -398,7 +401,6 @@ class Battle:
 		)( dying )
 
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
-		print('Serge -->', dying.monster.name)
 		return compose( 
 			lambda dying: self.__remove_monster(dying, 'player'), 
 			lambda dying: self.MM.remove_monster(dying),
