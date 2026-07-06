@@ -25,8 +25,8 @@ class MonsterManager :
 
 
 	def get_random_monsters ( self, n: int ):
-		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 5)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 5)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
 	def get_monster_list ( self ): return [ monster for monster in self.monsters.values() ]

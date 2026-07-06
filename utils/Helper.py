@@ -1,4 +1,5 @@
 from random import sample
+from types import new_class
 
 from pygame.sprite import Sprite
 from pygame.typing import ColorLike, Point
@@ -28,9 +29,19 @@ compose: Callable = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, 
 
 get_name_from_path = lambda path: basename(path).split('.')[0]
 
-def min_number ( m: float, n: float ): return max( m, n )
+def min_number ( minimum: float, n: float ): return max( minimum, n )
 
-def max_number ( m: float, n: float ): return min( m, n )
+def max_number ( maximum: float, n: float ): return min( maximum, n )
+
+def between ( minimum: float, maximum: float, n: float ): return min_number( minimum, max_number(maximum, n) )
+
+def set_truthy ( obj: Any, name: str ):
+	setattr(obj, name, True)
+	return obj
+
+def set_falsy ( obj: Any, name: str ):
+	setattr(obj, name, False)
+	return obj
 
 def kill_sprite ( sprite: Sprite ):
 	sprite.kill()

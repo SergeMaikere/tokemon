@@ -18,7 +18,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, start_timer, voyeur
+from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -147,8 +147,15 @@ class Battle:
 		sprites, sprite = self.__give_me_sprites()
 		if sprite:
 			self.__freeze_all_monsters(sprites)
-			self.__update_datas(sprite)
-			self.__opponent_play(sprite)
+			compose(
+				self.__reset_defense,
+				self.__update_datas,
+				self.__opponent_play,
+			)( sprite )
+
+	def __reset_defense ( self, sprite: MonsterSprite ):
+		set_falsy(sprite.monster, 'is_defending')
+		return sprite
 
 	def __give_me_sprites ( self ):
 		sprites = self.__get_all_fighters_sprites()
@@ -159,6 +166,17 @@ class Battle:
 
 	def __unfreeze_all_monsters ( self ): 
 		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
+
+	def __reset_indexes ( self ): 
+		self.indexes = { k: 0 for k in self.indexes.keys() }
+
+	def __reset_variables_to_none ( self, names: list[str] ):
+		for name in names: setattr(self, name, None)
+
+	def __resume_battle ( self ):
+		self.__reset_indexes()
+		self.__unfreeze_all_monsters()
+		self.__reset_variables_to_none(self.variables_none)
 
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
@@ -218,7 +236,6 @@ class Battle:
 				get_index=lambda: self.indexes['switch']
 			)
 
-
 	def __get_general_menu_icon ( self, i: int, data: Menu ):
 		return self.ui_images[f'{data['icon']}_highlight' if self.__is_selected(i) else data['icon']]
 
@@ -274,8 +291,6 @@ class Battle:
 			self.mode = 'attack'
 			self.catch = False
 
-	def __reset_indexes ( self ): 
-		self.indexes = { k: 0 for k in self.indexes.keys() }
 
 	def __general_selector ( self ):
 		match self.indexes['general']:
@@ -288,15 +303,13 @@ class Battle:
 		self.__reset_indexes()
 
 	def __defend ( self ):
-		self.__reset_variables_to_none(self.variables_none)
-		self.__reset_indexes()
-		self.__unfreeze_all_monsters()
+		set_truthy(self.current_monster.monster, 'is_defending')
+		self.__resume_battle()
 
 	def __attack_selector ( self ):
 		self.mode = 'target'
 		self.attack = required(self.current_monster).monster.get_abilities(all_of_them=False)[self.indexes['attack']]
 		self.target = ATTACK_DATA[self.attack]['target']
-		print(self.attack, self.target)
 
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 
@@ -317,18 +330,14 @@ class Battle:
 		else: 
 			TimedSprite(1000, self.ui_images['cross'], self.battle_sprites, center=self.targeted_monster.rect.center)
 
-		self.catch = False
-		self.__reset_indexes()
-		self.__reset_variables_to_none(self.variables_none)
-		self.__unfreeze_all_monsters()
+		set_falsy(self, 'catch')
+		self.__resume_battle()
 
 	def __handle_attack ( self ):
 		print(self.attack)
 		self.__animate_attack()
 		self.__update_health()
-		self.__reset_variables_to_none(self.variables_none)
-		self.__reset_indexes()
-		self.__unfreeze_all_monsters()
+		self.__resume_battle()
 
 	def __animate_attack ( self ):
 		if not self.attack or not self.targeted_monster: return
@@ -359,10 +368,6 @@ class Battle:
 		   attack == 'water' and monster == 'fire':
 			return amount * 2
 		return amount
-
-
-	def __reset_variables_to_none ( self, names: list[str] ):
-		for name in names: setattr(self, name, None)
 
 	def __switch_selector ( self ): 
 		if not self.switch_list: return

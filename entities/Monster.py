@@ -3,7 +3,7 @@ from random import randint
 from settings import *
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from utils.Types import Attacks
-from utils.Helper import min_number
+from utils.Helper import between, min_number
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -19,6 +19,8 @@ class Monster:
 
 		self._health = max(0, self.get_stat('max_health'))
 		self._energy = max(0, self.get_stat('max_energy'))
+
+		self.is_defending = False
 
 	@property
 	def health ( self ): return min_number(0, self._health)
@@ -53,7 +55,7 @@ class Monster:
 		self.initiative += self.get_stat('speed') * dt
 
 	def take_damage ( self, amount: float ):
-		defense = max( 0, min(1, 1 - self.get_stat('defense') / 2000) )
+		defense = between(0, 1, 1 - self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0)
 		self.health -= amount * defense
 
 	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
