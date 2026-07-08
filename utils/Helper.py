@@ -57,6 +57,10 @@ def required ( v: Optional[T]) -> T:
 	else:
 		return cast(T, v)
 
+def quit_game ():
+	pygame.quit()
+	exit()
+
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):
 	obj = {}
 	for root, _, files in walk(join(*path)):

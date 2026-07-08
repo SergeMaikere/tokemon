@@ -73,7 +73,8 @@ class DialogManager:
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
 		self.in_battle = True
 		self.current_dialog = None
-		self.BM.start_battle(character.datas['biome'], character.datas['monsters'])
+		self.BM.battle_trainer(character)
+		self.player.unblock()
 		del dialog
 
 	def update ( self ):

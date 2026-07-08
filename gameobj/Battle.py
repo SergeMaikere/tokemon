@@ -18,7 +18,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
+from utils.Helper import display_item, get_rect, kill_sprite, quit_game, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -28,7 +28,6 @@ class Battle:
 	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
 		
 		self.MM = monster_manager
-		self.opponent_monsters = opponent_monsters
 		self.fonts = fonts
 		self.ui_images = ui_images
 		self.battle_ground_surface = battle_ground
@@ -42,7 +41,7 @@ class Battle:
 
 		self.monsters: dict[Trainers, list[Monster]] = { 
 			'player': self.MM.get_player_battle_monsters(), 
-			'opponent': self.MM.get_opponent_battle_monsters(self.opponent_monsters) 
+			'opponent': self.MM.get_opponent_battle_monsters(opponent_monsters) 
 		}
 
 		self.attack_frames = compose(
@@ -71,7 +70,7 @@ class Battle:
 		self.attack_list: AttackList | None = None 
 		self.switch_list: SwitchList | None = None
 
-		self.catch = False
+		self.catch, self.victory, self.defeat = False, False, False
 
 		self.variables_none = [ 'mode', 'current_monster', 'attack', 'target', 'targeted_monster', 'attack_list', 'switch_list' ]
 
@@ -144,25 +143,28 @@ class Battle:
 	def __get_initiative ( self ):
 		if self.mode: return
 
-		sprites, sprite = self.__give_me_sprites()
+		sprite = self.__give_me_sprite()
 		if sprite:
-			self.__freeze_all_monsters(sprites)
+			self.__freeze_all_monsters()
 			compose(
 				self.__reset_defense,
 				self.__update_datas,
 				self.__opponent_play,
 			)( sprite )
 
+	def __reset_player_initiative ( self ):
+		for sprite in self.player_battle_sprites.sprites():
+			sprite.monster.initiative = 0
+
 	def __reset_defense ( self, sprite: MonsterSprite ):
 		set_falsy(sprite.monster, 'is_defending')
 		return sprite
 
-	def __give_me_sprites ( self ):
-		sprites = self.__get_all_fighters_sprites()
-		sprite = next( (sprite for sprite in sprites if sprite.monster.initiative >= 100), None )
-		return ( sprites, sprite )
+	def __give_me_sprite ( self ):
+		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.initiative >= 100), None )
 
-	def __freeze_all_monsters ( self, sprites: list[MonsterSprite] ): [ sprite.set_paused(True) for sprite in sprites ]
+	def __freeze_all_monsters ( self ): 
+		[ sprite.set_paused(True) for sprite in self.__get_all_fighters_sprites() ]
 
 	def __unfreeze_all_monsters ( self ): 
 		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
@@ -383,7 +385,7 @@ class Battle:
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
-		self.__freeze_all_monsters(self.__get_all_fighters_sprites())
+		self.__freeze_all_monsters()
 		self.timers['delayed death'].start()
 
 	def __get_dead_monster ( self ):
@@ -440,7 +442,20 @@ class Battle:
 		self.switch_list.switched, self.mode = None, None
 		self.__unfreeze_all_monsters()
 
+	def __check_for_end_of_battle ( self ):
+		if len(self.player_battle_sprites.sprites()) == 0: return self.__battle_lost()
+		if len(self.opponent_battle_sprites.sprites()) == 0: return self.__battle_won()
+
+	def __battle_won ( self ):
+		set_truthy(self, 'victory')
+		self.__reset_player_initiative()
+
+	def __battle_lost ( self ):
+		set_truthy(self, 'defeat')
+		# quit_game()
+
 	def update ( self, dt: float ):
+		self.__check_for_end_of_battle()
 		self.__input()
 		self.__update_timers()
 		self.__check_death()
