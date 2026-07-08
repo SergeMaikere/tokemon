@@ -1,5 +1,4 @@
 from functools import partial
-from os import kill
 from os.path import join
 from random import choice
 from typing import Literal
@@ -8,7 +7,6 @@ from pygame import Font
 from assets.data.game_data import ATTACK_DATA
 from gameobj.AttackAnimation import AttackAnimation
 from gameobj.AttackList import AttackList
-from gameobj.MyList import MyList
 from gameobj.SwitchList import SwitchList
 from gameobj.TimedSprite import TimedSprite
 from settings import *
@@ -18,7 +16,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, kill_sprite, quit_game, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
+from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -81,13 +79,10 @@ class Battle:
 		self.__initiate_battle()
 
 
-	def __update_timers ( self ):
-		for timer in self.timers.values(): timer.update()
 
-	def __get_all_fighters_sprites ( self ): return self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
-
-	def __get_group_size ( self, entity: Trainers ): 
-		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )
+	
+	
+	# DISPLAY MONSTERS
 
 	def __initiate_battle ( self ):
 		for entity, monsters in self.monsters.items():
@@ -101,6 +96,9 @@ class Battle:
 					lambda pos: self.__creates_battle_sprites(pos, entity, monster)
 				)( i )
 
+	def __get_position ( self, i: int, entity: Trainers ):
+		return { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
+
 	def __creates_battle_sprites ( self, pos: Point, entity: Trainers, monster: Monster ):
 		compose(
 			partial(self.__create_monster_sprite, pos, entity),
@@ -109,9 +107,6 @@ class Battle:
 			self.__display_monster_name,
 			self.__display_monster_level,
 		)( monster )
-
-	def __get_position ( self, i: int, entity: Trainers ):
-		return { k: v for k, v in enumerate(BATTLE_POSITIONS['left' if entity == 'player' else 'right'].values()) }[i]
 
 	def __create_monster_sprite ( self, pos: Point, entity: Trainers, monster: Monster ):
 		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__handle_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
@@ -140,6 +135,11 @@ class Battle:
 	def __draw_battle_ground ( self ):
 		self.canvas.blit(self.battle_ground_surface, self.battle_ground_rect)
 
+	
+
+	
+	# INITIATIVE
+
 	def __get_initiative ( self ):
 		if self.mode: return
 
@@ -163,23 +163,6 @@ class Battle:
 	def __give_me_sprite ( self ):
 		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.initiative >= 100), None )
 
-	def __freeze_all_monsters ( self ): 
-		[ sprite.set_paused(True) for sprite in self.__get_all_fighters_sprites() ]
-
-	def __unfreeze_all_monsters ( self ): 
-		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
-
-	def __reset_indexes ( self ): 
-		self.indexes = { k: 0 for k in self.indexes.keys() }
-
-	def __reset_variables_to_none ( self, names: list[str] ):
-		for name in names: setattr(self, name, None)
-
-	def __resume_battle ( self ):
-		self.__reset_indexes()
-		self.__unfreeze_all_monsters()
-		self.__reset_variables_to_none(self.variables_none)
-
 	def __update_datas ( self, sprite: MonsterSprite ): 
 		sprite.monster.initiative = 0
 		self.mode = 'general'
@@ -192,12 +175,17 @@ class Battle:
 		if self.target == 'opponent': return
 		self.__target_player_monster(sprite)
 		start_timer(self.timers['delayed attack'])
-
+	
 	def __target_player_monster ( self, sprite: MonsterSprite ):
 		self.target = 'player'
 		self.targeted_monster = choice(self.player_battle_sprites.sprites())
 		self.attack = choice(sprite.monster.get_abilities(False))
 		return sprite
+
+	
+
+	
+	# DISPLAY MENUS
 
 	def __display_menus ( self ):
 		if self.target == 'player': return
@@ -247,6 +235,13 @@ class Battle:
 
 	def __is_selected ( self, i: int ): return i == self.indexes[required(self.mode)]
 
+	
+
+
+	
+	# INPUT
+
+	# Input navigation
 	def __input ( self ):
 		if not self.current_monster or not self.mode: return
 		keys = pygame.key.get_just_pressed()
@@ -270,14 +265,6 @@ class Battle:
 			case 'target': return self.__get_group_size(required(self.target))
 			case _: return 0
 
-	def __action_input ( self ):
-		match self.mode:
-			case 'general': return self.__general_selector()
-			case 'attack': return self.__attack_selector()
-			case 'target': return self.__target_selector()
-			case 'switch': return self.__switch_selector()
-			case _: return
-
 	def __back_input ( self ):
 		match self.mode:
 			case 'switch': self.mode = 'general'
@@ -293,6 +280,16 @@ class Battle:
 			self.mode = 'attack'
 			self.catch = False
 
+	
+	
+	# Input selection
+	def __action_input ( self ):
+		match self.mode:
+			case 'general': return self.__general_selector()
+			case 'attack': return self.__attack_selector()
+			case 'target': return self.__target_selector()
+			case 'switch': return self.__switch_selector()
+			case _: return
 
 	def __general_selector ( self ):
 		match self.indexes['general']:
@@ -374,13 +371,26 @@ class Battle:
 	def __switch_selector ( self ): 
 		if not self.switch_list: return
 		self.switch_list.select()
+		self.__check_for_switch()
 		self.__reset_indexes()
+
+	def __check_for_switch ( self ):
+		if not self.switch_list or not self.switch_list.switched: return
+		for sprite in self.player_battle_sprites.sprites(): sprite.kill()
+		self.monsters['player'] = self.MM.get_monster_list()
+		self.__draw_trainer_monsters('player', self.monsters['player'])
+		self.switch_list.switched, self.mode = None, None
+		self.__unfreeze_all_monsters()
 		
 	def __select_target ( self ):
 		if self.mode != 'target' or not self.target: return
 		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
 		self.targeted_monster = sprites.sprites()[self.indexes['target']]
 
+
+	
+	# MONSTER DEATH
+	
 	def __check_death ( self ):
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
@@ -434,13 +444,9 @@ class Battle:
 	def __get_next_opponent_monster ( self ):
 		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
 
-	def __check_for_switch ( self ):
-		if not self.switch_list or not self.switch_list.switched: return
-		for sprite in self.player_battle_sprites.sprites(): sprite.kill()
-		self.monsters['player'] = self.MM.get_monster_list()
-		self.__draw_trainer_monsters('player', self.monsters['player'])
-		self.switch_list.switched, self.mode = None, None
-		self.__unfreeze_all_monsters()
+	
+
+	# END OF BATTLE
 
 	def __check_for_end_of_battle ( self ):
 		if len(self.player_battle_sprites.sprites()) == 0: return self.__battle_lost()
@@ -454,14 +460,47 @@ class Battle:
 		set_truthy(self, 'defeat')
 		# quit_game()
 
+
+	
+	# UTILS
+
+	def __freeze_all_monsters ( self ): 
+		[ sprite.set_paused(True) for sprite in self.__get_all_fighters_sprites() ]
+
+	def __unfreeze_all_monsters ( self ): 
+		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
+
+	def __reset_indexes ( self ): 
+		self.indexes = { k: 0 for k in self.indexes.keys() }
+
+	def __reset_variables_to_none ( self, names: list[str] ):
+		for name in names: setattr(self, name, None)
+
+	def __resume_battle ( self ):
+		self.__reset_indexes()
+		self.__unfreeze_all_monsters()
+		self.__reset_variables_to_none(self.variables_none)
+
+	def __update_timers ( self ):
+		for timer in self.timers.values(): timer.update()
+
+	def __get_all_fighters_sprites ( self ): return self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+
+	def __get_group_size ( self, entity: Trainers ): 
+		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )
+
+	
+
+	
+	# UPDATE
+
 	def update ( self, dt: float ):
-		self.__check_for_end_of_battle()
-		self.__input()
 		self.__update_timers()
+		self.__check_for_end_of_battle()
 		self.__check_death()
 		self.__draw_battle_ground()
-		self.__check_for_switch()
 		self.__get_initiative()
+		self.__input()
 		self.__select_target()
 		self.__update_battle_sprites(dt)
 		self.__display_menus()
