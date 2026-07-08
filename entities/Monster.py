@@ -1,5 +1,9 @@
 from random import randint
+
+from settings import *
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
+from utils.Types import Attacks
+from utils.Helper import between, min_number
 
 class Monster:
 	def __init__( self, name: str, level: int ) -> None:
@@ -13,9 +17,20 @@ class Monster:
 		self.level_up = self.level * 150
 		self.initiative = 0
 
-		self.health = max(0, self.get_stat('max_health') - randint(10, 100))
-		self.energy = max(0, self.get_stat('max_energy') - randint(10, 100))
+		self._health = max(0, self.get_stat('max_health'))
+		self._energy = max(0, self.get_stat('max_energy'))
 
+		self.is_defending = False
+
+	@property
+	def health ( self ): return min_number(0, self._health)
+	@health.setter
+	def health ( self, v: float ): self._health = v
+
+	@property
+	def energy ( self ): return min_number(0, self._energy)
+	@energy.setter
+	def energy ( self, v: float ): self._energy = v
 
 	def get_stat ( self, stat: str ): return self.base_stats[stat] * self.level
 
@@ -29,9 +44,19 @@ class Monster:
 			( self.initiative, 100 )
 		)
 
-	def get_abilities ( self, all_of_them: bool = True ):
+	def get_attack_amount ( self, attack: Attacks ):
+		return self.get_stat('attack') * ATTACK_DATA[attack]['amount']
+			
+	def get_abilities ( self, all_of_them: bool = True ) -> list[Attacks]:
 		if all_of_them: return [ ability for level, ability in self.abilities.items() if self.level >= level ]
 		return [ ability for level, ability in self.abilities.items() if self.level >= level and self.energy > ATTACK_DATA[ability]['cost'] ]
 
 	def increment_initiative ( self, dt: float ):
 		self.initiative += self.get_stat('speed') * dt
+
+	def take_damage ( self, amount: float ):
+		defense = between(0, 1, 1 - self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0)
+		self.health -= amount * defense
+
+	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
+		

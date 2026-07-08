@@ -5,16 +5,14 @@ from settings import *
 from utils.Helper import add_color_to_surface, display_item, get_progress_bar, get_rect, get_text_surface, compose
 from utils.MyGroup import MyGroup
 from gameobj.MonsterSprite import MonsterSprite
+from gameobj.MonsterInfoSprite import MonsterInfoSprite
 
-class MonsterStatsSprite ( pygame.sprite.Sprite ):
+class MonsterStatsSprite ( MonsterInfoSprite ):
 
 	def __init__( self, monster_sprite: MonsterSprite, font: Font, *groups: MyGroup ) -> None:
-		super().__init__(*groups)
+		super().__init__(monster_sprite, font, *groups)
 		self.z = BATTLE_LAYERS['overlay']
-		self.font = font
 		self.monster_rect = monster_sprite.rect
-		self.monster = monster_sprite.monster
-
 		self.progress_bars_colors = ( (COLORS['red'], COLORS['black']), (COLORS['blue'], COLORS['black']), (COLORS['black'], COLORS['white']) )
 
 		self.image: Surface = pygame.Surface((150, 48))
@@ -41,6 +39,7 @@ class MonsterStatsSprite ( pygame.sprite.Sprite ):
 		get_progress_bar(self.image, initiative_rect, colors[1], colors[0], int(value), int(max_value), 0)
 
 	def update ( self, _ ):
+		self.die_with_monster()
 		add_color_to_surface(self.image)	
 
 		for i, (value, max_value) in enumerate(self.monster.get_battle_infos()):

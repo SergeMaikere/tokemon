@@ -81,6 +81,5 @@ class MyList:
 				self._blit_text
 			)(i)
 
-
 	def update ( self ):
 		self._draw_list()

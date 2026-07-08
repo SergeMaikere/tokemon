@@ -25,7 +25,9 @@ Trainers = Literal['player', 'opponent']
 
 Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
 
-BatlleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
+BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
+
+Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
 
 class Size ( TypedDict ):

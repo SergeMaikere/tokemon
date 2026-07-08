@@ -7,12 +7,13 @@ from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.BattleSprites import BattleSprites
+from utils.GameOverManager import GameOverManager
 from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, set_truthy
 from utils.Types import FontTypes
 
 class Game:
@@ -42,8 +43,10 @@ class Game:
 		self.player = self.get_player(map_loader('world'), 'house')
 
 		self.monster_manager = MonsterManager()
+
+		self.game_over_manager = GameOverManager()
 		
-		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.ui_images, self.game_over_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -53,6 +56,7 @@ class Game:
 
 		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts, self.ui_images)
 
+		self.is_game_over = False
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
@@ -61,9 +65,6 @@ class Game:
 		else:
 			raise ValueError('Player datas are missing from tmx map')
 
-	def __quit_game ( self ):
-		pygame.quit()
-		exit()
 
 	def run ( self ):
 		
@@ -75,18 +76,22 @@ class Game:
 			self.canvas.fill((0, 0, 0, 0))
 
 			for event in pygame.event.get():
-				if event.type == pygame.QUIT: self.__quit_game()
+				if event.type == pygame.QUIT: quit_game()
+
+			self.game_over_manager.update()
 			
-			self.all_sprites.update(dt)
+			if not self.game_over_manager.is_game_over:
 
-			self.dialog_manager.update()
+				self.all_sprites.update(dt)
 
-			self.all_sprites.draw(self.player)
+				self.all_sprites.draw(self.player)
 
-			self.battle_manager.update(dt)
+				self.dialog_manager.update()
 
-			self.monster_index.update(dt)
-			
+				self.battle_manager.update(dt)
+
+				self.monster_index.update(dt)
+				
 			self.transition_manager.handle_transitions(dt)
 
 			pygame.display.update( )

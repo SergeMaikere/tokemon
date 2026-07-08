@@ -6,7 +6,7 @@ from entities.Monster import Monster
 from gameobj.MyList import MyList
 from utils.MonsterManager import MonsterManager
 from utils.Types import Colors
-from utils.Helper import compose, display_item, get_progress_bar, get_rect, get_text_surface
+from utils.Helper import compose, display_item, get_progress_bar, get_rect, get_text_surface, required
 
 colors: Colors = {
 	'bg': COLORS['white'],
@@ -17,10 +17,11 @@ colors: Colors = {
 
 class SwitchList ( MyList ):
 	def __init__(self, monster_manager: MonsterManager, font: Font, pos: Point, get_index: Callable, colors: Colors = colors ) -> None:
-		super().__init__([monster for monster in monster_manager.monsters.values()], {'width': 300, 'height': 350}, 4, font, pos, get_index, colors)
+		super().__init__(monster_manager.get_monster_list(), {'width': 300, 'height': 350}, 4, font, pos, get_index, colors)
 
 		self.MM = monster_manager
 		self.bg_padding = 90
+		self.selected_index, self.switched = None, None
 
 
 	def _set_icon ( self, monster: Monster, card_rect: FRect ):
@@ -65,3 +66,24 @@ class SwitchList ( MyList ):
 				lambda card_rect: self.__set_health_progress_bar(monster, card_rect),
 				lambda card_rect: self.__set_energy_progress_bar(monster, card_rect)
 			)(i)
+
+	def __select_item ( self ): self.selected_index = self.get_index()
+
+	def __swith_item_with_selected ( self ):
+		if self.selected_index == self.get_index(): return
+		i = required(self.selected_index)
+		
+		selected_item = self.MM.monsters[i]
+		current_item = self.MM.monsters[self.get_index()]
+		
+		self.MM.monsters[self.get_index()] = selected_item
+		self.MM.monsters[i] = current_item
+		
+		self.selected_index = None
+		self.switched = True
+
+	def select ( self ):
+		if self.selected_index is None:
+			self.__select_item()
+		else:
+			self.__swith_item_with_selected()

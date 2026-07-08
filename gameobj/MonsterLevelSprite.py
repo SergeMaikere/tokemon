@@ -1,21 +1,17 @@
 from pygame.font import Font
 
 from settings import *
-from entities.Monster import Monster
+from gameobj.MonsterInfoSprite import MonsterInfoSprite
+from gameobj.MonsterSprite import MonsterSprite
 from utils.MyGroup import MyGroup
-from utils.Types import Trainers
 from utils.Helper import add_color_to_surface, add_text_to_card, get_progress_bar, get_rect, get_text_surface, compose
 
 
-class MonsterLevelSprite ( pygame.sprite.Sprite ):
+class MonsterLevelSprite ( MonsterInfoSprite ):
 
-	def __init__( self, entity: Trainers, monster: Monster, name_rect: FRect, font: Font, *groups: MyGroup  ) -> None:
-		super().__init__(*groups)
-		self.z = BATTLE_LAYERS['name']
+	def __init__(self, monster_sprite: MonsterSprite, name_rect: FRect, font: Font, *groups: MyGroup) -> None:
+		super().__init__(monster_sprite, font, *groups)
 
-		self.entity = entity
-		self.monster = monster
-		self.font = font
 		self.name_rect = name_rect
 
 		self.card_surface = pygame.Surface((60, 26))
@@ -39,6 +35,7 @@ class MonsterLevelSprite ( pygame.sprite.Sprite ):
 		get_progress_bar(self.image, self.xp_bar_rect, COLORS['white'], COLORS['black'], self.monster.xp, self.monster.level_up)
 
 	def update ( self, _ ):
+		self.die_with_monster()
 		self.image = self.__add_text()
 		self.__display_xp_bar()
 	
