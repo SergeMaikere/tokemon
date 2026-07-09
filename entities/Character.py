@@ -19,6 +19,7 @@ class Character ( Entity ):
 			datas: dict, 
 			radius: int, 
 			dialog_manager: DialogManager,
+			nurse: bool,
 			*groups: MyGroup
 		) -> None:
 
@@ -29,6 +30,7 @@ class Character ( Entity ):
 		self.datas = datas
 		self.radius = radius
 		self.dialog_manager = dialog_manager
+		self.nurse = nurse
 
 		self.collision_rects = self.__get_collisions_rects(groups)
 		
@@ -57,13 +59,12 @@ class Character ( Entity ):
 	def __is_still_talking ( self ): return bool(self.dialog_manager.current_dialog)
 	
 	def __raycast ( self ):
-		if self.has_noticed_player or not is_dialog_possible(self, self.player, self.radius) or self.__is_still_talking() or not self.__has_line_of_sight(): return
+		if self.datas['defeated'] or not is_dialog_possible(self, self.player, self.radius) or self.__is_still_talking() or not self.__has_line_of_sight(): return
 		self.__notice_player()
 		self.__player_stop_and_turn()
 		self.__go_to_player()
 		self.__stop_at_player()
 		self.__create_dialog()
-		self.__remember_player()
 
 	def __has_line_of_sight ( self ):
 		if not self.__is_player_in_range(): return
@@ -95,10 +96,6 @@ class Character ( Entity ):
 	def __create_dialog ( self ):
 		if self.is_mobile or self.noticed_timer.running: return
 		self.dialog_manager._create_dialog(self)
-
-	def __remember_player ( self ):
-		if self.is_mobile or self.noticed_timer.running: return
-		self.has_noticed_player = True
 
 	def update ( self, dt: float ):
 		if self.is_mobile:

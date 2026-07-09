@@ -82,6 +82,7 @@ class MapsLoader:
 				TRAINER_DATA[obj.character_id],
 				int(obj.radius), 
 				self.dialog_manager,
+				obj.character_id == 'Nurse',
 				self.collision_sprites, self.all_characters, self.all_sprites
 			)
 		return obj

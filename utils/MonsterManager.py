@@ -48,3 +48,7 @@ class MonsterManager :
 	def remove_monster ( self, sprite: MonsterSprite ):
 		self.monsters = { i: m for i, m in self.monsters.items() if m != sprite.monster }
 		return sprite
+
+	def heal_player_monsters ( self ):
+		for monster in self.monsters.values():
+			monster.health = monster.get_stat('max_health')
