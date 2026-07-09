@@ -6,7 +6,7 @@ from entities.Player import Player
 from gameobj.Battle import Battle
 from utils.MonsterManager import MonsterManager
 from utils.GameOverManager import GameOverManager
-from utils.Helper import images_loader_dict, set_truthy
+from utils.Helper import images_loader_dict, set_none, set_truthy
 from utils.MyGroup import MyGroup
 from utils.Types import FontTypes
 
@@ -36,16 +36,18 @@ class BattleManager:
 	def battle_trainer ( self, character: Entity ):
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.MM, self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
+		return self.battle
 
 	def __handle_victory ( self ):
 		if self.character:
 			self.character.datas['defeated'] = True
-			self.character = None
-		self.battle = None
+			set_none(self, 'character')
+		set_none(self, 'battle')
 
 	def __handle_defeat ( self ):
 		set_truthy(self.GO, 'is_game_over')
-		self.battle = None
+		set_none(self, 'battle')
+		del self.battle
 
 	def update ( self, dt: float ):
 		if not self.battle: return

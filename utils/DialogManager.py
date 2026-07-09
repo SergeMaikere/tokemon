@@ -9,7 +9,7 @@ from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
 from utils.MyGroup import MyGroup
-from utils.Helper import compose
+from utils.Helper import compose, set_falsy, set_none, set_truthy
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
@@ -23,11 +23,10 @@ class DialogManager:
 
 		self.timer = Timer(500)
 		self.current_dialog = None
-		self.in_battle = False
 		
 
 	def input ( self ):
-		if self.in_battle: return
+		if self.BM.battle: return
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
 			if self.current_dialog:
@@ -81,9 +80,10 @@ class DialogManager:
 		del dialog
 
 	def __start_battle ( self, character: Entity ):
-			self.in_battle = True
-			self.current_dialog = None
-			self.BM.battle_trainer(character)
+		if character.datas['defeated']: return
+		set_truthy(self, 'in_battle')
+		set_none(self, 'current_dialog')
+		self.battle = self.BM.battle_trainer(character)
 
 	def update ( self ):
 		if not self.timer.running: return self.input()

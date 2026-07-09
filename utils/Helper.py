@@ -43,6 +43,10 @@ def set_falsy ( obj: Any, name: str ):
 	setattr(obj, name, False)
 	return obj
 
+def set_none ( obj: Any, name: str ):
+	setattr(obj, name, None)
+	return obj
+
 def kill_sprite ( sprite: Sprite ):
 	sprite.kill()
 	return sprite
