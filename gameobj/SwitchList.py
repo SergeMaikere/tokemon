@@ -4,7 +4,7 @@ from pygame import Font
 from settings import *
 from entities.Monster import Monster
 from gameobj.MyList import MyList
-from utils.MonsterManager import MonsterManager
+from utils.MonsterManager import MonsterManager as MM
 from utils.Types import Colors
 from utils.Helper import compose, display_item, get_progress_bar, get_rect, get_text_surface, required
 
@@ -16,10 +16,9 @@ colors: Colors = {
 }
 
 class SwitchList ( MyList ):
-	def __init__(self, monster_manager: MonsterManager, font: Font, pos: Point, get_index: Callable, colors: Colors = colors ) -> None:
-		super().__init__(monster_manager.get_monster_list(), {'width': 300, 'height': 350}, 4, font, pos, get_index, colors)
+	def __init__(self, font: Font, pos: Point, get_index: Callable, colors: Colors = colors ) -> None:
+		super().__init__(MM.get_monster_list(), {'width': 300, 'height': 350}, 4, font, pos, get_index, colors)
 
-		self.MM = monster_manager
 		self.bg_padding = 90
 		self.selected_index, self.switched = None, None
 
@@ -29,7 +28,7 @@ class SwitchList ( MyList ):
 		compose( 
 			lambda surface: get_rect(surface, midleft=card_rect.midleft + vector2(10, 0)),
 			lambda datas: display_item(self.canvas, datas) 
-		)( self.MM.monsters_icons[monster.name] )	
+		)( MM.get('monsters_icons')[monster.name] )	
 		return card_rect	
 
 
@@ -56,7 +55,7 @@ class SwitchList ( MyList ):
 	def _draw_list ( self ):
 		self._draw_main_rect()
 
-		for i, monster in self.MM.monsters.items():
+		for i, monster in MM.get('monsters').items():
 			compose(	
 				self._get_card_rect,
 				self._is_card_visible,
@@ -73,11 +72,11 @@ class SwitchList ( MyList ):
 		if self.selected_index == self.get_index(): return
 		i = required(self.selected_index)
 		
-		selected_item = self.MM.monsters[i]
-		current_item = self.MM.monsters[self.get_index()]
+		selected_item = MM.get('monsters')[i]
+		current_item = MM.get('monsters')[self.get_index()]
 		
-		self.MM.monsters[self.get_index()] = selected_item
-		self.MM.monsters[i] = current_item
+		MM.get('monsters')[self.get_index()] = selected_item
+		MM.get('monsters')[i] = current_item
 		
 		self.selected_index = None
 		self.switched = True

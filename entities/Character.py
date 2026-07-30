@@ -4,6 +4,7 @@ from pygame import Vector2
 from entities.Player import Player
 from entities.Entity import Entity
 from utils.DialogManager import DialogManager
+from utils.Helper import set_truthy
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import States
@@ -19,6 +20,7 @@ class Character ( Entity ):
 			datas: dict, 
 			radius: int, 
 			dialog_manager: DialogManager,
+			nurse: bool,
 			*groups: MyGroup
 		) -> None:
 
@@ -29,6 +31,7 @@ class Character ( Entity ):
 		self.datas = datas
 		self.radius = radius
 		self.dialog_manager = dialog_manager
+		self.nurse = nurse
 
 		self.collision_rects = self.__get_collisions_rects(groups)
 		
@@ -98,7 +101,7 @@ class Character ( Entity ):
 
 	def __remember_player ( self ):
 		if self.is_mobile or self.noticed_timer.running: return
-		self.has_noticed_player = True
+		set_truthy(self, 'has_noticed_player')
 
 	def update ( self, dt: float ):
 		if self.is_mobile:

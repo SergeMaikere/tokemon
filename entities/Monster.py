@@ -18,6 +18,7 @@ class Monster:
 		self.initiative = 0
 
 		self._health = max(0, self.get_stat('max_health'))
+		# self._health = randint(0, self.get_stat('max_health'))
 		self._energy = max(0, self.get_stat('max_energy'))
 
 		self.is_defending = False

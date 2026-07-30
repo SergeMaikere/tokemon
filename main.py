@@ -42,19 +42,19 @@ class Game:
 	
 		self.player = self.get_player(map_loader('world'), 'house')
 
-		self.monster_manager = MonsterManager()
+		MonsterManager.init()
 
 		self.game_over_manager = GameOverManager()
 		
-		self.battle_manager = BattleManager(self.player, self.monster_manager, self.fonts, self.ui_images, self.game_over_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
 
-		self.transition_manager = MapTransition(self.player, self.maps_loader, self.get_player)
+		self.transition_manager = MapTransition(self.player, self.maps_loader.transition_setup, self.get_player, self.transition_sprites)
 
-		self.monster_index = MonsterIndex(self.player, self.monster_manager, self.fonts, self.ui_images)
+		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
 		self.is_game_over = False
 
@@ -92,7 +92,7 @@ class Game:
 
 				self.monster_index.update(dt)
 				
-			self.transition_manager.handle_transitions(dt)
+			self.transition_manager.handle_map_transitions(dt)
 
 			pygame.display.update( )
 

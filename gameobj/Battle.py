@@ -17,15 +17,14 @@ from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
-from utils.MonsterManager import MonsterManager
+from utils.MonsterManager import MonsterManager as MM
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import Elements, FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
 
 class Battle:
-	def __init__( self, battle_ground: Surface, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
+	def __init__( self, battle_ground: Surface, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface], opponent_monsters: dict[int, tuple[MonsterNames, int]], *groups: MyGroup ) -> None:
 		
-		self.MM = monster_manager
 		self.fonts = fonts
 		self.ui_images = ui_images
 		self.battle_ground_surface = battle_ground
@@ -38,8 +37,8 @@ class Battle:
 		self.canvas = required(pygame.display.get_surface())
 
 		self.monsters: dict[Trainers, list[Monster]] = { 
-			'player': self.MM.get_player_battle_monsters(), 
-			'opponent': self.MM.get_opponent_battle_monsters(opponent_monsters) 
+			'player': MM.get_player_battle_monsters(), 
+			'opponent': MM.get_opponent_battle_monsters(opponent_monsters) 
 		}
 
 		self.attack_frames = compose(
@@ -109,7 +108,7 @@ class Battle:
 		)( monster )
 
 	def __create_monster_sprite ( self, pos: Point, entity: Trainers, monster: Monster ):
-		return MonsterSprite(monster, entity, self.MM.monster_frames[monster.name], self.MM.monster_frames_outlines[monster.name], pos, self.__handle_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
+		return MonsterSprite(monster, entity, MM.get('monster_frames')[monster.name], MM.get('monster_frames_outlines')[monster.name], pos, self.__handle_attack, self.battle_sprites, self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites)
 
 	def __create_monster_outline ( self, sprite: MonsterSprite ):
 		MonsterSpriteOutline(sprite, self.battle_sprites)
@@ -220,7 +219,6 @@ class Battle:
 			self.switch_list.update()
 		else:
 			self.switch_list = SwitchList(
-				monster_manager=self.MM,
 				font=self.fonts['regular'],
 				pos=required(self.current_monster).rect.midright,
 				get_index=lambda: self.indexes['switch']
@@ -261,7 +259,7 @@ class Battle:
 		match self.mode:
 			case 'general': return len(BATTLE_CHOICES['full'])
 			case 'attack': return len(required(self.current_monster).monster.get_abilities())
-			case 'switch': return len(self.MM.monsters)
+			case 'switch': return len(MM.get('monsters'))
 			case 'target': return self.__get_group_size(required(self.target))
 			case _: return 0
 
@@ -377,7 +375,7 @@ class Battle:
 	def __check_for_switch ( self ):
 		if not self.switch_list or not self.switch_list.switched: return
 		for sprite in self.player_battle_sprites.sprites(): sprite.kill()
-		self.monsters['player'] = self.MM.get_monster_list()
+		self.monsters['player'] = MM.get_monster_list()
 		self.__draw_trainer_monsters('player', self.monsters['player'])
 		self.switch_list.switched, self.mode = None, None
 		self.__unfreeze_all_monsters()
@@ -420,7 +418,7 @@ class Battle:
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
 		return compose( 
 			lambda dying: self.__remove_monster(dying, 'player'), 
-			lambda dying: self.MM.remove_monster(dying),
+			lambda dying: MM.remove_monster(dying),
 			lambda dying: kill_sprite(dying)
 		)( dying )
 		
@@ -435,7 +433,7 @@ class Battle:
 		return dying
 
 	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
-		self.MM.monsters[ next(reversed(self.MM.monsters)) + 1 ] = monster_sprite.monster
+		MM.get('monsters')[ next(reversed(MM.get('monsters'))) + 1 ] = monster_sprite.monster
 		if self.__get_group_size('player') < self.max_fighting_monsters:
 			pos = { i: pos for i, pos in enumerate(BATTLE_POSITIONS['left'].values()) }[len(self.player_battle_sprites.sprites())]
 			self.__creates_battle_sprites(pos, 'player', monster_sprite.monster)
