@@ -4,7 +4,7 @@ from functools import partial
 from gameobj.Dialog import Dialog
 from entities.Entity import Entity
 from entities.Player import Player
-from utils.MonsterManager import MonsterManager
+from utils.MonsterManager import MonsterManager as MM
 from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
@@ -13,11 +13,10 @@ from utils.Helper import compose, set_falsy, set_none, set_truthy
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
-	def __init__ ( self, player: Player, characters: MyGroup, monster_manager: MonsterManager, battle_manager: BattleManager, all_sprites: AllSprites ):
+	def __init__ ( self, player: Player, characters: MyGroup, battle_manager: BattleManager, all_sprites: AllSprites ):
 
 		self.player = player
 		self.characters = characters
-		self.MM = monster_manager
 		self.BM = battle_manager
 		self.all_sprites = all_sprites
 
@@ -73,7 +72,7 @@ class DialogManager:
 
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
 		if character.nurse:
-			self.MM.heal_player_monsters()
+			MM.heal_player_monsters()
 		else:
 			self.__start_battle(character)
 		self.player.unblock()
@@ -83,7 +82,7 @@ class DialogManager:
 		if character.datas['defeated']: return
 		set_truthy(self, 'in_battle')
 		set_none(self, 'current_dialog')
-		self.battle = self.BM.battle_trainer(character)
+		self.BM.battle_trainer(character)
 
 	def update ( self ):
 		if not self.timer.running: return self.input()

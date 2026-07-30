@@ -9,15 +9,14 @@ from entities.Monster import Monster
 from entities.Player import Player
 from gameobj.SideList import SideList
 from utils.Helper import get_progress_bar, required, compose
-from utils.MonsterManager import MonsterManager
+from utils.MonsterManager import MonsterManager as MM
 from utils.Types import Attacks, FontTypes
 
 class MonsterIndex:
-	def __init__( self, player: Player, monster_manager: MonsterManager, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface] ) -> None:
+	def __init__( self, player: Player, fonts: dict[FontTypes, Font], ui_images: dict[str, Surface] ) -> None:
 		
 		self.player = player
 		self.fonts = fonts
-		self.MM = monster_manager
 
 		self.ui_images = ui_images
 
@@ -26,7 +25,7 @@ class MonsterIndex:
 
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
-		self.side_list = SideList(self.MM, self.fonts['regular'], self.main_rect, 6, self.MM.monsters_icons)
+		self.side_list = SideList( self.fonts['regular'], self.main_rect, 6, MM.get('monsters_icons'))
 
 		self.top_rect = pygame.FRect(self.main_rect.left + self.side_list.card_width, self.main_rect.top, self.main_rect.width - self.side_list.card_width, self.main_rect.height * 0.4)
 
@@ -66,7 +65,7 @@ class MonsterIndex:
 		if not self.open: return
 		if keys[pygame.K_UP]: self.side_list.index -= 1
 		if keys[pygame.K_DOWN]: self.side_list.index += 1
-		self.side_list.index = self.side_list.index % len(self.MM.monsters)
+		self.side_list.index = self.side_list.index % len(MM.get('monsters'))
 
 	def __select ( self, keys: ScancodeWrapper ):
 		if not self.open: return
@@ -93,7 +92,7 @@ class MonsterIndex:
 		return monster
 
 	def __get_monster_frames (self, dt: float, monster: Monster ):
-		frames = self.MM.monster_frames[monster.name]['idle']
+		frames = MM.get('monster_frames')[monster.name]['idle']
 		self.animation_index += ANIMATION_SPEED * dt
 		return frames[int(self.animation_index) % len(frames)]
 
@@ -181,7 +180,7 @@ class MonsterIndex:
 				bg_color=COLORS['black'],
 				color=COLORS['white'],
 				value=value,
-				value_max=self.MM.monsters_max_stats[stat] * monster.level,
+				value_max=MM.get('monsters_max_stats')[stat] * monster.level,
 			)
 			
 			self.__set_icon(stat, midleft=stat_rect.topleft + vector2(-30, 0))
@@ -216,7 +215,7 @@ class MonsterIndex:
 
 	def __draw_ability_card ( self, ability: Attacks, datas: tuple[Surface, FRect] ):
 		surface, rect = datas
-		pygame.draw.rect(self.canvas, COLORS[self.MM.get_attack_data(ability, 'element')], rect.inflate(10, 10), 0, 4 )
+		pygame.draw.rect(self.canvas, COLORS[MM.get_attack_data(ability, 'element')], rect.inflate(10, 10), 0, 4 )
 		self.canvas.blit(surface, rect)
 		return  datas
 
@@ -231,7 +230,7 @@ class MonsterIndex:
 			self.__display_progress_bars,
 			self.__display_stats,
 			self.__display_abilities,
-		)(self.MM.monsters[self.side_list.index])
+		)(MM.get('monsters')[self.side_list.index])
 
 		self.__draw_side_list_shadow()
 

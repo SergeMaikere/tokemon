@@ -109,7 +109,7 @@ class MapsLoader:
 			partial(self.__get_layer, 'Entities', self.__set_character),
 		)(tmx_map)
 
-	def transition_setup( self, tmx_map: TiledMap, player_spawn_pos: str ):
+	def transition_setup( self, target: str, player_spawn_pos: str ):
 		self.__kill_all_sprites()
 		return compose(
 			partial(self.__set_terrain, 'Terrain'),
@@ -121,4 +121,4 @@ class MapsLoader:
 			partial(self.__get_layer, 'Monsters', self.__set_monster_patch),
 			partial(self.__get_layer, 'Coast', self.__set_coasts),
 			partial(self.__get_layer, 'Entities', partial(self.__set_entities, player_spawn_pos)),
-		)(tmx_map)
+		)(self.maps[target])

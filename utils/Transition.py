@@ -9,7 +9,7 @@ from utils.MyGroup import MyGroup
 from utils.Types import TransitionState
 
 
-class MapTransition:
+class Transition:
 	def __init__(self, player: Player, transition_setup: Callable, get_player: Callable, transition_sprites: MyGroup) -> None:
 		
 		self.player = player

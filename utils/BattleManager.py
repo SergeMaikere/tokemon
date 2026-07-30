@@ -4,7 +4,6 @@ from pygame import Font
 from entities.Entity import Entity
 from entities.Player import Player
 from gameobj.Battle import Battle
-from utils.MonsterManager import MonsterManager
 from utils.GameOverManager import GameOverManager
 from utils.Helper import images_loader_dict, set_none, set_truthy
 from utils.MyGroup import MyGroup
@@ -14,16 +13,13 @@ class BattleManager:
 	def __init__( 
 			self, 
 			player: Player, 
-			monster_manager: MonsterManager, 
 			fonts: dict[FontTypes, Font], 
 			ui_images: dict[str, Surface], 
-			game_over_manager: GameOverManager,
 			*groups: MyGroup 
 		) -> None:
 
 		self.player = player
-		self.MM = monster_manager
-		self.GO = game_over_manager
+		self.GO = GameOverManager
 
 		self.fonts = fonts
 		self.ui_images = ui_images
@@ -33,10 +29,9 @@ class BattleManager:
 		self.battle, self.character = None, None
 
 
-	def battle_trainer ( self, character: Entity ):
+	def battle_trainer ( self, character: Entity ):	
 		self.character = character
-		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.MM, self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
-		return self.battle
+		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
 
 	def __handle_victory ( self ):
 		if self.character:

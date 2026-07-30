@@ -2,9 +2,10 @@ from typing import Literal
 
 from settings import *
 from utils.Helper import quit_game, set_truthy
+from utils.Singleton import SingletonMeta
 
 
-class GameOverManager:
+class GameOverManager ( metaclass=SingletonMeta ):
 	def __init__( self ) -> None:
 		self.is_game_over, self.is_saved = False, False
 		self.state: Literal[ 'undecided', 'play_again', 'quit' ] = 'undecided'
