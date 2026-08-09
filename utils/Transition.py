@@ -1,6 +1,7 @@
 from typing import Callable, Literal
 
 from settings import *
+from gameobj.Sprite import Sprite
 from entities.Player import Player
 from utils.Helper import required
 from utils.Timer import Timer
@@ -8,11 +9,10 @@ from utils.Types import TransitionState
 
 
 class Transition:
-	def __init__(self, player: Player, load_new_scene: Callable, get_player: Callable) -> None:
+	def __init__(self, player: Player, load_new_scene: Callable) -> None:
 		
 		self.player = player
 		self.load_new_scene = load_new_scene
-		self.get_player = get_player
 
 		self.canvas = required(pygame.display.get_surface())
 		self.tint = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -25,7 +25,8 @@ class Transition:
 		self.timer = Timer(500, self.__fade_to_light)
 
 
-	def start_scene_transition ( self ):
+	def start_scene_transition ( self, sprite: Sprite ):
+		self.transition_sprite = sprite
 		self.state = 'fade_to_black'
 
 	def __fade_to_black ( self, dt: float ):
@@ -44,10 +45,12 @@ class Transition:
 
 	def __set_state_to_load ( self ): 
 		if self.transparency >= 255: self.state = 'load_scene'
-
+	
 	def __load_new_scene ( self ):
-		self.load_new_scene()
-		self.state = 'fade_to_light'
+		self.load_new_scene(self.transition_sprite)
+		self.transition_sprite = None # reset transition_sprite so it is ready for next map transition
+		self.state = 'fade_to_light' # set next state
+		self.canvas.fill(0) # cleanse the display surface otherwise it shows ghosts of the old map
 
 	def __fade_to_light ( self, dt: float ):
 		self.__set_transparency(dt, -1)

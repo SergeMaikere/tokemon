@@ -45,7 +45,6 @@ class Game:
 
 		MonsterManager.init()
 
-		self.collision_manager = CollisionManager(self.player, self.collision_sprites)
 
 		self.game_over_manager = GameOverManager()
 		
@@ -59,6 +58,8 @@ class Game:
 
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
+		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.collision_sprites, self.transition_sprites)
+		
 		self.is_game_over = False
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
@@ -97,8 +98,6 @@ class Game:
 
 				self.monster_index.update(dt)
 				
-			self.transition_manager.handle_map_transitions(dt)
-
 			pygame.display.update( )
 
 

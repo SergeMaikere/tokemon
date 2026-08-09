@@ -28,14 +28,14 @@ class MapTransition:
 		self.timer = Timer(500, self.__fade_to_light)
 
 
-	def __handle_collisions ( self, transition_sprites: MyGroup ):
-		self.transition_sprite = self.__check_for_collision(transition_sprites)
-		if self.transition_sprite: 
-			self.state = 'fade_to_black'
-			self.player.block()
+	# def __handle_collisions ( self, transition_sprites: MyGroup ):
+	# 	self.transition_sprite = self.__check_for_collision(transition_sprites)
+	# 	if self.transition_sprite: 
+	# 		self.state = 'fade_to_black'
+	# 		self.player.block()
 
-	def __check_for_collision ( self, transition_sprites: MyGroup ):
-		return next( (sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox)), None )
+	# def __check_for_collision ( self, transition_sprites: MyGroup ):
+	# 	return next( (sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox)), None )
 
 	def __fade_to_black ( self, dt: float ):
 		self.__set_transparency(dt, 1)

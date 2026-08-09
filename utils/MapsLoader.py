@@ -109,8 +109,12 @@ class MapsLoader:
 			partial(self.__get_layer, 'Entities', self.__set_character),
 		)(tmx_map)
 
-	def transition_setup( self, target: str, player_spawn_pos: str ):
+	def transition_setup( self, transition_sprite: TransitionSprite ):
 		self.__kill_all_sprites()
+
+		target = transition_sprite.target
+		player_spawn_pos = transition_sprite.player_spawn_pos
+		
 		return compose(
 			partial(self.__set_terrain, 'Terrain'),
 			partial(self.__set_terrain, 'Terrain Top'),
