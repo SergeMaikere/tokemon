@@ -4,38 +4,29 @@ from settings import *
 from entities.Player import Player
 from utils.Helper import required
 from utils.Timer import Timer
-from utils.MapsLoader import MapsLoader
-from utils.MyGroup import MyGroup
 from utils.Types import TransitionState
 
 
 class Transition:
-	def __init__(self, player: Player, transition_setup: Callable, get_player: Callable, transition_sprites: MyGroup) -> None:
+	def __init__(self, player: Player, load_new_scene: Callable, get_player: Callable) -> None:
 		
 		self.player = player
-		self.transition_setup = transition_setup
+		self.load_new_scene = load_new_scene
 		self.get_player = get_player
 
 		self.canvas = required(pygame.display.get_surface())
 		self.tint = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
-		self.transition_sprites = transition_sprites
 		self.transition_sprite = None
 		self.transition_speed = 600
 		self.transparency = 0
 
-		self.state: TransitionState = 'check_collision'
+		self.state: TransitionState = 'standby'
 		self.timer = Timer(500, self.__fade_to_light)
 
 
-	def __handle_collisions ( self, transition_sprites: MyGroup ):
-		self.transition_sprite = self.__check_for_collision(transition_sprites)
-		if self.transition_sprite: 
-			self.state = 'fade_to_black'
-			self.player.block()
-
-	def __check_for_collision ( self, transition_sprites: MyGroup ):
-		return next( (sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox)), None )
+	def start_scene_transition ( self ):
+		self.state = 'fade_to_black'
 
 	def __fade_to_black ( self, dt: float ):
 		self.__set_transparency(dt, 1)
@@ -52,20 +43,11 @@ class Transition:
 	def __draw_new_fade ( self ): self.canvas.blit(self.tint, (0,0))
 
 	def __set_state_to_load ( self ): 
-		if self.transparency >= 255: self.state = 'load_map'
+		if self.transparency >= 255: self.state = 'load_scene'
 
-	def __set_state_to_fade_to_light ( self ):
-		if self.transparency >= 255: self.state = 'fade_to_light'
-
-	def __load_new_map ( self ):
-		if not self.transition_sprite: return
-		self.transition_setup(self.transition_sprite.target, self.transition_sprite.pos)
-		self.__update_datas_after_map_loaded()
-
-	def __update_datas_after_map_loaded ( self ):
-		self.transition_sprite = None # reset transition_sprite so it is ready for next map transition
-		self.state = 'fade_to_light' # set next state
-		self.canvas.fill(0) # cleanse the display surface otherwise it shows ghosts of the old map
+	def __load_new_scene ( self ):
+		self.load_new_scene()
+		self.state = 'fade_to_light'
 
 	def __fade_to_light ( self, dt: float ):
 		self.__set_transparency(dt, -1)
@@ -78,13 +60,13 @@ class Transition:
 
 	def __unblock_player ( self ):
 		self.player.unblock()
-		self.state = 'check_collision'
+		self.state = 'standby'
 	
-	def handle_map_transitions ( self, dt: float ):
+	def update ( self, dt: float ):
+		if self.state == 'standby': return
+
 		match self.state:
-			case 'check_collision': self.__handle_collisions(self.transition_sprites)
 			case 'fade_to_black': self.__fade_to_black(dt)
-			case 'load_map': self.__load_new_map()
+			case 'load_scene': self.__load_new_scene()
 			case 'fade_to_light': self.__fade_to_light(dt)
 			case 'done': self.__unblock_player()
-			case _: raise ValueError('Incorrect value state for MapsTransition')

@@ -19,6 +19,8 @@ class Entity ( Sprite ):
 		self.speed = 100
 		self.direction = vector2()
 
+	def __update_y_order ( self ): self.y_order = self.rect.centery
+
 	def block ( self ): 
 		self.is_mobile = False
 		self.direction = vector2()
@@ -44,6 +46,7 @@ class Entity ( Sprite ):
 		self.image = self.frames[self.state][int(self.index) % len(self.frames[self.state])]
 
 	def _move ( self, dt: float ):
+		self.__update_y_order()
 		self.hitbox.center += self.direction * self.speed * dt
 		self.rect.center = self.hitbox.center
 
