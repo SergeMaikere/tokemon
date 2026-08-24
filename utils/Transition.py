@@ -29,6 +29,7 @@ class Transition:
 	def start_scene_transition ( self, sprite: Sprite ):
 		if isinstance(sprite, MonsterPatch) and sprite.defeated: return
 		self.transition_sprite = sprite
+		self.player.block()
 		self.state = 'fade_to_black'
 
 	def __fade_to_black ( self, dt: float ):

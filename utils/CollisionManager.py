@@ -23,7 +23,6 @@ class CollisionManager:
 		transition_sprite = self.player.check_for_collision(collision_group)
 		if transition_sprite: 
 			transition_manager.start_scene_transition(transition_sprite)
-			self.player.block()
 
 
 	def __transition_triggered_by_collision ( self, transition_manager: Transition, collision_group: MyGroup, dt: float ):
