@@ -11,7 +11,7 @@ class MonsterPatch ( Sprite ):
 
 		self.biome = biome
 		self.level = level
-		self.monsters = cast( list[MonsterNames] ,monsters.split(',') )
+		self.monsters = cast( list[MonsterNames], monsters.split(',') )
 		self.defeated = False
 
 		self.y_order -= 60

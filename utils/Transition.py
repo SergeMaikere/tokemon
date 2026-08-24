@@ -26,6 +26,10 @@ class Transition:
 		self.timer = Timer(500, self.__fade_to_light)
 
 
+	def start ( self ): self.state = 'fade_to_black'
+	
+	def ongoing ( self ): return self.state != 'standby'
+
 	def start_scene_transition ( self, sprite: Sprite ):
 		if isinstance(sprite, MonsterPatch) and sprite.defeated: return
 		self.transition_sprite = sprite
