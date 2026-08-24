@@ -2,7 +2,6 @@ from settings import *
 from gameobj.Sprite import Sprite
 from pygame import Surface
 from utils.MyGroup import MyGroup
-from pygame.sprite import Group
 from utils.Types import States
 
 class Entity ( Sprite ):
@@ -19,7 +18,6 @@ class Entity ( Sprite ):
 		self.speed = 100
 		self.direction = vector2()
 
-	def __update_y_order ( self ): self.y_order = self.rect.centery
 
 	def block ( self ): 
 		self.is_mobile = False
@@ -30,6 +28,9 @@ class Entity ( Sprite ):
 	def stop( self ):
 		self.block()
 		self.direction = pygame.Vector2()
+
+	def check_for_collision ( self, sprite_group: MyGroup ):
+		return next( (sprite for sprite in sprite_group if sprite.rect.colliderect(self.hitbox)), None )
 
 	def _set_direction ( self ):
 		pass
@@ -46,7 +47,6 @@ class Entity ( Sprite ):
 		self.image = self.frames[self.state][int(self.index) % len(self.frames[self.state])]
 
 	def _move ( self, dt: float ):
-		self.__update_y_order()
 		self.hitbox.center += self.direction * self.speed * dt
 		self.rect.center = self.hitbox.center
 

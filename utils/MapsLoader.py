@@ -12,7 +12,7 @@ from gameobj.Sprite import Sprite
 from gameobj.AnimatedSprite import AnimatedSprite
 from gameobj.CollisionSprite import CollisionSprite
 from utils.DialogManager import DialogManager
-from utils.Helper import compose, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader
+from utils.Helper import compose, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader, voyeur
 from utils.MyGroup import MyGroup
 
 class MapsLoader:
@@ -26,7 +26,7 @@ class MapsLoader:
 		self.coast_frames = coasts_image_cutter()
 
 		self.groups = groups
-		self.all_sprites, self.collision_sprites, self.all_characters, self.transition_sprites = self.groups
+		self.all_sprites, self.collision_sprites, self.all_characters, self.transition_sprites, self.monster_patch_sprites = self.groups
 
 
 	def __get_layer ( self, name: str, func: Callable, tmx_map: TiledMap ) -> TiledMap:
@@ -57,7 +57,7 @@ class MapsLoader:
 		TransitionSprite(pygame.Surface((obj.width, obj.height)), obj.target, obj.pos, self.transition_sprites, center=(obj.x, obj.y))
 
 	def __set_monster_patch ( self, obj: TiledObject ):
-		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.all_sprites, topleft=(obj.x, obj.y))
+		MonsterPatch(obj.biome, obj.level, obj.monsters, obj.image, self.monster_patch_sprites, self.all_sprites, topleft=(obj.x, obj.y))
 
 	def __set_coasts ( self, obj: TiledObject ):
 		AnimatedSprite('coast', WORLD_LAYERS['bg'], self.coast_frames[obj.terrain][obj.side], self.all_sprites, topleft=(obj.x, obj.y))

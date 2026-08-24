@@ -7,55 +7,28 @@ from utils.Transition import Transition
 
 
 class CollisionManager:
-	def __init__( self, player: Player, load_scene: Callable, collision_sprites: MyGroup, transition_sprites: MyGroup ) -> None:
+	def __init__( self, player: Player, load_map: Callable, load_battle: Callable, transition_sprites: MyGroup, monster_patch_sprites: MyGroup ) -> None:
 		self.player = player
 
-		self.collision_sprites = collision_sprites
 		self.transition_sprites = transition_sprites
+		self.monster_patch_sprites = monster_patch_sprites
 
-		self.transition_map = Transition(self.player, load_scene)
+		self.transition_map = Transition(self.player, load_map)
+		self.transition_battle = Transition(self.player, load_battle)
 
 
-	def __move_hitbox_x ( self, dt: float ): self.player.hitbox.centerx += self.player.direction.x * self.player.speed * dt
-	def __move_hitbox_y ( self, dt: float ): self.player.hitbox.centery += self.player.direction.y * self.player.speed * dt
-	
-	def __collision_handler_x ( self ):
-		for sprite in self.collision_sprites:
-			if sprite.hitbox.colliderect(self.player.hitbox):
-				if self.player.direction.x > 0: self.player.hitbox.right = sprite.hitbox.left
-				if self.player.direction.x < 0: self.player.hitbox.left = sprite.hitbox.right
-
-	def __collision_handler_y ( self ):
-		for sprite in self.collision_sprites:
-			if sprite.hitbox.colliderect(self.player.hitbox):
-				if self.player.direction.y > 0: self.player.hitbox.bottom = sprite.hitbox.top
-				if self.player.direction.y < 0: self.player.hitbox.top = sprite.hitbox.bottom
-		
-	def __player_collides ( self, dt: float ):
-		self.__move_hitbox_x(dt)
-		self.__collision_handler_x()
-		self.__move_hitbox_y(dt)
-		self.__collision_handler_y()
-
-	def __check_for_collision_with_transition_sprite ( self, transition_sprites: MyGroup ):
-		return next( (sprite for sprite in transition_sprites if sprite.rect.colliderect(self.player.hitbox)), None )
-
-	def __check_or_do_transition ( self ):
-		transition_sprite = self.__check_for_collision_with_transition_sprite(self.transition_sprites)
+	def __check_transition ( self, transition_manager: Transition, collision_group: MyGroup ):
+		transition_sprite = self.player.check_for_collision(collision_group)
 		if transition_sprite: 
-			self.transition_map.start_scene_transition(transition_sprite)
+			transition_manager.start_scene_transition(transition_sprite)
 			self.player.block()
 
 
-	def __player_changes_map ( self, dt: float ):
-		if self.transition_map.state == 'standby': return self.__check_or_do_transition()
-		if self.transition_map.state != 'standby': return self.transition_map.update(dt)
-
-	def __player_encounter_monster ( self ): 
-		pass
+	def __transition_triggered_by_collision ( self, transition_manager: Transition, collision_group: MyGroup, dt: float ):
+		if transition_manager.state == 'standby': return self.__check_transition(transition_manager, collision_group)
+		if transition_manager.state != 'standby': return transition_manager.update(dt)
 
 
 	def update ( self, dt: float ):
-		self.__player_collides(dt)
-		self.__player_changes_map(dt)
-		self.__player_encounter_monster()
+		self.__transition_triggered_by_collision(self.transition_map, self.transition_sprites, dt)
+		self.__transition_triggered_by_collision(self.transition_battle, self.monster_patch_sprites, dt)

@@ -1,8 +1,9 @@
+from pygame import Font
 
 from settings import *
-from pygame import Font
 from entities.Entity import Entity
 from entities.Player import Player
+from gameobj.MonsterPatch import MonsterPatch
 from gameobj.Battle import Battle
 from utils.GameOverManager import GameOverManager
 from utils.Helper import images_loader_dict, set_none, set_truthy
@@ -32,6 +33,10 @@ class BattleManager:
 	def battle_trainer ( self, character: Entity ):	
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
+
+	def battle_monster ( self, sprite: MonsterPatch ):
+		monsters = { i: (monster_name, sprite.level) for i, monster_name in enumerate(sprite.monsters) }
+		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 
 	def __handle_victory ( self ):
 		if self.character:

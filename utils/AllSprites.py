@@ -5,7 +5,7 @@ from os.path import join
 from pygame.sprite import Sprite
 
 from entities.Entity import Entity
-from utils.Helper import load_image, required
+from utils.Helper import load_image, required, voyeur
 from utils.MyGroup import MyGroup
 
 class AllSprites ( MyGroup ):
@@ -42,5 +42,4 @@ class AllSprites ( MyGroup ):
 				if sprite == player and player.is_noticed:
 					rect = self.notice.get_frect(midbottom=sprite.rect.midtop)
 					self.canvas.blit(self.notice, rect.topleft + self.offset)
-
 		

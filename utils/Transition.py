@@ -67,7 +67,6 @@ class Transition:
 	
 	def update ( self, dt: float ):
 		if self.state == 'standby': return
-
 		match self.state:
 			case 'fade_to_black': self.__fade_to_black(dt)
 			case 'load_scene': self.__load_new_scene()
