@@ -450,9 +450,15 @@ class Battle:
 		if len(self.player_battle_sprites.sprites()) == 0: return self.__battle_lost()
 		if len(self.opponent_battle_sprites.sprites()) == 0: return self.__battle_won()
 
+	
+	def __kill_player_sprites ( self ):
+		for sprite in self.player_battle_sprites: 
+			sprite.kill()
+
 	def __battle_won ( self ):
 		set_truthy(self, 'victory')
 		self.__reset_player_initiative()
+		self.__kill_player_sprites()
 
 	def __battle_lost ( self ):
 		set_truthy(self, 'defeat')
