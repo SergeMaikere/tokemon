@@ -5,10 +5,10 @@ from pytmx import TiledMap
 
 from entities.Player import Player
 from utils.AllSprites import AllSprites
+from utils.CollisionManager import CollisionManager
 from utils.BattleManager import BattleManager
 from utils.BattleSprites import BattleSprites
 from utils.GameOverManager import GameOverManager
-from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
@@ -36,6 +36,7 @@ class Game:
 		self.collision_sprites = MyGroup('collision_sprites')
 		self.character_sprites = MyGroup('character_sprites')
 		self.transition_sprites = MyGroup('transition_sprites')
+		self.monster_patch_sprites = MyGroup('monster_patch_sprites')
 		self.battle_sprites = BattleSprites()
 		self.player_battle_sprites = MyGroup('player_battle_sprites')
 		self.opponent_battle_sprites = MyGroup('opponent_battle_sprites')
@@ -50,18 +51,18 @@ class Game:
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
-		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites)
-
-		self.transition_manager = MapTransition(self.player, self.maps_loader.transition_setup, self.get_player, self.transition_sprites)
+		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites, self.monster_patch_sprites)
 
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
+		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)
+		
 		self.is_game_over = False
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
 		if obj:
-			return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
+			return Player(frames_loader('player'), (obj.x, obj.y), self.character_sprites, self.all_sprites)
 		else:
 			raise ValueError('Player datas are missing from tmx map')
 
@@ -90,10 +91,10 @@ class Game:
 
 				self.battle_manager.update(dt)
 
+				self.collision_manager.update(dt)
+
 				self.monster_index.update(dt)
 				
-			self.transition_manager.handle_map_transitions(dt)
-
 			pygame.display.update( )
 
 

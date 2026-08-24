@@ -4,7 +4,6 @@ from pygame.typing import Point
 from pygame.math import Vector2 as vector 
 from sys import exit
 
-
 vector2 = pygame.Vector2
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720

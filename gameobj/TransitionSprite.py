@@ -7,4 +7,4 @@ class TransitionSprite ( Sprite ):
 		super().__init__('transition', WORLD_LAYERS['main'], image, *groups, **anchor)
 
 		self.target = target
-		self.pos = pos
+		self.player_spawn_pos = pos

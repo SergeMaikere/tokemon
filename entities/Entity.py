@@ -2,7 +2,6 @@ from settings import *
 from gameobj.Sprite import Sprite
 from pygame import Surface
 from utils.MyGroup import MyGroup
-from pygame.sprite import Group
 from utils.Types import States
 
 class Entity ( Sprite ):
@@ -19,6 +18,7 @@ class Entity ( Sprite ):
 		self.speed = 100
 		self.direction = vector2()
 
+
 	def block ( self ): 
 		self.is_mobile = False
 		self.direction = vector2()
@@ -28,6 +28,9 @@ class Entity ( Sprite ):
 	def stop( self ):
 		self.block()
 		self.direction = pygame.Vector2()
+
+	def check_for_collision ( self, sprite_group: MyGroup ):
+		return next( (sprite for sprite in sprite_group if sprite.rect.colliderect(self.hitbox)), None )
 
 	def _set_direction ( self ):
 		pass
