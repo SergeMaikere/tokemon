@@ -9,7 +9,6 @@ from utils.CollisionManager import CollisionManager
 from utils.BattleManager import BattleManager
 from utils.BattleSprites import BattleSprites
 from utils.GameOverManager import GameOverManager
-from utils.MapTransition import MapTransition
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
 from utils.MyGroup import MyGroup
@@ -53,8 +52,6 @@ class Game:
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites, self.monster_patch_sprites)
-
-		self.transition_manager = MapTransition(self.player, self.maps_loader.transition_setup, self.get_player, self.transition_sprites)
 
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 

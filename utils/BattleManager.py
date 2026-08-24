@@ -27,7 +27,7 @@ class BattleManager:
 		self.groups = groups
 
 		self.battle_grounds = images_loader_dict('assets', 'graphics', 'backgrounds')
-		self.battle, self.character = None, None
+		self.battle, self.character, self.patch = None, None, None
 
 
 	def battle_trainer ( self, character: Entity ):	
@@ -36,13 +36,20 @@ class BattleManager:
 
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		monsters = { i: (monster_name, sprite.level) for i, monster_name in enumerate(sprite.monsters) }
+		self.patch = sprite
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 
 	def __handle_victory ( self ):
 		if self.character:
-			self.character.datas['defeated'] = True
+			set_truthy(self.character.datas, 'defeated')
 			set_none(self, 'character')
+
+		if self.patch:
+			set_truthy(self.patch, 'defeated')
+			set_none(self, 'patch')
+
 		set_none(self, 'battle')
+		self.player.unblock()
 
 	def __handle_defeat ( self ):
 		set_truthy(self.GO, 'is_game_over')

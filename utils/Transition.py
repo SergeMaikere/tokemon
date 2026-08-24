@@ -1,5 +1,6 @@
 from typing import Callable, Literal
 
+from gameobj.MonsterPatch import MonsterPatch
 from settings import *
 from gameobj.Sprite import Sprite
 from entities.Player import Player
@@ -26,6 +27,7 @@ class Transition:
 
 
 	def start_scene_transition ( self, sprite: Sprite ):
+		if isinstance(sprite, MonsterPatch) and sprite.defeated: return
 		self.transition_sprite = sprite
 		self.state = 'fade_to_black'
 
