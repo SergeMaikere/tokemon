@@ -75,13 +75,11 @@ class DialogManager:
 			MM.heal_player_monsters()
 		else:
 			self.__start_battle(character)
-		self.player.unblock()
 		del dialog
 
 	def __start_battle ( self, character: Entity ):
-		if character.datas['defeated']: return
-		set_truthy(self, 'in_battle')
 		set_none(self, 'current_dialog')
+		if character.datas['defeated']: return self.player.unblock()
 		self.BM.battle_trainer(character)
 
 	def update ( self ):
