@@ -58,7 +58,7 @@ class Game:
 
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
-		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager.battle_monster, self.transition_sprites, self.monster_patch_sprites)
+		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)
 		
 		self.is_game_over = False
 
@@ -90,11 +90,11 @@ class Game:
 
 				self.all_sprites.draw(self.player)
 
-				self.collision_manager.update(dt)
-
 				self.dialog_manager.update()
 
 				self.battle_manager.update(dt)
+
+				self.collision_manager.update(dt)
 
 				self.monster_index.update(dt)
 				

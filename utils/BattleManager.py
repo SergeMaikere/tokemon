@@ -34,7 +34,7 @@ class BattleManager:
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
 
-	def battle_monster ( self, sprite: MonsterPatch ):
+	def battle_monsters ( self, sprite: MonsterPatch ):
 		monsters = { i: (monster_name, sprite.level) for i, monster_name in enumerate(sprite.monsters) }
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 
