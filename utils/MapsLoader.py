@@ -65,7 +65,7 @@ class MapsLoader:
 	def __set_collisions_sprites ( self, obj: TiledObject ):
 		image = pygame.Surface((obj.width, obj.height))
 		Sprite('wall', WORLD_LAYERS['main'], image, self.collision_sprites, topleft=(obj.x, obj.y))
-	
+		
 	def __set_player ( self, player_spawn_pos: str, obj: TiledObject ):
 		if obj.name == 'Player' and obj.pos == player_spawn_pos:
 			self.player.rect.center = self.player.hitbox.center = (obj.x, obj.y)

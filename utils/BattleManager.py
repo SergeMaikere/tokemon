@@ -9,7 +9,7 @@ from utils.GameOverManager import GameOverManager
 from utils.Helper import images_loader_dict, set_none, set_truthy
 from utils.MyGroup import MyGroup
 from utils.Transition import Transition
-from utils.Types import FontTypes
+from utils.Types import BattleStates, FontTypes
 
 class BattleManager:
 	def __init__( 
@@ -31,8 +31,10 @@ class BattleManager:
 		self.battle, self.character, self.patch = None, None, None
 
 		self.transition_overworld = Transition(self.player, lambda _: set_none(self, 'battle'))
-		self.state = 'standby'
+		self.state: BattleStates = 'standby'
 
+
+	def is_state ( self, state: BattleStates ): return self.state == state
 
 	def battle_trainer ( self, character: Entity ):	
 		self.character = character

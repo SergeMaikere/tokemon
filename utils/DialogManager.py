@@ -1,3 +1,5 @@
+from typing import Callable
+
 from settings import *
 from functools import partial
 
@@ -13,11 +15,12 @@ from utils.Helper import compose, set_falsy, set_none, set_truthy
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
-	def __init__ ( self, player: Player, characters: MyGroup, battle_manager: BattleManager, all_sprites: AllSprites ):
+	def __init__ ( self, player: Player, characters: MyGroup, battle_state: Callable, battle_trainer: Callable, all_sprites: AllSprites ):
 
 		self.player = player
 		self.characters = characters
-		self.BM = battle_manager
+		self.battle_state = battle_state
+		self.battle_trainer = battle_trainer
 		self.all_sprites = all_sprites
 
 		self.timer = Timer(500)
@@ -25,7 +28,7 @@ class DialogManager:
 		
 
 	def input ( self ):
-		if self.BM.battle: return
+		if not self.battle_state('standby'): return
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
 			if self.current_dialog:
@@ -44,9 +47,13 @@ class DialogManager:
 			compose(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
-				self._create_dialog,
+				self.__create_dialog,
 				self.__immobilize_player
 			)(character)
+
+	def reinitiate_dialog ( self, character: Entity ):
+		self.__create_dialog(character)
+		self.timer.start()
 
 	def __is_dialog_possible ( self, player: Player, character: Entity ):
 		if not is_dialog_possible(player, character): return None
@@ -60,7 +67,7 @@ class DialogManager:
 		if self.player.state == 'down': character.state = 'up'
 		return character
 
-	def _create_dialog ( self, character: Entity ):
+	def __create_dialog ( self, character: Entity ):
 		if not character: return None
 		self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
 		return character
@@ -80,7 +87,7 @@ class DialogManager:
 	def __start_battle ( self, character: Entity ):
 		set_none(self, 'current_dialog')
 		if character.datas['defeated']: return self.player.unblock()
-		self.BM.battle_trainer(character)
+		self.battle_trainer(character)
 
 	def update ( self ):
 		if not self.timer.running: return self.input()
