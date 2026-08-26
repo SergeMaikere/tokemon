@@ -1,5 +1,3 @@
-from typing import Callable
-
 from settings import *
 from functools import partial
 
@@ -11,24 +9,24 @@ from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
 from utils.MyGroup import MyGroup
-from utils.Helper import compose, set_falsy, set_none, set_truthy
+from utils.Helper import compose, required, set_none
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
-	def __init__ ( self, player: Player, characters: MyGroup, battle_state: Callable, battle_trainer: Callable, all_sprites: AllSprites ):
+	def __init__ ( self, player: Player, characters: MyGroup, battle_manager: BattleManager, all_sprites: AllSprites ):
 
 		self.player = player
 		self.characters = characters
-		self.battle_state = battle_state
-		self.battle_trainer = battle_trainer
+		self.BM = battle_manager
 		self.all_sprites = all_sprites
 
 		self.timer = Timer(500)
-		self.current_dialog = None
+		self.current_dialog, self.current_character = None, None
+		self.battle_state = None
 		
 
 	def input ( self ):
-		if not self.battle_state('standby'): return
+		if self.BM.battle: return
 		keys = pygame.key.get_just_pressed()
 		if keys[pygame.K_SPACE]:
 			if self.current_dialog:
@@ -47,16 +45,14 @@ class DialogManager:
 			compose(
 				partial(self.__is_dialog_possible, self.player),
 				self.__make_character_face_player,
-				self.__create_dialog,
+				self._create_dialog,
 				self.__immobilize_player
 			)(character)
 
-	def reinitiate_dialog ( self, character: Entity ):
-		self.__create_dialog(character)
-		self.timer.start()
 
 	def __is_dialog_possible ( self, player: Player, character: Entity ):
 		if not is_dialog_possible(player, character): return None
+		self.current_character = character
 		return character
 
 	def __make_character_face_player ( self, character: Entity ):
@@ -67,7 +63,7 @@ class DialogManager:
 		if self.player.state == 'down': character.state = 'up'
 		return character
 
-	def __create_dialog ( self, character: Entity ):
+	def _create_dialog ( self, character: Entity ):
 		if not character: return None
 		self.current_dialog = Dialog(character, self.finish_dialog, self.all_sprites)
 		return character
@@ -87,10 +83,19 @@ class DialogManager:
 	def __start_battle ( self, character: Entity ):
 		set_none(self, 'current_dialog')
 		if character.datas['defeated']: return self.player.unblock()
-		self.battle_trainer(character)
+		self.BM.battle_trainer(character)
 
-	def update ( self ):
+	def __reinitiate_dialog ( self, character: Entity ):
+		self._create_dialog(character)
+		self.BM.set_state('standby')
+		self.timer.start()
+
+	def update ( self ):		
+		if self.BM.is_state('defeated_enemy_dialog'): 
+			self.__reinitiate_dialog(required(self.current_character))
+		
 		if not self.timer.running: return self.input()
 		self.timer.update()
+
 
 

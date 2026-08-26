@@ -98,6 +98,7 @@ class Character ( Entity ):
 	def __create_dialog ( self ):
 		if self.is_mobile or self.noticed_timer.running: return
 		self.dialog_manager._create_dialog(self)
+		self.dialog_manager.current_character = self
 
 	def __remember_player ( self ):
 		if self.is_mobile or self.noticed_timer.running: return

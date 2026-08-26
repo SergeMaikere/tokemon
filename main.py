@@ -1,8 +1,8 @@
 from pygame import Font
-from gameobj.MonsterIndex import MonsterIndex
-from settings import *
 from pytmx import TiledMap
 
+from settings import *
+from gameobj.MonsterIndex import MonsterIndex
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.CollisionManager import CollisionManager
@@ -49,7 +49,7 @@ class Game:
 		
 		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
-		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager.is_state, self.battle_manager.battle_trainer, self.all_sprites)
+		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites, self.monster_patch_sprites)
 
