@@ -32,6 +32,9 @@ class Entity ( Sprite ):
 	def check_for_collision ( self, sprite_group: MyGroup ):
 		return next( (sprite for sprite in sprite_group if sprite.rect.colliderect(self.hitbox)), None )
 
+	def check_collision_and_movement ( self, sprite_group: MyGroup ):
+		return next( (sprite for sprite in sprite_group if sprite.rect.colliderect(self.hitbox) and self.direction), None )
+
 	def _set_direction ( self ):
 		pass
 
