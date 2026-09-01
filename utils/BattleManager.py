@@ -54,7 +54,6 @@ class BattleManager:
 	def __handle_victory ( self ):
 		if self.character:
 			self.character.datas['defeated'] = True
-			set_none(self, 'character')
 
 		if self.patch:
 			set_truthy(self.patch, 'defeated')

@@ -21,7 +21,7 @@ class DialogManager:
 		self.all_sprites = all_sprites
 
 		self.timer = Timer(500)
-		self.current_dialog, self.current_character = None, None
+		self.current_dialog = None
 		self.battle_state = None
 		
 
@@ -52,7 +52,6 @@ class DialogManager:
 
 	def __is_dialog_possible ( self, player: Player, character: Entity ):
 		if not is_dialog_possible(player, character): return None
-		self.current_character = character
 		return character
 
 	def __make_character_face_player ( self, character: Entity ):
@@ -88,11 +87,12 @@ class DialogManager:
 	def __reinitiate_dialog ( self, character: Entity ):
 		self._create_dialog(character)
 		self.BM.set_state('standby')
+		set_none(self.BM, 'character')
 		self.timer.start()
 
 	def update ( self ):		
-		if self.BM.is_state('defeated_enemy_dialog'): 
-			self.__reinitiate_dialog(required(self.current_character))
+		if self.BM.is_state('defeated_enemy_dialog') and self.BM.character: 
+			self.__reinitiate_dialog(required(self.BM.character))
 		
 		if not self.timer.running: return self.input()
 		self.timer.update()
