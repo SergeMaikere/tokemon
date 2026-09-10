@@ -9,7 +9,7 @@ from utils.GameOverManager import GameOverManager
 from utils.Helper import images_loader_dict, set_none, set_truthy
 from utils.MyGroup import MyGroup
 from utils.Transition import Transition
-from utils.Types import FontTypes
+from utils.Types import BattleStates, FontTypes
 
 class BattleManager:
 	def __init__( 
@@ -31,51 +31,56 @@ class BattleManager:
 		self.battle, self.character, self.patch = None, None, None
 
 		self.transition_overworld = Transition(self.player, lambda _: set_none(self, 'battle'))
-		self.state = 'standby'
+		self.state: BattleStates = 'standby'
 
+
+	def is_state ( self, state: BattleStates ): return self.state == state
+
+	def set_state( self, state: BattleStates ): 
+		self.state = state
+		voyeur(f'Battle state from battle manager: {self.state}')
 
 	def battle_trainer ( self, character: Entity ):	
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
-		self.state = 'ongoing'
+		self.set_state('ongoing')
 
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		self.patch = sprite
 		monsters = { i: (monster_name, sprite.level) for i, monster_name in enumerate(sprite.monsters) }
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
-		self.state = 'ongoing'
+		self.set_state('ongoing')
 
 	def __handle_victory ( self ):
 		if self.character:
 			self.character.datas['defeated'] = True
-			set_none(self, 'character')
 
 		if self.patch:
 			set_truthy(self.patch, 'defeated')
 			set_none(self, 'patch')
 
 		self.transition_overworld.start()
-		self.state = 'back_to_world'
+		self.set_state('back_to_world')
 
 	def __handle_defeat ( self ):
 		set_truthy(self.GO, 'is_game_over')
 		self.transition_overworld.start()
-		self.state = 'back_to_world'
+		self.set_state('back_to_world')
 
 	def __check_victory ( self ):
 		if self.battle and self.battle.victory and self.state == 'ongoing':
-			self.state = 'victory'
+			self.set_state('victory')
 
 	def __check_defeat ( self ):
 		if self.battle and self.battle.defeat and self.state == 'ongoing':
-			self.state = 'defeat'
+			self.set_state('defeat')
 
 	def __update_battle ( self, dt: float ):
 		if not self.battle: return
 		self.battle.update(dt)
 
 	def __update_transition ( self, dt: float ):
-		if self.transition_overworld.state == 'standby': self.state = 'standby'
+		if self.transition_overworld.state == 'standby': self.set_state('defeated_enemy_dialog')
 		self.transition_overworld.update(dt)
 
 	def update ( self, dt: float ):
@@ -84,7 +89,7 @@ class BattleManager:
 			case 'victory': self.__handle_victory()
 			case 'defeat': self.__handle_defeat()
 			case 'back_to_world': self.__update_transition(dt)
-		
-		self.__check_victory()
-		self.__check_defeat()
+			case _:
+				self.__check_victory()
+				self.__check_defeat()
 		self.__update_battle(dt)

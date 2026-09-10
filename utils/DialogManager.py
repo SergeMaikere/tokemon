@@ -9,7 +9,7 @@ from utils.AllSprites import AllSprites
 from utils.BattleManager import BattleManager
 from utils.Timer import Timer
 from utils.MyGroup import MyGroup
-from utils.Helper import compose, set_falsy, set_none, set_truthy
+from utils.Helper import compose, required, set_none
 from utils.DialogTools import is_dialog_possible
 
 class DialogManager:
@@ -22,6 +22,7 @@ class DialogManager:
 
 		self.timer = Timer(500)
 		self.current_dialog = None
+		self.battle_state = None
 		
 
 	def input ( self ):
@@ -47,6 +48,7 @@ class DialogManager:
 				self._create_dialog,
 				self.__immobilize_player
 			)(character)
+
 
 	def __is_dialog_possible ( self, player: Player, character: Entity ):
 		if not is_dialog_possible(player, character): return None
@@ -82,8 +84,19 @@ class DialogManager:
 		if character.datas['defeated']: return self.player.unblock()
 		self.BM.battle_trainer(character)
 
-	def update ( self ):
+	def __reinitiate_dialog ( self, character: Entity ):
+		self.player.block()
+		self._create_dialog(character)
+		self.BM.set_state('standby')
+		set_none(self.BM, 'character')
+		self.timer.start()
+
+	def update ( self ):		
+		if self.BM.is_state('defeated_enemy_dialog') and self.BM.character: 
+			self.__reinitiate_dialog(required(self.BM.character))
+		
 		if not self.timer.running: return self.input()
 		self.timer.update()
+
 
 

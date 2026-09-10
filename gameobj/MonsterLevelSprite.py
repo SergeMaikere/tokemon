@@ -20,6 +20,8 @@ class MonsterLevelSprite ( MonsterInfoSprite ):
 
 		self.xp_bar_rect = pygame.FRect(0, self.rect.height - 2, self.rect.width, 2)
 
+		self.temp_xp = self.monster.xp
+
 	def __set_image_rect (  self ) -> tuple[ Surface, FRect ]:
 		return compose( add_color_to_surface, self.__get_card_rect )( self.card_surface )
 

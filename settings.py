@@ -1,3 +1,5 @@
+from typing import Any
+
 import pygame
 from pygame import Surface, FRect
 from pygame.typing import Point
@@ -62,3 +64,9 @@ BATTLE_CHOICES = {
 		'defend': {'pos' : vector2(40, 0), 'icon': 'shield'},
 		'switch': {'pos' : vector2(30, 40), 'icon': 'arrows'}}
 }
+
+def voyeur ( x: Any ):
+	print('\n****VOYEUR****')
+	print(x)
+	print('************\n')
+	return x

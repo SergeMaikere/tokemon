@@ -22,6 +22,8 @@ MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', '
 
 BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]
 
+BattleStates = Literal[ 'standby', 'ongoing', 'victory', 'defeat', 'back_to_world', 'defeated_enemy_dialog' ]
+
 Trainers = Literal['player', 'opponent']
 
 Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]

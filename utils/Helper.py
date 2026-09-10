@@ -19,12 +19,6 @@ from utils.Types import Coasts, FontTypes, MonsterNames, States
 
 T = TypeVar('T')
 
-def voyeur ( x: Any ):
-	print('\n****VOYEUR****')
-	print(x)
-	print('************\n')
-	return x
-
 compose: Callable = lambda *funcs: lambda arg: reduce(lambda g, f: f(g), funcs, arg)
 
 get_name_from_path = lambda path: basename(path).split('.')[0]

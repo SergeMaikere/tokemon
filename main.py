@@ -1,8 +1,8 @@
 from pygame import Font
-from gameobj.MonsterIndex import MonsterIndex
-from settings import *
 from pytmx import TiledMap
 
+from settings import *
+from gameobj.MonsterIndex import MonsterIndex
 from entities.Player import Player
 from utils.AllSprites import AllSprites
 from utils.CollisionManager import CollisionManager
@@ -62,7 +62,7 @@ class Game:
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
 		if obj:
-			return Player(frames_loader('player'), (obj.x, obj.y), self.character_sprites, self.all_sprites)
+			return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		else:
 			raise ValueError('Player datas are missing from tmx map')
 

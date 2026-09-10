@@ -1,7 +1,6 @@
 from settings import *
 from entities.Entity import Entity
 from pygame import Surface
-from utils.Helper import voyeur
 from utils.MyGroup import MyGroup
 from pygame.sprite import Group
 
@@ -13,8 +12,6 @@ class Player ( Entity ):
 		self.speed = 250
 		self.is_noticed = False
 
-
-	def __update_y_order ( self ): self.y_order = self.rect.centery
 
 	def set_is_noticed ( self, noticed: bool ): self.is_noticed = noticed
 
@@ -40,9 +37,9 @@ class Player ( Entity ):
 				if self.direction.y < 0: self.hitbox.top = sprite.hitbox.bottom
 		
 	def _move ( self, dt: float ):
-		self.__update_y_order()
-		self.__collision_handler_x()
+		self.y_order = self.rect.centery
 		self.__move_hitbox_x(dt)
-		self.__collision_handler_y()
+		self.__collision_handler_x()
 		self.__move_hitbox_y(dt)
+		self.__collision_handler_y()
 		self.rect.center = self.hitbox.center
