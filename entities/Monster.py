@@ -12,13 +12,12 @@ class Monster:
 		self.base_stats = MONSTER_DATA[name]['stats']
 		self.element = self.base_stats['element']
 		self.abilities = MONSTER_DATA[name]['abilities']
+		self.evolve = MONSTER_DATA[name]['evolve']
 
-		self.xp = randint(0, 1000)
-		self.level_up = self.level * 150
 		self.initiative = 0
-
+		self.level_up = self.get_level_up()
+		self.xp = 0
 		self._health = max(0, self.get_stat('max_health'))
-		# self._health = randint(0, self.get_stat('max_health'))
 		self._energy = max(0, self.get_stat('max_energy'))
 
 		self.is_defending = False
@@ -32,6 +31,8 @@ class Monster:
 	def energy ( self ): return min_number(0, self._energy)
 	@energy.setter
 	def energy ( self, v: float ): self._energy = v
+
+	def get_level_up ( self ): return self.level * 150
 
 	def get_stat ( self, stat: str ): return self.base_stats[stat] * self.level
 
@@ -60,4 +61,13 @@ class Monster:
 		self.health -= amount * defense
 
 	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
+
+	def update_xp ( self, amount: float ):
+		if self.xp + amount < self.level_up: return self.__raise_level(amount)
+		self.xp += amount
+
+	def __raise_level( self, amount: float ):
+		self.level += 1
+		self.xp = (self.xp + amount) - self.level_up
+		self.level_up = self.get_level_up()
 		

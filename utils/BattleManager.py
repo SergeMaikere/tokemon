@@ -89,7 +89,7 @@ class BattleManager:
 			case 'victory': self.__handle_victory()
 			case 'defeat': self.__handle_defeat()
 			case 'back_to_world': self.__update_transition(dt)
-		
-		self.__check_victory()
-		self.__check_defeat()
+			case _:
+				self.__check_victory()
+				self.__check_defeat()
 		self.__update_battle(dt)

@@ -59,6 +59,8 @@ class Battle:
 			'delayed attack': Timer(900, func=self.__target_selector)
 		}
 
+		self.battle_xp = 100
+
 		self.mode: BattleMode | None = None 
 		self.current_monster: MonsterSprite | None = None 
 		self.attack: Attacks | None = None 
@@ -412,7 +414,8 @@ class Battle:
 		return compose(
 			self.__add_opponent_monster,
 			lambda dying: self.__remove_monster(dying, 'opponent'),
-			lambda dying: kill_sprite(dying)
+			lambda dying: kill_sprite(dying),
+			self.__add_xp
 		)( dying )
 
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
@@ -430,6 +433,12 @@ class Battle:
 		if len(self.monsters['opponent']) <= self.max_fighting_monsters: return dying
 		monster = self.__get_next_opponent_monster()
 		self.__creates_battle_sprites(dying.pos, 'opponent', monster)
+		return dying
+
+	def __add_xp ( self, dying: MonsterSprite ):
+		amount = (dying.monster.level * 100) / len(self.player_battle_sprites)
+		for sprite in self.player_battle_sprites: 
+			sprite.monster.update_xp(amount)
 		return dying
 
 	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
@@ -450,7 +459,6 @@ class Battle:
 		if len(self.player_battle_sprites.sprites()) == 0: return self.__battle_lost()
 		if len(self.opponent_battle_sprites.sprites()) == 0: return self.__battle_won()
 
-	
 	def __kill_player_sprites ( self ):
 		for sprite in self.player_battle_sprites: 
 			sprite.kill()
