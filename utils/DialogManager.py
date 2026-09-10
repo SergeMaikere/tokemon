@@ -85,6 +85,7 @@ class DialogManager:
 		self.BM.battle_trainer(character)
 
 	def __reinitiate_dialog ( self, character: Entity ):
+		self.player.block()
 		self._create_dialog(character)
 		self.BM.set_state('standby')
 		set_none(self.BM, 'character')
