@@ -1,10 +1,12 @@
 from functools import partial
+from os import kill
 from os.path import join
 from random import choice
 from typing import Literal
 from pygame import Font
 
 from assets.data.game_data import ATTACK_DATA
+from entities import Entity
 from gameobj.AttackAnimation import AttackAnimation
 from gameobj.AttackList import AttackList
 from gameobj.SwitchList import SwitchList
@@ -16,7 +18,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer, voyeur
+from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer
 from utils.MonsterManager import MonsterManager as MM
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
@@ -318,14 +320,23 @@ class Battle:
 		if self.catch: return self.__catch_a_monster()
 		if not self.catch: return self.current_monster.set_state('attack')
 
+	def __reset_batlle_sprites ( self ):
+		self.__kill_all_fighters_sprites()
+		self.__initiate_battle()
+
+	def __handle_monster_catch ( self ):
+		compose(
+			lambda catched: self.__bury_the_opponent_monster(catched),
+			self.__add_player_monster,
+		)(self.targeted_monster)
+		self.__reset_batlle_sprites()
+
+
 	def __catch_a_monster ( self ):
 		if not self.targeted_monster: return
+
 		if self.targeted_monster.monster.is_catchable():
-			compose(
-				self.__add_player_monster,
-				lambda dying: self.__remove_monster(dying, 'opponent'),
-				lambda sprite: kill_sprite(sprite)
-			)(self.targeted_monster)
+			self.__handle_monster_catch()
 		else: 
 			TimedSprite(1000, self.ui_images['cross'], self.battle_sprites, center=self.targeted_monster.rect.center)
 
@@ -412,8 +423,8 @@ class Battle:
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
 		return compose(
-			self.__add_opponent_monster,
 			lambda dying: self.__remove_monster(dying, 'opponent'),
+			lambda dying: self.__add_monster_to_battle('opponent', dying),
 			lambda dying: kill_sprite(dying),
 			self.__add_xp
 		)( dying )
@@ -422,17 +433,18 @@ class Battle:
 		return compose( 
 			lambda dying: self.__remove_monster(dying, 'player'), 
 			lambda dying: MM.remove_monster(dying),
+			lambda dying: self.__add_monster_to_battle('player', dying),
 			lambda dying: kill_sprite(dying)
 		)( dying )
+	
 		
 	def __remove_monster ( self, dying: MonsterSprite, entity: Trainers ):
 		self.monsters[entity] = [ monster for monster in self.monsters[entity] if monster != dying.monster ]
 		return dying
 
-	def __add_opponent_monster ( self, dying: MonsterSprite ):
-		if len(self.monsters['opponent']) <= self.max_fighting_monsters: return dying
-		monster = self.__get_next_opponent_monster()
-		self.__creates_battle_sprites(dying.pos, 'opponent', monster)
+	def __add_monster_to_battle ( self, entity: Trainers, dying: MonsterSprite ):
+		if len(self.monsters[entity]) < self.max_fighting_monsters: return dying
+		self.__creates_battle_sprites(dying.pos, entity, self.__get_next_monster(entity))
 		return dying
 
 	def __add_xp ( self, dying: MonsterSprite ):
@@ -442,16 +454,14 @@ class Battle:
 		return dying
 
 	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
-		MM.get('monsters')[ next(reversed(MM.get('monsters'))) + 1 ] = monster_sprite.monster
-		if self.__get_group_size('player') < self.max_fighting_monsters:
-			pos = { i: pos for i, pos in enumerate(BATTLE_POSITIONS['left'].values()) }[len(self.player_battle_sprites.sprites())]
-			self.__creates_battle_sprites(pos, 'player', monster_sprite.monster)
+		MM.add_monster(monster_sprite)
+		self.monsters['player'].append(monster_sprite.monster)
 		return monster_sprite
 
-	def __get_next_opponent_monster ( self ):
-		return required(next((monster for monster in self.monsters['opponent'] if monster not in [sprite.monster for sprite in self.opponent_battle_sprites.sprites()]), None))
+	def __get_next_monster ( self, entity: Trainers ):
+		monster_sprites = [sprite.monster for sprite in self.__get_battle_sprites(entity).sprites()] 
+		return required(next((monster for monster in self.monsters[entity] if monster not in monster_sprites), None))
 
-	
 
 	# END OF BATTLE
 
@@ -496,7 +506,14 @@ class Battle:
 	def __update_timers ( self ):
 		for timer in self.timers.values(): timer.update()
 
+	def __get_battle_sprites ( self, entity: Trainers ):
+		return self.player_battle_sprites if entity == 'player' else self.opponent_battle_sprites
+
 	def __get_all_fighters_sprites ( self ): return self.player_battle_sprites.sprites() + self.opponent_battle_sprites.sprites()
+
+	def __kill_all_fighters_sprites ( self ):
+		for sprite in self.battle_sprites.sprites(): 
+			kill_sprite(sprite)
 
 	def __get_group_size ( self, entity: Trainers ): 
 		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )

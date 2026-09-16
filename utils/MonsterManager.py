@@ -5,7 +5,7 @@ from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from gameobj.MonsterSprite import MonsterSprite
 from settings import *
 from entities.Monster import Monster
-from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader, required
+from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader, required, compose
 from utils.Types import Attacks, MonsterNames, Trainers
 
 
@@ -24,7 +24,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_random_monsters(2)
+		cls.monsters = cls.get_random_monsters(5)
 
 		cls.monster_frames = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -42,9 +42,9 @@ class MonsterManager:
 
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 5)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 50)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 15)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
 	@classmethod	
 	def get_monster_list ( cls ): return [ monster for monster in cls.monsters.values() ]
@@ -68,8 +68,16 @@ class MonsterManager:
 		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ]
 
 	@classmethod
+	def add_monster ( cls, sprite: MonsterSprite ):
+		cls.get('monsters')[ len(cls.get('monsters')) ] = sprite.monster
+		return sprite
+
+	@classmethod
 	def remove_monster ( cls, sprite: MonsterSprite ):
-		cls.monsters = { i: m for i, m in cls.monsters.items() if m != sprite.monster }
+		cls.monsters = compose(
+			lambda monsters: [ monster for monster in monsters.values() if monster != sprite.monster ],
+			lambda monsters: { i: m for i, m in enumerate(monsters) } 
+		)( cls.monsters )
 		return sprite
 
 	@classmethod

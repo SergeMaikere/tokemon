@@ -1,3 +1,5 @@
+from random import randint
+
 from pygame import Font
 
 from settings import *
@@ -38,7 +40,6 @@ class BattleManager:
 
 	def set_state( self, state: BattleStates ): 
 		self.state = state
-		voyeur(f'Battle state from battle manager: {self.state}')
 
 	def battle_trainer ( self, character: Entity ):	
 		self.character = character
@@ -47,7 +48,7 @@ class BattleManager:
 
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		self.patch = sprite
-		monsters = { i: (monster_name, sprite.level) for i, monster_name in enumerate(sprite.monsters) }
+		monsters = { i: (monster_name, sprite.level + randint(-3, 3)) for i, monster_name in enumerate(sprite.monsters) }
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 		self.set_state('ongoing')
 
@@ -68,11 +69,11 @@ class BattleManager:
 		self.set_state('back_to_world')
 
 	def __check_victory ( self ):
-		if self.battle and self.battle.victory and self.state == 'ongoing':
+		if self.battle and self.battle.victory:
 			self.set_state('victory')
 
 	def __check_defeat ( self ):
-		if self.battle and self.battle.defeat and self.state == 'ongoing':
+		if self.battle and self.battle.defeat:
 			self.set_state('defeat')
 
 	def __update_battle ( self, dt: float ):
@@ -86,10 +87,10 @@ class BattleManager:
 	def update ( self, dt: float ):
 		match self.state:
 			case 'standby': return
+			case 'ongoing':
+				self.__check_victory()
+				self.__check_defeat()
 			case 'victory': self.__handle_victory()
 			case 'defeat': self.__handle_defeat()
 			case 'back_to_world': self.__update_transition(dt)
-			case _:
-				self.__check_victory()
-				self.__check_defeat()
 		self.__update_battle(dt)

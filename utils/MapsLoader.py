@@ -12,7 +12,7 @@ from gameobj.Sprite import Sprite
 from gameobj.AnimatedSprite import AnimatedSprite
 from gameobj.CollisionSprite import CollisionSprite
 from utils.DialogManager import DialogManager
-from utils.Helper import compose, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader, voyeur
+from utils.Helper import compose, get_layer_by_name, get_layer_by_name_tiles, maps_loader, images_loader_list, coasts_image_cutter, frames_loader
 from utils.MyGroup import MyGroup
 
 class MapsLoader:

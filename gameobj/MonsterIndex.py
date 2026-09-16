@@ -162,7 +162,7 @@ class MonsterIndex:
 		)
 
 		self.__set_text('regular', f'Hp: {int(monster.health)}/{monster.get_stat('max_health')}', midleft=health_rect.midleft + vector2(10, 0))
-		self.__set_text('regular', f'Exp: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
+		self.__set_text('regular', f'Energy: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
 
 		return monster
 		
@@ -225,6 +225,8 @@ class MonsterIndex:
 		self.__draw_main_rect()
 		self.side_list.display()
 
+		monster_list = { i: monster.name for i, monster in MM.get('monsters').items() }
+		voyeur(f'Current Player Monsters => {monster_list}')
 		compose(
 			partial(self.__display_top, dt),
 			self.__display_progress_bars,
