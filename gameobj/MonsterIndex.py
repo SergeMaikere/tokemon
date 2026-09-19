@@ -225,8 +225,6 @@ class MonsterIndex:
 		self.__draw_main_rect()
 		self.side_list.display()
 
-		monster_list = { i: monster.name for i, monster in MM.get('monsters').items() }
-		voyeur(f'Current Player Monsters => {monster_list}')
 		compose(
 			partial(self.__display_top, dt),
 			self.__display_progress_bars,

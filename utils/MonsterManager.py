@@ -42,9 +42,9 @@ class MonsterManager:
 
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
-		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 15)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
 	
 	@classmethod	
 	def get_monster_list ( cls ): return [ monster for monster in cls.monsters.values() ]

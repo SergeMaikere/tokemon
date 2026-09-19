@@ -57,13 +57,13 @@ class Monster:
 		self.initiative += self.get_stat('speed') * dt
 
 	def take_damage ( self, amount: float ):
-		defense = between(0, 1, 1 - self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0)
+		defense = between(0, 1, 1 - (self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0))
 		self.health -= amount * defense
 
 	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
 
 	def update_xp ( self, amount: float ):
-		if self.xp + amount < self.level_up: return self.__raise_level(amount)
+		if self.xp + amount > self.level_up: return self.__raise_level(amount)
 		self.xp += amount
 
 	def __raise_level( self, amount: float ):
