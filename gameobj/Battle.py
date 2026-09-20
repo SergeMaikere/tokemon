@@ -61,8 +61,6 @@ class Battle:
 			'delayed attack': Timer(900, func=self.__target_selector)
 		}
 
-		self.battle_xp = 100
-
 		self.mode: BattleMode | None = None 
 		self.current_monster: MonsterSprite | None = None 
 		self.attack: Attacks | None = None 
@@ -148,7 +146,7 @@ class Battle:
 
 		sprite = self.__give_me_sprite()
 		if sprite:
-			self.__freeze_all_monsters()
+			self.freeze_all_monsters()
 			compose(
 				self.__reset_defense,
 				self.__update_datas,
@@ -285,6 +283,7 @@ class Battle:
 	
 	
 	# Input selection
+	## General
 	def __action_input ( self ):
 		match self.mode:
 			case 'general': return self.__general_selector()
@@ -303,27 +302,20 @@ class Battle:
 				self.catch = True
 		self.__reset_indexes()
 
+	## Defend
 	def __defend ( self ):
 		set_truthy(self.current_monster.monster, 'is_defending')
 		self.__resume_battle()
 
-	def __attack_selector ( self ):
-		self.mode = 'target'
-		self.attack = required(self.current_monster).monster.get_abilities(all_of_them=False)[self.indexes['attack']]
-		self.target = ATTACK_DATA[self.attack]['target']
-
-	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
-
+	## Select a target
 	def __target_selector ( self ):
 		if not self.current_monster: return
 		self.current_monster.index = 0
 		if self.catch: return self.__catch_a_monster()
 		if not self.catch: return self.current_monster.set_state('attack')
 
-	def __reset_batlle_sprites ( self ):
-		self.__kill_all_fighters_sprites()
-		self.__initiate_battle()
 
+	## Catch
 	def __handle_monster_catch ( self ):
 		compose(
 			lambda catched: self.__bury_the_opponent_monster(catched),
@@ -331,6 +323,9 @@ class Battle:
 		)(self.targeted_monster)
 		self.__reset_batlle_sprites()
 
+	def __reset_batlle_sprites ( self ):
+		self.__kill_all_fighters_sprites()
+		self.__initiate_battle()
 
 	def __catch_a_monster ( self ):
 		if not self.targeted_monster: return
@@ -342,6 +337,12 @@ class Battle:
 
 		set_falsy(self, 'catch')
 		self.__resume_battle()
+
+	## Attack
+	def __attack_selector ( self ):
+		self.mode = 'target'
+		self.attack = required(self.current_monster).monster.get_abilities(all_of_them=False)[self.indexes['attack']]
+		self.target = ATTACK_DATA[self.attack]['target']
 
 	def __handle_attack ( self ):
 		print(self.attack)
@@ -379,6 +380,7 @@ class Battle:
 			return amount * 2
 		return amount
 
+	## Switch
 	def __switch_selector ( self ): 
 		if not self.switch_list: return
 		self.switch_list.select()
@@ -406,7 +408,7 @@ class Battle:
 		if self.timers['delayed death'].running or \
 		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
-		self.__freeze_all_monsters()
+		self.freeze_all_monsters()
 		self.timers['delayed death'].start()
 
 	def __get_dead_monster ( self ):
@@ -486,7 +488,7 @@ class Battle:
 	
 	# UTILS
 
-	def __freeze_all_monsters ( self ): 
+	def freeze_all_monsters ( self ): 
 		[ sprite.set_paused(True) for sprite in self.__get_all_fighters_sprites() ]
 
 	def __unfreeze_all_monsters ( self ): 
@@ -518,6 +520,7 @@ class Battle:
 	def __get_group_size ( self, entity: Trainers ): 
 		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )
 
+	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 	
 
 	

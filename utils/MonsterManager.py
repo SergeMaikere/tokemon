@@ -24,7 +24,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_random_monsters(5)
+		cls.monsters = cls.get_soon_to_evolve_monsters(1)
 
 		cls.monster_frames = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -42,9 +42,18 @@ class MonsterManager:
 
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 15)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+
+	@classmethod
+	def set_close_to_level_up ( cls, monster: Monster ):
+		monster.xp = monster.level_up
+		return monster
+
+	@classmethod
+	def get_soon_to_evolve_monsters ( cls, n: int ):
+		return { j: cls.set_close_to_level_up(Monster('Gulfin', 31)) for j in [i for i in range(n)] }
 	
 	@classmethod	
 	def get_monster_list ( cls ): return [ monster for monster in cls.monsters.values() ]

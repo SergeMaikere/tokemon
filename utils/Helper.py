@@ -198,6 +198,15 @@ def create_frame_outline ( frame: Surface, width: int ):
 	new_surface.blit(mask_surface, (0, width))
 
 	return new_surface
+
+def get_tinted_surface ( ):
+	tint_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+	tint_surface.set_alpha(200)
+	return tint_surface
+
+def tint ( canvas: Surface, tinted_surface: Surface ): 
+	canvas.blit(tinted_surface, (0, 0))
+	return tinted_surface
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 
