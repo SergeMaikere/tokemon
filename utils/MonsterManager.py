@@ -1,5 +1,6 @@
 from os.path import join
 from random import randint, sample
+from typing import Literal
 
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from gameobj.MonsterSprite import MonsterSprite
@@ -26,7 +27,7 @@ class MonsterManager:
 	def init ( cls ):
 		cls.monsters = cls.get_soon_to_evolve_monsters(1)
 
-		cls.monster_frames = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
+		cls.monster_frames: dict[ MonsterNames, dict[Literal['idle', 'attack'], list[Surface]] ] = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
 		cls.monster_frames_outlines = get_frame_outline(cls.monster_frames, 4)
 

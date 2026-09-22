@@ -11,7 +11,6 @@ Coasts = Literal[ 'grass', 'grass_i', 'sand_i', 'sand', 'rock', 'rock_i', 'ice',
 
 Biomes = Literal[ 'grass', 'grass_ice', 'sand' ]
 
-# TransitionState = Literal[ 'check_collision', 'fade_to_black', 'load_map', 'fade_to_light', 'done' ]
 TransitionState = Literal[ 'standby', 'fade_to_black', 'load_scene', 'fade_to_light', 'done' ]
 
 FontTypes = Literal[ 'regular', 'small', 'bold', 'dialog' ]
@@ -22,7 +21,7 @@ MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', '
 
 BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]
 
-BattleStates = Literal[ 'standby', 'ongoing', 'victory', 'defeat', 'back_to_world', 'defeated_enemy_dialog' ]
+BattleStates = Literal[ 'standby', 'ongoing', 'victory', 'defeat', 'back_to_world', 'defeated_enemy_dialog', 'evolution' ]
 
 Trainers = Literal['player', 'opponent']
 
@@ -30,7 +29,11 @@ Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
 
 BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
+EvolutionSates = Literal[ 'standby', 'display_current', 'display_evolution' ]
+
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
+
+Pos = tuple[ float, float ]
 
 
 class Size ( TypedDict ):

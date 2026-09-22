@@ -48,7 +48,9 @@ class Game:
 
 		self.game_over_manager = GameOverManager()
 		
-		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.evolution_manager = EvolutionManager(self.player, self.fonts['bold'], self.player_battle_sprites)
+		
+		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.evolution_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -58,7 +60,6 @@ class Game:
 
 		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)
 		
-		self.evolution_manager = EvolutionManager(self.player, self.battle_manager, self.player_battle_sprites)
 
 		self.is_game_over = False
 
@@ -98,7 +99,7 @@ class Game:
 
 				self.monster_index.update(dt)
 
-				self.evolution_manager.update()
+				self.evolution_manager.update(dt)
 				
 			pygame.display.update( )
 
