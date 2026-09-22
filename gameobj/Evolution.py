@@ -13,14 +13,14 @@ class Evolution:
 		self.current_surface = pygame.transform.scale2x(MM.monster_frames[monster_name]['idle'][0])
 		self.evolution_surface = pygame.transform.scale2x(MM.monster_frames[evolution_name]['idle'][0])
 
-		self.silhouete_surface = self.__set_silhouete_surface()
-		self.mask_tint, self.tint_speed = 0, 80
 
 		self.current_text_surface = self.__set_text_surface(font, f'{monster_name} is evolving!')
 		self.evolution_text_surface = self.__set_text_surface(font, f'{monster_name} evolved into {evolution_name}!')
 
 		self.canvas = required(pygame.display.get_surface())
 		self.tinted_surface = get_tinted_surface()
+		self.silhouete_surface = self.__set_silhouete_surface()
+		self.mask_tint, self.tint_speed = 0, 80
 
 		self.state = 'standby'
 
@@ -43,11 +43,17 @@ class Evolution:
 	def set_state ( self, state: EvolutionSates ):
 		self.state = state
 
-	def __display_current ( self, pos: Pos ):
+	def __set_state_to_evolution ( self ):
+		if self.mask_tint < 255: return
+		self.set_state('display_evolution')
+		self.timers['show evolution'].start()
+		self.mask_tint = 0
+
+	def __display_monster ( self, surface: Surface, pos: Pos ):
 		return compose(
-			lambda pos: get_rect(self.current_surface, center=pos),
+			lambda pos: get_rect(surface, center=pos),
 			lambda datas: display_item(self.canvas, datas)
-		)( (WINDOW_WIDTH/2, WINDOW_HEIGHT/2) )
+		)( pos )
 
 	def __set_tint ( self, dt: float, rect: FRect ):
 		self.mask_tint += self.tint_speed * dt
@@ -60,24 +66,32 @@ class Evolution:
 			lambda datas: display_item(self.canvas, datas)
 		)( rect )
 
-	def __display_text ( self, rect: FRect ):
+	def __display_text ( self, surface: Surface, rect: FRect ):
 		return compose(
-			lambda rect: get_rect(self.current_text_surface, midtop=rect.midbottom + vector2(0, 20)),
+			lambda rect: get_rect(surface, midtop=rect.midbottom + vector2(0, 20)),
 			lambda datas: display_item(self.canvas, datas)
 		)( rect )
 
 	def __handle_display_current ( self, dt: float ):
-		compose(
-			self.__display_current,
+		return compose(
+			lambda pos: self.__display_monster(self.current_surface, pos),
 			lambda rect: self.__display_silhouete(dt, rect),
-			self.__display_text
+			lambda rect: self.__display_text(self.current_text_surface, rect)
+		)( (WINDOW_WIDTH/2, WINDOW_HEIGHT/2) )
+
+	def __handle_display_evolution ( self ):
+		return compose(
+			lambda pos: self.__display_monster(self.evolution_surface, pos),
+			lambda rect: self.__display_text(self.evolution_text_surface, rect)
 		)( (WINDOW_WIDTH/2, WINDOW_HEIGHT/2) )
 
 
 	def update ( self, dt: float ):
 		tint(self.canvas, self.tinted_surface)
+		self.__set_state_to_evolution()
 
 		for timer in self.timers.values(): timer.update()
 
 		match self.state:
 			case 'display_current': self.__handle_display_current(dt)
+			case 'display_evolution': self.__handle_display_evolution()

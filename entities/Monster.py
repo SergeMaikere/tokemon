@@ -2,11 +2,11 @@ from random import randint
 
 from settings import *
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
-from utils.Types import Attacks
+from utils.Types import Attacks, MonsterNames
 from utils.Helper import between, min_number
 
 class Monster:
-	def __init__( self, name: str, level: int ) -> None:
+	def __init__( self, name: MonsterNames, level: int ) -> None:
 		self.name, self.level = name, level
 
 		self.base_stats = MONSTER_DATA[name]['stats']

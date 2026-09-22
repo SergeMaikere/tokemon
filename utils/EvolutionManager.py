@@ -27,7 +27,6 @@ class EvolutionManager:
 
 	def handle_evolution ( self ):
 		monster = self.__check_for_evolution()
-		voyeur(f'Evolution Manager check for evolution => {monster}')
 		if monster:
 			self.player.block()
 			self.evolution = Evolution(self.font, monster.name, monster.evolve[0], self.__end_evolution)

@@ -29,7 +29,7 @@ Icons = Literal[ 'sword', 'shield', 'arrows', 'hand' ]
 
 BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
-EvolutionSates = Literal[ 'standby', 'display_current', 'display_evolution' ]
+EvolutionSates = Literal[ 'display_current', 'display_evolution' ]
 
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
