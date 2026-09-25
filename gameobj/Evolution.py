@@ -1,5 +1,4 @@
 from typing import Callable
-
 from pygame import Font
 
 from settings import *
@@ -25,8 +24,8 @@ class Evolution:
 		self.state = 'standby'
 
 		self.timers = {
-			'start delay': Timer(800, autostart=True, func=lambda: self.set_state('display_current')),
-			'show evolution': Timer(1800, func=end_evolution)
+			'start delay': Timer(900, autostart=True, func=lambda: self.set_state('display_current')),
+			'show evolution': Timer(2100, func=end_evolution)
 		}
 
 	def __set_silhouete_surface ( self ):

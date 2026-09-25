@@ -90,7 +90,11 @@ class BattleManager:
 
 	def __check_for_evolution ( self ):
 		self.EM.handle_evolution()
-		self.state = 'defeated_enemy_dialog'
+		self.state = 'evolution_ongoing'
+
+	def __check_for_evolution_end ( self ):
+		if self.EM.evolution: return
+		self.set_state('defeated_enemy_dialog')
 
 	def update ( self, dt: float ):
 		if self.temp != self.state:
@@ -105,4 +109,5 @@ class BattleManager:
 			case 'defeat': self.__handle_defeat()
 			case 'back_to_world': self.__back_to_main_world(dt)
 			case 'evolution': self.__check_for_evolution()
+			case 'evolution_ongoing': self.__check_for_evolution_end()
 		self.__update_battle(dt)
