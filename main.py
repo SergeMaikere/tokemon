@@ -8,6 +8,7 @@ from utils.AllSprites import AllSprites
 from utils.CollisionManager import CollisionManager
 from utils.BattleManager import BattleManager
 from utils.BattleSprites import BattleSprites
+from utils.EvolutionManager import EvolutionManager
 from utils.GameOverManager import GameOverManager
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
@@ -47,7 +48,9 @@ class Game:
 
 		self.game_over_manager = GameOverManager()
 		
-		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.evolution_manager = EvolutionManager(self.player, self.fonts['bold'], self.player_battle_sprites)
+		
+		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.evolution_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -57,6 +60,7 @@ class Game:
 
 		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)
 		
+
 		self.is_game_over = False
 
 	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
@@ -94,6 +98,8 @@ class Game:
 				self.collision_manager.update(dt)
 
 				self.monster_index.update(dt)
+
+				self.evolution_manager.update(dt)
 				
 			pygame.display.update( )
 

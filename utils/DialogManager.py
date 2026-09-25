@@ -94,6 +94,8 @@ class DialogManager:
 	def update ( self ):		
 		if self.BM.is_state('defeated_enemy_dialog') and self.BM.character: 
 			self.__reinitiate_dialog(required(self.BM.character))
+		if self.BM.is_state('defeated_enemy_dialog') and not self.BM.character:
+			self.BM.set_state('standby')
 		
 		if not self.timer.running: return self.input()
 		self.timer.update()

@@ -5,7 +5,7 @@ from os.path import join
 from pygame.sprite import Sprite
 
 from entities.Entity import Entity
-from utils.Helper import load_image, required, voyeur
+from utils.Helper import load_image, required
 from utils.MyGroup import MyGroup
 
 class AllSprites ( MyGroup ):

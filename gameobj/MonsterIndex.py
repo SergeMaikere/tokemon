@@ -8,7 +8,7 @@ from settings import *
 from entities.Monster import Monster
 from entities.Player import Player
 from gameobj.SideList import SideList
-from utils.Helper import get_progress_bar, required, compose
+from utils.Helper import get_progress_bar, required, compose, get_tinted_surface
 from utils.MonsterManager import MonsterManager as MM
 from utils.Types import Attacks, FontTypes
 
@@ -21,7 +21,7 @@ class MonsterIndex:
 		self.ui_images = ui_images
 
 		self.canvas: Surface = required(pygame.display.get_surface())
-		self.tint_surface = self.__get_tinted_surface()
+		self.tint_surface = get_tinted_surface()
 
 		self.main_rect = pygame.FRect(0, 0, self.canvas.width * 0.6, self.canvas.height * 0.8).move_to(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
 
@@ -43,12 +43,6 @@ class MonsterIndex:
 		health_bar_rect = pygame.FRect((0, 0), (self.top_rect.width * 0.45, 30)).move_to(midtop=(self.top_rect.left + self.top_rect.width/4, self.top_rect.bottom + 10))
 		energy_bar_rect = pygame.FRect((0, 0), (self.top_rect.width * 0.45, 30)).move_to(midtop=(self.top_rect.right - self.top_rect.width/4, self.top_rect.bottom + 10))
 		return (health_bar_rect, energy_bar_rect)
-
-
-	def __get_tinted_surface ( self ):
-		tint_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-		tint_surface.set_alpha(200)
-		return tint_surface
 
 	def __input ( self ):
 		keys = pygame.key.get_just_pressed()
@@ -162,7 +156,7 @@ class MonsterIndex:
 		)
 
 		self.__set_text('regular', f'Hp: {int(monster.health)}/{monster.get_stat('max_health')}', midleft=health_rect.midleft + vector2(10, 0))
-		self.__set_text('regular', f'Exp: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
+		self.__set_text('regular', f'Energy: {int(monster.energy)}/{monster.get_stat('max_energy')}', midleft=energy_rect.midleft + vector2(10, 0))
 
 		return monster
 		
