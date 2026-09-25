@@ -8,10 +8,12 @@ from utils.Timer import Timer
 from utils.Types import EvolutionSates, MonsterNames, Pos
 
 class Evolution:
-	def __init__( self, font: Font, monster_name: MonsterNames, evolution_name: MonsterNames, end_evolution: Callable ) -> None:
+	def __init__( self, star_frames: list[Surface], font: Font, monster_name: MonsterNames, evolution_name: MonsterNames, end_evolution: Callable ) -> None:
+		self.star_frames = star_frames
+		self.star_index = 0
+		
 		self.current_surface = pygame.transform.scale2x(MM.monster_frames[monster_name]['idle'][0])
 		self.evolution_surface = pygame.transform.scale2x(MM.monster_frames[evolution_name]['idle'][0])
-
 
 		self.current_text_surface = self.__set_text_surface(font, f'{monster_name} is evolving!')
 		self.evolution_text_surface = self.__set_text_surface(font, f'{monster_name} evolved into {evolution_name}!')
@@ -48,7 +50,7 @@ class Evolution:
 		self.timers['show evolution'].start()
 		self.mask_tint = 0
 
-	def __display_monster ( self, surface: Surface, pos: Pos ):
+	def __display_surface ( self, surface: Surface, pos: Pos ):
 		return compose(
 			lambda pos: get_rect(surface, center=pos),
 			lambda datas: display_item(self.canvas, datas)
@@ -73,14 +75,20 @@ class Evolution:
 
 	def __handle_display_current ( self, dt: float ):
 		return compose(
-			lambda pos: self.__display_monster(self.current_surface, pos),
+			lambda pos: self.__display_surface(self.current_surface, pos),
 			lambda rect: self.__display_silhouete(dt, rect),
 			lambda rect: self.__display_text(self.current_text_surface, rect)
 		)( (WINDOW_WIDTH/2, WINDOW_HEIGHT/2) )
 
-	def __handle_display_evolution ( self ):
+	def __display_star_animation ( self, dt: float, rect: FRect ):
+		self.star_index += ANIMATION_SPEED * dt
+		surface = self.star_frames[int(self.star_index) % len(self.star_frames)]
+		return self.__display_surface(surface, rect.center)
+
+	def __handle_display_evolution ( self, dt: float ):
 		return compose(
-			lambda pos: self.__display_monster(self.evolution_surface, pos),
+			lambda pos: self.__display_surface(self.evolution_surface, pos),
+			lambda rect: self.__display_star_animation(dt, rect),
 			lambda rect: self.__display_text(self.evolution_text_surface, rect)
 		)( (WINDOW_WIDTH/2, WINDOW_HEIGHT/2) )
 
@@ -93,4 +101,4 @@ class Evolution:
 
 		match self.state:
 			case 'display_current': self.__handle_display_current(dt)
-			case 'display_evolution': self.__handle_display_evolution()
+			case 'display_evolution': self.__handle_display_evolution(dt)
