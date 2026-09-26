@@ -75,6 +75,7 @@ class DialogManager:
 	def finish_dialog ( self, dialog: Dialog, character: Entity ):
 		if character.nurse:
 			MM.heal_player_monsters()
+			self.player.unblock()
 		else:
 			self.__start_battle(character)
 		del dialog
