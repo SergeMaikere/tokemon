@@ -25,7 +25,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_soon_to_evolve_monsters(1)
+		cls.monsters = cls.get_random_monsters(3)
 
 		cls.monster_frames: dict[ MonsterNames, dict[Literal['idle', 'attack'], list[Surface]] ] = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -43,9 +43,7 @@ class MonsterManager:
 
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
-		return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, randint(1, 15)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		# return { i: monster for i, monster in enumerate([Monster(name, 30) for name in [name for name, data in MONSTER_DATA.items() if len(data['abilities']) > 4]]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 
 	@classmethod
 	def set_close_to_level_up ( cls, monster: Monster ):

@@ -21,7 +21,7 @@ class EvolutionManager:
 
 
 	def __check_for_evolution ( self ):
-		return next( (monster for monster in MM.monsters.values() if monster.level == monster.evolve[1]), None )
+		return next( (monster for monster in MM.monsters.values() if monster.evolve and monster.level == monster.evolve[1]), None )
 
 	def __end_evolution ( self ):
 		set_none(self, 'evolution')
