@@ -8,6 +8,7 @@ from utils.Helper import set_truthy
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import States
+from utils.MusicManager import MusicManager as Music
 from utils.DialogTools import is_dialog_possible, turn_toward_entity
 
 class Character ( Entity ):
@@ -80,6 +81,7 @@ class Character ( Entity ):
 		if self.noticed_timer.running: return self.noticed_timer.update()
 		self.player.set_is_noticed(True)
 		self.noticed_timer.start()
+		Music.play('notice')
 
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)

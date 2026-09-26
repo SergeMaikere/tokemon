@@ -31,6 +31,8 @@ BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
 EvolutionSates = Literal[ 'display_current', 'display_evolution' ]
 
+Sounds = Literal[ 'battle', 'evolution', 'fire', 'green', 'ice', 'notice', 'overworld', 'scratch', 'splash' ]
+
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
 Pos = tuple[ float, float ]

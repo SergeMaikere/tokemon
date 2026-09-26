@@ -7,6 +7,7 @@ from entities.Entity import Entity
 from entities.Player import Player
 from gameobj.MonsterPatch import MonsterPatch
 from gameobj.Battle import Battle
+from utils.MusicManager import MusicManager as Music
 from utils.GameOverManager import GameOverManager
 from utils.EvolutionManager import EvolutionManager
 from utils.Helper import images_loader_dict, set_none, set_truthy
@@ -49,12 +50,14 @@ class BattleManager:
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
 		self.set_state('ongoing')
-
+		Music.switch('overworld', 'battle')
+	
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		self.patch = sprite
 		monsters = { i: (monster_name, sprite.level + randint(-3, 3)) for i, monster_name in enumerate(sprite.monsters) }
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 		self.set_state('ongoing')
+		Music.switch('overworld', 'battle')
 
 	def __handle_victory ( self ):
 		if self.character:
@@ -87,19 +90,24 @@ class BattleManager:
 	def __back_to_main_world ( self, dt: float ):
 		if self.transition_overworld.state == 'standby': self.set_state('evolution')
 		self.transition_overworld.update(dt)
+		Music.switch('battle', 'overworld')
 
 	def __check_for_evolution ( self ):
-		self.EM.handle_evolution()
-		self.state = 'evolution_ongoing'
+		evolution = self.EM.handle_evolution()
+		if evolution: 
+			self.state = 'evolution_ongoing'
+			Music.switch('overworld', 'evolution')
 
 	def __check_for_evolution_end ( self ):
 		if self.EM.evolution: return
 		self.set_state('defeated_enemy_dialog')
+		Music.switch('evolution', 'overworld')
 
 	def update ( self, dt: float ):
 		if self.temp != self.state:
 			voyeur(f'Battle Manager state => {self.state}')
 			self.temp = self.state
+
 		match self.state:
 			case 'standby': return
 			case 'ongoing':

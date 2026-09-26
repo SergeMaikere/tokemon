@@ -32,6 +32,7 @@ class EvolutionManager:
 		if monster:
 			self.player.block()
 			self.evolution = Evolution(self.stars, self.font, monster.name, monster.evolve[0], self.__end_evolution)
+		return bool(monster)
 	
 	def update ( self, dt: float ):
 		if not self.evolution: return

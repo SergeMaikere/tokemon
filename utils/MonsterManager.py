@@ -54,7 +54,7 @@ class MonsterManager:
 
 	@classmethod
 	def get_soon_to_evolve_monsters ( cls, n: int ):
-		return { j: cls.set_close_to_level_up(Monster('Gulfin', 29)) for j in [i for i in range(n)] }
+		return { j: cls.set_close_to_level_up(Monster('Gulfin', 31)) for j in [i for i in range(n)] }
 	
 	@classmethod	
 	def get_monster_list ( cls ): return [ monster for monster in cls.monsters.values() ]

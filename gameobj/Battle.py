@@ -18,6 +18,7 @@ from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
 from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer
 from utils.MonsterManager import MonsterManager as MM
+from utils.MusicManager import MusicManager
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import Elements, FontTypes, Menu, MonsterNames, Trainers, BattleMode, Attacks
@@ -351,6 +352,7 @@ class Battle:
 	def __animate_attack ( self ):
 		if not self.attack or not self.targeted_monster: return
 		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
+		MusicManager.play_attack(self.attack)
 
 	def __update_health ( self ):
 		if not self.attack or not self.targeted_monster: return

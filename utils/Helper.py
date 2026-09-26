@@ -230,4 +230,9 @@ load_frames: Callable = compose(load_image, partial(row_cut, (4, 4), States.__ar
 
 frames_loader: Callable = partial(small_walker, load_frames, join('assets', 'graphics', 'characters'))
 
+load_sound: Callable = lambda path: pygame.mixer.Sound(path)
+
+sound_loader: Callable = lambda *path: big_walker_dict(load_sound, *path)
+
+
 

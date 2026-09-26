@@ -12,9 +12,10 @@ from utils.EvolutionManager import EvolutionManager
 from utils.GameOverManager import GameOverManager
 from utils.MapsLoader import MapsLoader
 from utils.MonsterManager import MonsterManager
+from utils.MusicManager import MusicManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, set_truthy
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, sound_loader
 from utils.Types import FontTypes
 
 class Game:
@@ -45,6 +46,7 @@ class Game:
 		self.player = self.get_player(map_loader('world'), 'house')
 
 		MonsterManager.init()
+		MusicManager.init()
 
 		self.game_over_manager = GameOverManager()
 		
@@ -74,6 +76,7 @@ class Game:
 	def run ( self ):
 		
 		self.maps_loader.setup(self.maps_loader.maps['world'])
+		MusicManager.play_in_loop('overworld')
 
 		while True:
 			dt = self.clock.tick(60) / 1000
