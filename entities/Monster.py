@@ -23,9 +23,9 @@ class Monster:
 		self.is_defending = False
 
 	@property
-	def health ( self ): return min_number(0, self._health)
+	def health ( self ): return self._health
 	@health.setter
-	def health ( self, v: float ): self._health = v
+	def health ( self, v: float ): self._health = between(0, self.get_stat('max_health'), v)
 
 	@property
 	def energy ( self ): return min_number(0, self._energy)
@@ -59,6 +59,9 @@ class Monster:
 	def take_damage ( self, amount: float ):
 		defense = between(0, 1, 1 - (self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0))
 		self.health -= amount * defense
+
+	def lose_energy ( self, amount: float ):
+		self.energy -= amount
 
 	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
 

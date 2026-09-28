@@ -57,7 +57,7 @@ class Game:
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
 		self.maps_loader = MapsLoader(self.player, self.dialog_manager, self.all_sprites, self.collision_sprites, self.character_sprites, self.transition_sprites, self.monster_patch_sprites)
-
+ 
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
 		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)

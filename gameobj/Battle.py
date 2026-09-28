@@ -364,6 +364,11 @@ class Battle:
 			self.targeted_monster.monster.take_damage
 		)(self.attack)
 
+	def __update_energy ( self ):
+		if not self.attack or not self.targeted_monster: return
+		self.current_monster.monster.lose_energy(ATTACK_DATA[self.attack]['cost'])
+
+
 	def __halve ( self, element_datas: tuple[Elements, Elements], amount: float ):
 		attack, monster = element_datas
 		if attack == 'fire' and monster == 'water' or \

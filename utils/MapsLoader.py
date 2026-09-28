@@ -111,7 +111,6 @@ class MapsLoader:
 
 	def transition_setup( self, transition_sprite: TransitionSprite ):
 		self.__kill_all_sprites()
-
 		target = transition_sprite.target
 		player_spawn_pos = transition_sprite.player_spawn_pos
 		

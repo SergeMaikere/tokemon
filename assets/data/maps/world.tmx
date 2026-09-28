@@ -184,7 +184,7 @@
 </data>
  </layer>
  <objectgroup id="3" name="Entities">
-  <object id="12" name="Player" x="4257.94" y="3731.26">
+  <object id="12" name="Player" x="4451.27" y="3845.93">
    <properties>
     <property name="direction" value="down"/>
     <property name="pos" value="house"/>
@@ -282,14 +282,14 @@
    </properties>
    <point/>
   </object>
-  <object id="1149" name="Player" x="4318.32" y="1482.47">
+  <object id="1149" name="Player" x="4318.32" y="1482.47" visible="0">
    <properties>
     <property name="direction" value="down"/>
     <property name="pos" value="plant"/>
    </properties>
    <point/>
   </object>
-  <object id="1151" name="Player" x="1790.75" y="2304.25">
+  <object id="1151" name="Player" x="1790.75" y="2304.25" visible="0">
    <properties>
     <property name="direction" value="down"/>
     <property name="pos" value="hospital2"/>
@@ -4335,38 +4335,38 @@
   <object id="1133" x="1935.25" y="2341.25" width="416" height="58.5"/>
   <object id="1134" x="1616" y="2085.75" width="352" height="58.5"/>
  </objectgroup>
- <objectgroup id="5" name="Transition" visible="0">
+ <objectgroup id="5" name="Transition">
   <object id="17" x="4421.09" y="3770.75" width="54.6667" height="3.83333">
    <properties>
     <property name="pos" value="world"/>
     <property name="target" value="house"/>
    </properties>
   </object>
-  <object id="18" x="4226.67" y="3389.33" width="120" height="3.81818">
+  <object id="18" x="4226.67" y="3389.33" width="120" height="3.81818" visible="0">
    <properties>
     <property name="pos" value="world"/>
     <property name="target" value="hospital"/>
    </properties>
   </object>
-  <object id="930" x="706.667" y="891.417" width="54.6667" height="3.83333">
+  <object id="930" x="706.667" y="891.417" width="54.6667" height="3.83333" visible="0">
    <properties>
     <property name="pos" value="entrance"/>
     <property name="target" value="water"/>
    </properties>
   </object>
-  <object id="962" x="1344" y="3904" width="54.6667" height="3.83333">
+  <object id="962" x="1344" y="3904" width="54.6667" height="3.83333" visible="0">
    <properties>
     <property name="pos" value="entrance"/>
     <property name="target" value="fire"/>
    </properties>
   </object>
-  <object id="1148" x="4292.85" y="1400.08" width="54.6667" height="3.83333">
+  <object id="1148" x="4292.85" y="1400.08" width="54.6667" height="3.83333" visible="0">
    <properties>
     <property name="pos" value="entrance"/>
     <property name="target" value="plant"/>
    </properties>
   </object>
-  <object id="1150" x="1731.67" y="2170.92" width="120" height="3.81818">
+  <object id="1150" x="1731.67" y="2170.92" width="120" height="3.81818" visible="0">
    <properties>
     <property name="pos" value="world"/>
     <property name="target" value="hospital2"/>

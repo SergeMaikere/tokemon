@@ -78,7 +78,7 @@ class DialogManager:
 			self.player.unblock()
 		else:
 			self.__start_battle(character)
-		del dialog
+		set_none(self, 'current_dialog')
 
 	def __start_battle ( self, character: Entity ):
 		set_none(self, 'current_dialog')

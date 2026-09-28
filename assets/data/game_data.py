@@ -265,15 +265,15 @@ TRAINER_DATA = {
 MONSTER_DATA = {
 	'Plumette': {
 		'stats': {'element': 'plant', 'max_health': 15, 'max_energy': 17, 'attack': 4, 'defense': 8, 'recovery': 5, 'speed': 1},
-		'abilities': {0: 'scratch', 5: 'splash'},
+		'abilities': {0: 'scratch', 5: 'spark'},
 		'evolve': ('Ivieron', 15)},
 	'Ivieron': {
 		'stats': {'element': 'plant', 'max_health': 18, 'max_energy': 20, 'attack': 5, 'defense': 10, 'recovery': 6, 'speed': 1.2},
-		'abilities': {0: 'scratch', 5: 'splash', 10: 'heal'},
+		'abilities': {0: 'scratch', 5: 'spark', 10: 'heal'},
 		'evolve': ('Pluma', 32)},
 	'Pluma': {
 		'stats': {'element': 'plant', 'max_health': 23, 'max_energy': 25, 'attack': 6, 'defense': 12, 'recovery': 7, 'speed': 1.8},
-		'abilities': {0: 'scratch', 5: 'splash', 10: 'heal'},
+		'abilities': {0: 'scratch', 5: 'spark', 10: 'heal'},
 		'evolve': None},
 	'Sparchu': {
 		'stats': {'element': 'fire', 'max_health': 15, 'max_energy': 17, 'attack': 3, 'defense': 8, 'recovery': 5, 'speed': 1},
