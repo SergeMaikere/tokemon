@@ -7,10 +7,10 @@ from gameobj.AnimatedSprite import AnimatedSprite
 from utils.Helper import required, compose
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
-from utils.Types import Trainers
+from utils.Types import Pos, Trainers
 
 class MonsterSprite ( AnimatedSprite ):
-	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline_frames: dict[str, list[Surface]], pos: Point, handle_attack: Callable, *groups: MyGroup) -> None:
+	def __init__(self, monster: Monster, entity: Trainers, frames: dict[str, list[Surface]], outline_frames: dict[str, list[Surface]], pos: Pos, handle_attack: Callable, *groups: MyGroup) -> None:
 		
 		self.monster = monster
 		self.entity: Trainers = entity

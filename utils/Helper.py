@@ -1,6 +1,7 @@
 from random import sample
 from types import new_class
 
+from pygame.font import match_font
 from pygame.sprite import Sprite
 from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
@@ -15,7 +16,7 @@ from pytmx.util_pygame import load_pygame
 
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
-from utils.Types import Coasts, FontTypes, MonsterNames, States
+from utils.Types import Coasts, FontTypes, MonsterNames, Pos, States, Trainers
 
 T = TypeVar('T')
 
@@ -58,6 +59,15 @@ def required ( v: Optional[T]) -> T:
 def quit_game ():
 	pygame.quit()
 	exit()
+
+def get_index_from_battle_pos ( pos: Pos ):
+	match pos:
+		case (360, 260): return 0
+		case (900, 260): return 0
+		case (190, 400): return 1
+		case (1110, 390): return 1
+		case (410, 520): return 2
+		case _: return 2
 
 def big_walker_dict ( func: Callable[ [str], Any ], *path: str ):
 	obj = {}

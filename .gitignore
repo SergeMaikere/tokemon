@@ -1,5 +1,10 @@
+# Personal Notes
+bugs.txt
+convert_wav.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.pytest_cache/
 *.py[codz]
 *$py.class
 

@@ -25,7 +25,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_random_monsters(3)
+		cls.monsters = cls.get_specific_monsters([('Plumette', 30), ('Charmadillo', 30)])
 
 		cls.monster_frames: dict[ MonsterNames, dict[Literal['idle', 'attack'], list[Surface]] ] = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -46,16 +46,11 @@ class MonsterManager:
 		return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 
 	@classmethod
-	def set_close_to_level_up ( cls, monster: Monster ):
-		monster.xp = monster.level_up
-		return monster
-
-	@classmethod
-	def get_soon_to_evolve_monsters ( cls, n: int ):
-		return { j: cls.set_close_to_level_up(Monster('Gulfin', 31)) for j in [i for i in range(n)] }
+	def get_specific_monsters ( cls, datas: list[tuple[MonsterNames, int]] ):
+		return { i: Monster(data[0], data[1]) for i, data in enumerate(datas) }
 	
 	@classmethod	
-	def get_monster_list ( cls ): return [ monster for monster in cls.monsters.values() ]
+	def get_monster_list ( cls ): return [ monster for monster in cls.get('monsters').values() ]
 
 	@classmethod
 	def get_attack_data ( cls, attack: Attacks, data: str ): return ATTACK_DATA[attack][data]
@@ -68,12 +63,10 @@ class MonsterManager:
 				max_stats[stat] = value if not stat in max_stats else max(max_stats[stat], value)
 		return { stat.replace('max_', ''): value for stat, value in max_stats.items()}
 
-	@classmethod
-	def get_player_battle_monsters ( cls ): return [ monster for monster in cls.monsters.values() ]
 	
 	@classmethod	
 	def get_opponent_battle_monsters ( cls, opponent_monsters: dict[int, tuple[MonsterNames, int]] ): 
-		return [ Monster(data[0], data[1]) for data in  opponent_monsters.values() ]
+		return { i: Monster(data[0], data[1]) for i, data in  opponent_monsters.items() }
 
 	@classmethod
 	def add_monster ( cls, sprite: MonsterSprite ):
@@ -90,7 +83,7 @@ class MonsterManager:
 
 	@classmethod
 	def heal_player_monsters ( cls ):
-		for monster in cls.monsters.values():
+		for monster in cls.get('monsters').values():
 			monster.health = monster.get_stat('max_health')
 
 

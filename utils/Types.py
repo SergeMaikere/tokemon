@@ -1,6 +1,5 @@
 
-from typing import Literal, TypedDict
-
+from typing import Callable, Generic, Literal, TypeVar, TypedDict, cast
 from pygame import Vector2
 from pytmx.pytmx import ColorLike
 
@@ -37,6 +36,15 @@ Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
 Pos = tuple[ float, float ]
 
+T = TypeVar('T')
+
+class LazyDict ( dict[ str, T | Callable[[], T] ], Generic[T] ):
+	def __getitem__(self, key: str) -> T:
+		value = super().__getitem__(key)
+		if callable(value): 
+			func = cast(Callable[[], T], value)
+			return func()
+		return value
 
 class Size ( TypedDict ):
 	width: float
