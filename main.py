@@ -76,7 +76,7 @@ class Game:
 	def run ( self ):
 		
 		self.maps_loader.setup(self.maps_loader.maps['world'])
-		MusicManager.play_in_loop('overworld')
+		# MusicManager.play_in_loop('overworld')
 
 		while True:
 			dt = self.clock.tick(60) / 1000

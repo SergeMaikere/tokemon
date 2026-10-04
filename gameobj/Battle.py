@@ -84,7 +84,6 @@ class Battle:
 		self.__initiate_battle()
 
 
-
 	
 	
 	# DISPLAY MONSTERS
@@ -406,11 +405,13 @@ class Battle:
 		self.__draw_trainer_monsters('player', self.monsters['player'])
 		self.switch_list.switched, self.mode = None, None
 		self.__unfreeze_all_monsters()
-		
+
+	## Target	
 	def __select_target ( self ):
 		if self.mode != 'target' or not self.target: return
-		sprites = self.player_battle_sprites if self.target == 'player' else self.opponent_battle_sprites
-		self.targeted_monster = sprites.sprites()[self.indexes['target']]
+		sprites = self.__get_battle_sprites(self.target)
+		self.targeted_monster = next( (s for s in sprites.sprites() if s.monster == self.monsters[self.target][self.indexes['target']]), None )
+
 
 
 	
@@ -430,16 +431,18 @@ class Battle:
 		dying = self.__get_dead_monster()
 		if not dying: return
 		if self.opponent_battle_sprites in dying.groups(): 
+			voyeur(f'Bury opponent monster before => {self.monsters['opponent']}')
 			self.__bury_the_opponent_monster(dying)
+			voyeur(f'Bury opponent monster after => {self.monsters['opponent']}')
 		else: 
 			self.__bury_the_player_monster(dying)
 		self.__unfreeze_all_monsters()
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
 		return compose(
+			lambda dying: kill_sprite(dying),
 			lambda dying: self.__remove_monster(dying, 'opponent'),
 			lambda dying: self.__add_monster_to_battle('opponent', dying),
-			lambda dying: kill_sprite(dying),
 			self.__add_xp
 		)( dying )
 
@@ -453,16 +456,14 @@ class Battle:
 	
 		
 	def __remove_monster ( self, dying: MonsterSprite, entity: Trainers ):
-		voyeur(f'Battle number of monsters {entity} has left before __remove_monster => {len(self.monsters[entity])}')
 		self.monsters[entity] = { i: monster for i, monster in self.monsters[entity].items() if monster != dying.monster }
-		voyeur(f'Battle number of monsters {entity} has left after __remove_monster => {len(self.monsters[entity])}')
 		return dying
 
 	def __set_new_monster ( self, entity: Trainers, pos: Pos, datas: tuple[int, Monster] ):
 		self.monsters[entity][get_index_from_battle_pos(pos)] = datas[1]
 		return datas
 
-	def __remove_monster_by_index ( self, entity: Trainers, datas: tuple[int, Monster] ):
+	def __remove_monster_by_index ( self, entity: Trainers, datas: tuple[ int, MonsterSprite] ):
 		del self.monsters[entity][datas[0]]
 		return datas
 
@@ -522,7 +523,7 @@ class Battle:
 		[ sprite.set_paused(False) for sprite in self.__get_all_fighters_sprites() ]
 
 	def __reset_indexes ( self ): 
-		self.indexes = { k: 0 for k in self.indexes.keys() }
+		self.indexes = { k: 0 for k in self.indexes }
 
 	def __reset_variables_to_none ( self, names: list[str] ):
 		for name in names: setattr(self, name, None)
@@ -545,7 +546,7 @@ class Battle:
 			kill_sprite(sprite)
 
 	def __get_group_size ( self, entity: Trainers ): 
-		return len( self.player_battle_sprites.sprites() if entity == 'player' else self.opponent_battle_sprites.sprites() )
+		return len( self.__get_battle_sprites(entity).sprites() )
 
 	def is_player_targeted ( self ): return self.mode == 'target' and self.target == 'player'
 	

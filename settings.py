@@ -70,3 +70,4 @@ def voyeur ( x: Any ):
 	print(x)
 	print('************\n')
 	return x
+
