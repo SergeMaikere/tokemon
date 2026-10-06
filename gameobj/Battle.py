@@ -324,7 +324,7 @@ class Battle:
 	def __handle_monster_catch ( self ):
 		compose(
 			lambda catched: self.__bury_the_opponent_monster(catched),
-			self.__add_player_monster,
+			MM.add_monster,
 		)(self.targeted_monster)
 		self.__reset_batlle_sprites()
 
@@ -369,10 +369,6 @@ class Battle:
 			lambda amount: self.__double(elememt_datas, amount),
 			self.targeted_monster.monster.take_damage
 		)(self.attack)
-
-	# def __update_energy ( self ):
-	# 	if not self.attack or not self.targeted_monster: return
-	# 	required(self.current_monster).monster.lose_energy(ATTACK_DATA[self.attack]['cost'])
 
 
 	def __halve ( self, element_datas: tuple[Elements, Elements], amount: float ):
@@ -433,9 +429,7 @@ class Battle:
 		if self.opponent_battle_sprites in dying.groups(): 
 			self.__bury_the_opponent_monster(dying)
 		else: 
-			voyeur(f'Bury player monster before => {self.monsters['player']}')
 			self.__bury_the_player_monster(dying)
-			voyeur(f'Bury player monster after => {self.monsters['player']}')
 		self.__unfreeze_all_monsters()
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
@@ -468,11 +462,6 @@ class Battle:
 		for sprite in self.player_battle_sprites: 
 			sprite.monster.update_xp(amount)
 		return dying
-
-	def __add_player_monster ( self, monster_sprite: MonsterSprite ):
-		MM.add_monster(monster_sprite)
-		self.monsters['player'][len(self.monsters['player'])] = monster_sprite.monster
-		return monster_sprite
 
 	def __get_next_monster ( self, entity: Trainers ):
 		monster_sprites = [sprite.monster for sprite in self.__get_battle_sprites(entity).sprites()] 
