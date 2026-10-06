@@ -213,6 +213,10 @@ class MonsterIndex:
 		self.canvas.blit(surface, rect)
 		return  datas
 
+	def __get_current_monster ( self ):
+		keys = list(MM.get('monsters').keys())
+		return MM.get('monsters')[keys[self.side_list.index]]
+
 	def __display ( self, dt: float ):
 		if not self.open: return
 		self.__tint()
@@ -224,7 +228,7 @@ class MonsterIndex:
 			self.__display_progress_bars,
 			self.__display_stats,
 			self.__display_abilities,
-		)(MM.get('monsters')[self.side_list.index])
+		)( self.__get_current_monster() )
 
 		self.__draw_side_list_shadow()
 
