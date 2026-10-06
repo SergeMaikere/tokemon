@@ -431,11 +431,11 @@ class Battle:
 		dying = self.__get_dead_monster()
 		if not dying: return
 		if self.opponent_battle_sprites in dying.groups(): 
-			voyeur(f'Bury opponent monster before => {self.monsters['opponent']}')
 			self.__bury_the_opponent_monster(dying)
-			voyeur(f'Bury opponent monster after => {self.monsters['opponent']}')
 		else: 
+			voyeur(f'Bury player monster before => {self.monsters['player']}')
 			self.__bury_the_player_monster(dying)
+			voyeur(f'Bury player monster after => {self.monsters['player']}')
 		self.__unfreeze_all_monsters()
 
 	def __bury_the_opponent_monster ( self, dying: MonsterSprite ):
@@ -449,7 +449,6 @@ class Battle:
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
 		return compose( 
 			lambda dying: kill_sprite(dying),
-			lambda dying: self.__remove_monster(dying, 'player'), 
 			lambda dying: MM.remove_monster(dying),
 			lambda dying: self.__add_monster_to_battle('player', dying),
 		)( dying )
@@ -462,7 +461,6 @@ class Battle:
 		if len(self.monsters[entity]) < self.max_fighting_monsters: return dying
 		new_guy = self.__get_next_monster(entity)
 		self.__create_battle_sprite(dying.pos, entity, new_guy)
-		
 		return dying
 
 	def __add_xp ( self, dying: MonsterSprite ):

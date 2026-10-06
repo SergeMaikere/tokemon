@@ -44,7 +44,7 @@ class MonsterManager:
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
 		# return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(monster_name, 30) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, 5) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 
 	@classmethod
 	def get_specific_monsters ( cls, datas: list[tuple[MonsterNames, int]] ):
@@ -76,10 +76,7 @@ class MonsterManager:
 
 	@classmethod
 	def remove_monster ( cls, sprite: MonsterSprite ):
-		cls.monsters = compose(
-			lambda monsters: [ monster for monster in monsters.values() if monster != sprite.monster ],
-			lambda monsters: { i: m for i, m in enumerate(monsters) } 
-		)( cls.monsters )
+		cls.monsters = { i: m for i, m in cls.get('monsters').items() if m != sprite.monster }
 		return sprite
 
 	@classmethod
