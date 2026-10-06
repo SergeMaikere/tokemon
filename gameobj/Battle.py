@@ -409,8 +409,8 @@ class Battle:
 	## Target	
 	def __select_target ( self ):
 		if self.mode != 'target' or not self.target: return
-		sprites = self.__get_battle_sprites(self.target)
-		self.targeted_monster = next( (s for s in sprites.sprites() if s.monster == self.monsters[self.target][self.indexes['target']]), None )
+		sprites = { s.pos_index: s for s in sorted(self.__get_battle_sprites(self.target), key=lambda s: s.pos_index) }
+		self.targeted_monster = sprites[ list(sprites.keys())[self.indexes['target']] ]
 
 
 
@@ -448,32 +448,20 @@ class Battle:
 
 	def __bury_the_player_monster ( self, dying: MonsterSprite ):
 		return compose( 
+			lambda dying: kill_sprite(dying),
 			lambda dying: self.__remove_monster(dying, 'player'), 
 			lambda dying: MM.remove_monster(dying),
 			lambda dying: self.__add_monster_to_battle('player', dying),
-			lambda dying: kill_sprite(dying)
 		)( dying )
-	
 		
 	def __remove_monster ( self, dying: MonsterSprite, entity: Trainers ):
 		self.monsters[entity] = { i: monster for i, monster in self.monsters[entity].items() if monster != dying.monster }
 		return dying
 
-	def __set_new_monster ( self, entity: Trainers, pos: Pos, datas: tuple[int, Monster] ):
-		self.monsters[entity][get_index_from_battle_pos(pos)] = datas[1]
-		return datas
-
-	def __remove_monster_by_index ( self, entity: Trainers, datas: tuple[ int, MonsterSprite] ):
-		del self.monsters[entity][datas[0]]
-		return datas
-
 	def __add_monster_to_battle ( self, entity: Trainers, dying: MonsterSprite ):
 		if len(self.monsters[entity]) < self.max_fighting_monsters: return dying
-		compose(
-			lambda datas: self.__set_new_monster(entity, dying.pos, datas),
-			lambda datas: self.__remove_monster_by_index(entity, datas),
-			lambda datas: self.__create_battle_sprite(dying.pos, entity, datas[1])
-		)( self.__get_next_monster(entity) )
+		new_guy = self.__get_next_monster(entity)
+		self.__create_battle_sprite(dying.pos, entity, new_guy)
 		
 		return dying
 
@@ -490,7 +478,7 @@ class Battle:
 
 	def __get_next_monster ( self, entity: Trainers ):
 		monster_sprites = [sprite.monster for sprite in self.__get_battle_sprites(entity).sprites()] 
-		return required(next(((i, monster) for i, monster in self.monsters[entity].items() if monster not in monster_sprites), None))
+		return required(next((monster for monster in self.monsters[entity].values() if monster not in monster_sprites), None))
 
 
 	# END OF BATTLE

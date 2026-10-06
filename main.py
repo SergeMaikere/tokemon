@@ -70,7 +70,7 @@ class Game:
 		if obj:
 			return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 		else:
-			raise ValueError('Player datas are missing from tmx map')
+			 raise ValueError('Player datas are missing from tmx map')
 
 
 	def run ( self ):

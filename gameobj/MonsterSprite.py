@@ -4,7 +4,7 @@ from typing import Callable, Literal
 from settings import *
 from entities.Monster import Monster
 from gameobj.AnimatedSprite import AnimatedSprite
-from utils.Helper import required, compose
+from utils.Helper import get_index_from_battle_pos, required, compose
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import Pos, Trainers
@@ -16,6 +16,7 @@ class MonsterSprite ( AnimatedSprite ):
 		self.entity: Trainers = entity
 		self.outline_frames = outline_frames
 		self.pos = pos
+		self.pos_index = get_index_from_battle_pos(pos)
 		self.handle_attack = handle_attack
 		self.my_groups = groups
 		
