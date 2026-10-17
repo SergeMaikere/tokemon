@@ -27,7 +27,7 @@ class BattleManager:
 
 		self.player = player
 		self.EM = evolution_manager
-		self.GOM = GameOverManager
+		self.GOM = GameOverManager()
 
 		self.fonts = fonts
 		self.ui_images = ui_images
@@ -37,6 +37,7 @@ class BattleManager:
 		self.battle, self.character, self.patch = None, None, None
 
 		self.transition_overworld = Transition(self.player, lambda _: set_none(self, 'battle'))
+		self.transition_game_over = Transition(self.player, lambda _: set_none(self, 'battle'))
 		self.state: BattleStates = 'standby'
 		self.temp = None
 
@@ -70,10 +71,10 @@ class BattleManager:
 		self.transition_overworld.start()
 		self.set_state('back_to_world')
 
-	def __handle_defeat ( self ):
-		set_truthy(self.GOM, 'is_game_over')
-		self.transition_overworld.start()
-		self.set_state('back_to_world')
+	def __go_to_game_over ( self, dt: float ):
+		if self.transition_game_over.state == 'standby': self.set_state('standby')
+		self.transition_game_over.update(dt)
+		
 
 	def __check_victory ( self ):
 		if self.battle and self.battle.victory:
@@ -81,7 +82,10 @@ class BattleManager:
 
 	def __check_defeat ( self ):
 		if self.battle and self.battle.defeat:
-			self.set_state('defeat')
+			self.transition_game_over.start()
+			set_truthy(self.GOM, 'is_game_over')
+			self.set_state('go_to_game_over')
+			Music.switch('battle', 'game_over')
 
 	def __update_battle ( self, dt: float ):
 		if not self.battle: return
@@ -114,8 +118,8 @@ class BattleManager:
 				self.__check_victory()
 				self.__check_defeat()
 			case 'victory': self.__handle_victory()
-			case 'defeat': self.__handle_defeat()
 			case 'back_to_world': self.__back_to_main_world(dt)
 			case 'evolution': self.__check_for_evolution()
 			case 'evolution_ongoing': self.__check_for_evolution_end()
+			case 'go_to_game_over': self.__go_to_game_over(dt)
 		self.__update_battle(dt)

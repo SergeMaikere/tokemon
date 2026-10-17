@@ -7,7 +7,7 @@ from gameobj.MonsterSprite import MonsterSprite
 from settings import *
 from entities.Monster import Monster
 from utils.Helper import get_frame_outline, images_loader_dict, monsters_frames_loader, required, compose
-from utils.Types import Attacks, MonsterNames, Trainers
+from utils.Types import Attacks, MonsterNames
 
 
 
@@ -25,7 +25,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_random_monsters(2)
+		cls.monsters = cls.get_random_monsters(1)
 
 		cls.monster_frames: dict[ MonsterNames, dict[Literal['idle', 'attack'], list[Surface]] ] = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -44,7 +44,7 @@ class MonsterManager:
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
 		# return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
-		return { i: monster for i, monster in enumerate([Monster(monster_name, 30) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, 1) for monster_name in sample([name for name in MONSTER_DATA.keys()], n)]) }
 
 	@classmethod
 	def get_specific_monsters ( cls, datas: list[tuple[MonsterNames, int]] ):
@@ -83,5 +83,6 @@ class MonsterManager:
 	def heal_player_monsters ( cls ):
 		for monster in cls.get('monsters').values():
 			monster.health = monster.get_stat('max_health')
+			monster.energy = monster.get_stat('max_energy')
 
 

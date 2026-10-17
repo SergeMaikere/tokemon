@@ -1,7 +1,7 @@
 from functools import partial
 from os.path import join
 from random import choice
-from typing import Callable, Literal, TypeAlias, cast
+from typing import Literal, TypeAlias, cast
 from pygame import Font
 
 from settings import *
@@ -16,7 +16,7 @@ from gameobj.MonsterLevelSprite import MonsterLevelSprite
 from gameobj.MonsterNameSprite import MonsterNameSprite
 from gameobj.MonsterStatsSprite import MonsterStatsSprite
 from gameobj.MonsterSprite import MonsterSprite
-from utils.Helper import display_item, get_index_from_battle_pos, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer
+from utils.Helper import display_item, get_rect, kill_sprite, required, get_group, compose, images_loader_dict, cut, set_falsy, set_truthy, start_timer
 from utils.MonsterManager import MonsterManager as MM
 from utils.MusicManager import MusicManager
 from utils.MyGroup import MyGroup
@@ -183,9 +183,8 @@ class Battle:
 		start_timer(self.timers['delayed attack'])
 	
 	def __target_player_monster ( self, sprite: MonsterSprite ):
-		self.target = 'player'
 		self.targeted_monster = choice(self.player_battle_sprites.sprites())
-		self.attack = choice(sprite.monster.get_abilities(False))
+		self.attack = choice([attack for attack in sprite.monster.get_abilities(False) if attack != 'heal' and attack != 'battlecry'])
 		return sprite
 
 	
@@ -350,25 +349,36 @@ class Battle:
 		self.target = ATTACK_DATA[self.attack]['target']
 
 	def __handle_attack ( self ):
+		if not self.attack: return
 		print(self.attack)
-		self.__animate_attack()
-		self.__update_health()
+		compose(
+			self.__animate_attack,
+			self.__update_health,
+			self.__update_energy
+		)( self.attack )
 		self.__resume_battle()
 
-	def __animate_attack ( self ):
-		if not self.attack or not self.targeted_monster: return
-		AttackAnimation(self.attack_frames[ATTACK_DATA[self.attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
-		MusicManager.play_attack(self.attack)
+	def __animate_attack ( self, attack: Attacks ):
+		if not self.targeted_monster: return
+		AttackAnimation(self.attack_frames[ATTACK_DATA[attack]['animation']], self.targeted_monster.rect.center, self.battle_sprites)
+		MusicManager.play_attack(attack)
+		return attack
 
-	def __update_health ( self ):
-		if not self.attack or not self.targeted_monster: return
-		elememt_datas = ( ATTACK_DATA[self.attack]['element'], self.targeted_monster.monster.base_stats['element'] )
+	def __update_energy ( self, attack: Attacks ):
+		if not self.current_monster: return
+		self.current_monster.monster.lose_energy(attack)
+		return attack
+
+	def __update_health ( self, attack: Attacks ):
+		if not self.targeted_monster: return
+		elememt_datas = ( ATTACK_DATA[attack]['element'], self.targeted_monster.monster.base_stats['element'] )
 		compose(
 			lambda attack: required(self.targeted_monster).monster.get_attack_amount(attack),
 			lambda amount: self.__halve(elememt_datas, amount),
 			lambda amount: self.__double(elememt_datas, amount),
 			self.targeted_monster.monster.take_damage
-		)(self.attack)
+		)( attack )
+		return attack
 
 
 	def __halve ( self, element_datas: tuple[Elements, Elements], amount: float ):
@@ -471,6 +481,7 @@ class Battle:
 	# END OF BATTLE
 
 	def __check_for_end_of_battle ( self ):
+		if self.victory or self.defeat: return
 		if len(self.player_battle_sprites.sprites()) == 0: return self.__battle_lost()
 		if len(self.opponent_battle_sprites.sprites()) == 0: return self.__battle_won()
 
@@ -484,8 +495,9 @@ class Battle:
 		self.__kill_player_sprites()
 
 	def __battle_lost ( self ):
+		voyeur('Battle, __battle_lost')
 		set_truthy(self, 'defeat')
-		# quit_game()
+		self.freeze_all_monsters()
 
 
 	

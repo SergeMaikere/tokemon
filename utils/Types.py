@@ -12,7 +12,7 @@ Biomes = Literal[ 'grass', 'grass_ice', 'sand' ]
 
 TransitionState = Literal[ 'standby', 'fade_to_black', 'load_scene', 'fade_to_light', 'done' ]
 
-FontTypes = Literal[ 'regular', 'small', 'bold', 'dialog' ]
+FontTypes = Literal[ 'regular', 'small', 'bold', 'dialog', 'giant' ]
 
 Attacks = Literal[ 'burn', 'heal', 'battlecry', 'spark', 'scratch', 'splash', 'fire', 'explosion', 'annihilate', 'ice' ]
 
@@ -20,7 +20,7 @@ MonsterNames = Literal[ 'Plumette', 'Ivieron', 'Pluma', 'Sparchu', 'Cindrill', '
 
 BattleGrounds = Literal[ 'ice', 'forest', 'sand' ]
 
-BattleStates = Literal[ 'standby', 'ongoing', 'victory', 'defeat', 'back_to_world', 'defeated_enemy_dialog', 'evolution', 'evolution_ongoing' ]
+BattleStates = Literal[ 'standby', 'ongoing', 'victory', 'defeat', 'back_to_world', 'defeated_enemy_dialog', 'evolution', 'evolution_ongoing', 'go_to_game_over' ]
 
 Trainers = Literal['player', 'opponent']
 
@@ -30,7 +30,7 @@ BattleMode  = Literal[ 'general', 'monster', 'attack', 'switch', 'target' ]
 
 EvolutionSates = Literal[ 'display_current', 'display_evolution' ]
 
-Sounds = Literal[ 'battle', 'evolution', 'fire', 'green', 'ice', 'notice', 'overworld', 'scratch', 'splash' ]
+Sounds = Literal[ 'battle', 'evolution', 'fire', 'game_over', 'green', 'ice', 'notice', 'overworld', 'scratch', 'splash' ]
 
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 

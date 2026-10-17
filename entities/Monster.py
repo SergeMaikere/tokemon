@@ -28,9 +28,9 @@ class Monster:
 	def health ( self, v: float ): self._health = between(0, self.get_stat('max_health'), v)
 
 	@property
-	def energy ( self ): return min_number(0, self._energy)
+	def energy ( self ): return self._energy
 	@energy.setter
-	def energy ( self, v: float ): self._energy = v
+	def energy ( self, v: float ): self._energy = between(0, self.get_stat('max_energy'), v)
 
 	def get_level_up ( self ): return self.level * 150
 
@@ -60,8 +60,8 @@ class Monster:
 		defense = between(0, 1, 1 - (self.get_stat('defense') / 2000) - (0.2 if self.is_defending else 0))
 		self.health -= amount * defense
 
-	def lose_energy ( self, amount: float ):
-		self.energy -= amount
+	def lose_energy ( self, attack: Attacks ):
+		self.energy -= ATTACK_DATA[attack]['cost']
 
 	def is_catchable ( self ): return self.health <= self.get_stat('max_health') * 0.1
 

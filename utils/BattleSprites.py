@@ -1,7 +1,7 @@
 from typing import Callable
-from pygame.sprite import Sprite
 
 from gameobj.MonsterSprite import MonsterSprite
+from gameobj.Sprite import Sprite
 from settings import *
 from utils.Helper import required
 from utils.MyGroup import MyGroup

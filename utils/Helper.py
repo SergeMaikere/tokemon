@@ -164,6 +164,9 @@ def get_progress_bar ( surface: Surface, rect: FRect, bg_color: ColorLike, color
 def get_group ( groups: tuple[MyGroup, ...], name: str ) -> MyGroup:
 	return required( next((group for group in groups if group.name == name), None) )
 
+def get_canvas ():
+	return required( pygame.display.get_surface() )
+
 def get_text_surface ( font: Font, text: str, color: ColorLike = COLORS['black'] ): return font.render(text, False, color)
 
 def add_background_to_text ( surface: Surface, padding: int = 10, color: ColorLike = COLORS['white'] ):
