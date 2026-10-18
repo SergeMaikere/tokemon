@@ -2,12 +2,13 @@ from functools import reduce
 from typing import Literal
 
 from pygame import surface
+from pygame.key import ScancodeWrapper
 
 
 from settings import *
 from utils.Helper import add_color_to_surface, font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_truthy, compose
 from utils.Singleton import SingletonMeta
-from utils.Types import Pos
+from utils.Types import GameOverOptions, GameOverStates, Pos
 
 
 class GameOverManager ( metaclass=SingletonMeta ):
@@ -17,21 +18,29 @@ class GameOverManager ( metaclass=SingletonMeta ):
 			'option': font_loader('PixeloidSan', 24)
 		}
 		self.canvas = get_canvas()
-		self.state: Literal[ 'undecided', 'save', 'play_again', 'quit' ] = 'undecided'
+		self.state: GameOverStates = 'undecided'
 		
 		self.text = 'GAME OVER LOSER'
-		self.options = [ 'SAVE', 'TRY AGAIN IF YOU DARE', 'QUIT' ]
+		self.options: list[GameOverOptions] = [ {'text': 'SAVE', 'state': 'save'}, {'text': 'TRY AGAIN IF YOU DARE', 'state': 'play_again'}, {'text': 'QUIT', 'state': 'quit'} ]
 		self.button_padding_x, self.button_padding_y = 10, 20
 		
 		self.index = 0
 		self.is_game_over, self.is_saved = False, False
 
 
-	def __input ( self ):
-		keys = pygame.key.get_just_pressed()
+	def __left_and_right ( self, keys: ScancodeWrapper ):
 		if keys[pygame.K_LEFT]: self.index -= 1
 		if keys[pygame.K_RIGHT]: self.index += 1
 		self.index = self.index % len(self.options)
+
+	def __select_option ( self, keys: ScancodeWrapper ):
+		if not keys[pygame.K_SPACE]: return
+		self.state = self.options[self.index]['state']
+
+	def __input ( self ):
+		keys = pygame.key.get_just_pressed()
+		self.__left_and_right(keys)
+		self.__select_option(keys)
 
 	def __display_positive_message ( self, fonts ):
 		return compose(
@@ -62,7 +71,7 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		return banner_rect
 
 	def __display_options ( self, message_rect: FRect ):
-		buttons = [ self.__make_button(i, option) for i, option in enumerate(self.options) ]	
+		buttons = [ self.__make_button(i, option['text']) for i, option in enumerate(self.options) ]	
 		compose(
 			lambda buttons: get_sized_surface(reduce(lambda total, button: total + button.width, buttons, 0) + self.button_padding_y, buttons[0].height),
 			lambda surface: get_rect(surface, midtop=message_rect.midbottom + vector2(0, self.button_padding_x * 2)),

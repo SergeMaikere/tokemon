@@ -34,6 +34,8 @@ Sounds = Literal[ 'battle', 'evolution', 'fire', 'game_over', 'green', 'ice', 'n
 
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
+GameOverStates = Literal[ 'undecided', 'save', 'play_again', 'quit' ]
+
 Pos = tuple[ float, float ]
 
 T = TypeVar('T')
@@ -59,3 +61,7 @@ class Colors ( TypedDict ):
 	text: ColorLike
 	bg_selected: ColorLike
 	text_selected: ColorLike
+
+class GameOverOptions ( TypedDict ):
+	text: str
+	state: GameOverStates
