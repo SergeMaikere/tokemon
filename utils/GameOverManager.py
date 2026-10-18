@@ -19,11 +19,19 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		self.canvas = get_canvas()
 		self.state: Literal[ 'undecided', 'save', 'play_again', 'quit' ] = 'undecided'
 		
-		self.is_game_over, self.is_saved = False, False
 		self.text = 'GAME OVER LOSER'
 		self.options = [ 'SAVE', 'TRY AGAIN IF YOU DARE', 'QUIT' ]
 		self.button_padding_x, self.button_padding_y = 10, 20
+		
+		self.index = 0
+		self.is_game_over, self.is_saved = False, False
 
+
+	def __input ( self ):
+		keys = pygame.key.get_just_pressed()
+		if keys[pygame.K_LEFT]: self.index -= 1
+		if keys[pygame.K_RIGHT]: self.index += 1
+		self.index = self.index % len(self.options)
 
 	def __display_positive_message ( self, fonts ):
 		return compose(
@@ -34,10 +42,10 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		)( fonts ) 
 
 	
-	def __make_button ( self, text: str ):
+	def __make_button ( self, index: int, text: str ):
 		return compose(
-			lambda text: get_text_surface(self.fonts['option'], text),
-			lambda surface: add_background_to_text(surface)
+			lambda text: get_text_surface(font=self.fonts['option'], text=text, color=COLORS['black'] if index == self.index else COLORS['white']),
+			lambda surface: add_background_to_text(surface=surface, color=COLORS['light'] if index == self.index else COLORS['gray'])
 		)( text )
 
 
@@ -54,7 +62,7 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		return banner_rect
 
 	def __display_options ( self, message_rect: FRect ):
-		buttons = [ self.__make_button(option) for option in self.options ]	
+		buttons = [ self.__make_button(i, option) for i, option in enumerate(self.options) ]	
 		compose(
 			lambda buttons: get_sized_surface(reduce(lambda total, button: total + button.width, buttons, 0) + self.button_padding_y, buttons[0].height),
 			lambda surface: get_rect(surface, midtop=message_rect.midbottom + vector2(0, self.button_padding_x * 2)),
@@ -79,6 +87,7 @@ class GameOverManager ( metaclass=SingletonMeta ):
 
 	def update ( self ):
 		if not self.is_game_over: return
+		self.__input()
 		self.__display_game_over_screen()
 
 		match self.state:
