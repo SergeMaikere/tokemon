@@ -5,6 +5,7 @@ from pygame import Surface, FRect
 from pygame.typing import Point
 from pygame.math import Vector2 as vector 
 from sys import exit
+from os import open
 
 vector2 = pygame.Vector2
 

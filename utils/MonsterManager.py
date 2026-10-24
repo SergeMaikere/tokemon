@@ -1,6 +1,7 @@
 from os.path import join
 from random import randint, sample
 from typing import Literal
+import json
 
 from assets.data.game_data import ATTACK_DATA, MONSTER_DATA
 from gameobj.MonsterSprite import MonsterSprite
@@ -25,7 +26,7 @@ class MonsterManager:
 
 	@classmethod
 	def init ( cls ):
-		cls.monsters = cls.get_random_monsters(1)
+		cls.monsters = cls.get_player_monsters()
 
 		cls.monster_frames: dict[ MonsterNames, dict[Literal['idle', 'attack'], list[Surface]] ] = monsters_frames_loader(join('assets', 'graphics', 'monsters'))
 
@@ -40,6 +41,14 @@ class MonsterManager:
 		if key in cls.__dict__:
 			return required(getattr(cls, key))
 		raise KeyError(key)
+
+	@classmethod
+	def get_player_monsters ( cls ):
+		try:
+			with open(join('assets', 'data', 'player_monsters.txt'), 'r') as file:
+				return json.load(file)
+		except:
+			return cls.get_random_monsters(3)
 
 	@classmethod
 	def get_random_monsters ( cls, n: int ):
