@@ -1,5 +1,8 @@
+from typing import Callable
+
 from pygame import Font
 from pytmx import TiledMap
+from pytmx.pytmx import TiledObject
 
 from settings import *
 from gameobj.MonsterIndex import MonsterIndex
@@ -43,13 +46,14 @@ class Game:
 		self.battle_sprites = BattleSprites()
 		self.player_battle_sprites = MyGroup('player_battle_sprites')
 		self.opponent_battle_sprites = MyGroup('opponent_battle_sprites')
-	
-		self.player = self.get_player(map_loader('world'), 'house')
+		
+		self.overworld_map = map_loader('world')
+		self.player = self.access_player(self.overworld_map, 'house', self.create_player)
 
 		MonsterManager.init()
 		MusicManager.init()
-
-		self.game_over_manager = GameOverManager()
+		
+		self.game_over_manager = GameOverManager(self.player, lambda: self.access_player(self.overworld_map, 'house', self.reset_player_pos))
 		
 		self.evolution_manager = EvolutionManager(self.player, self.fonts['bold'], self.player_battle_sprites)
 		
@@ -62,13 +66,19 @@ class Game:
 		self.monster_index = MonsterIndex(self.player, self.fonts, self.ui_images)
 
 		self.collision_manager = CollisionManager(self.player, self.maps_loader.transition_setup, self.battle_manager, self.transition_sprites, self.monster_patch_sprites)
-		
-	def get_player ( self, tmx_map: TiledMap, player_spawn: str ):
+	
+	def access_player ( self, tmx_map: TiledMap, player_spawn: str, func: Callable ):
 		obj = next( obj for obj in get_layer_by_name(tmx_map, 'Entities') if obj.name == 'Player' and obj.pos == player_spawn )
 		if obj:
-			return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
+			return func(obj)
 		else:
 			raise ValueError('Player datas are missing from tmx map')
+	
+	def create_player ( self, obj: TiledObject ):
+		return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
+
+	def reset_player_pos ( self, obj: TiledObject ):
+		self.player.rect.center = self.player.hitbox.center = (obj.x, obj.y)
 
 
 	def run ( self ):
@@ -84,7 +94,7 @@ class Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: quit_game()
 
-			self.game_over_manager.update()
+			self.game_over_manager.update(dt)
 			
 			if not self.game_over_manager.is_game_over:
 

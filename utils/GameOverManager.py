@@ -1,18 +1,21 @@
 from functools import reduce
-from typing import Literal
-
-from pygame import surface
+from typing import Callable
 from pygame.key import ScancodeWrapper
 
-
 from settings import *
-from utils.Helper import add_color_to_surface, font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_truthy, compose
+from entities.Player import Player
+from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_truthy, compose
+from utils.MusicManager import MusicManager
 from utils.Singleton import SingletonMeta
-from utils.Types import GameOverOptions, GameOverStates, Pos
-
+from utils.Transition import Transition
+from utils.MonsterManager import MonsterManager as MM
+from utils.Types import GameOverOptions, GameOverStates
 
 class GameOverManager ( metaclass=SingletonMeta ):
-	def __init__( self ) -> None:
+	def __init__( self, player: Player, reset_player: Callable ) -> None:
+		self.player = player
+		self.reset_player = reset_player
+
 		self.fonts = {
 			'giant': font_loader('dogicapixelbold', 80),
 			'option': font_loader('PixeloidSan', 24)
@@ -21,12 +24,21 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		self.state: GameOverStates = 'undecided'
 		
 		self.text = 'GAME OVER LOSER'
-		self.options: list[GameOverOptions] = [ {'text': 'SAVE', 'state': 'save'}, {'text': 'TRY AGAIN IF YOU DARE', 'state': 'play_again'}, {'text': 'QUIT', 'state': 'quit'} ]
+		self.options: list[GameOverOptions] = [ {'text': 'TRY AGAIN IF YOU DARE', 'state': 'play_again'}, {'text': 'QUIT', 'state': 'quit'} ]
 		self.button_padding_x, self.button_padding_y = 10, 20
 		
 		self.index = 0
 		self.is_game_over, self.is_saved = False, False
 
+		self.transition_overworld = Transition(self.player, self.__display_overworld)
+
+
+	def __display_overworld ( self, _ ):
+		self.is_game_over = False
+		self.reset_player()
+		self.player.state = 'down'
+		MM.set_monsters()
+		MusicManager.switch('game_over', 'overworld')
 
 	def __left_and_right ( self, keys: ScancodeWrapper ):
 		if keys[pygame.K_LEFT]: self.index -= 1
@@ -85,21 +97,17 @@ class GameOverManager ( metaclass=SingletonMeta ):
 			self.__display_positive_message,
 			self.__display_options,
 		)( self.fonts['giant'] )
-
-	def __save_progress ( self ):
-		if self.is_saved: return
-		set_truthy(self, 'is_saved')
-		print('Saving game')
 	
-	def __play_new_game ( self ):
-		print('Playing new game')
+	def __play_new_game ( self, dt: float ):
+		if self.transition_overworld.state == 'standby':
+			self.transition_overworld.start()
+		self.transition_overworld.update(dt)
 
-	def update ( self ):
+	def update ( self, dt: float ):
 		if not self.is_game_over: return
 		self.__input()
 		self.__display_game_over_screen()
 
 		match self.state:
-			case 'save': self.__save_progress()
-			case 'play_again': self.__play_new_game()
+			case 'play_again': self.__play_new_game(dt)
 			case 'quit': quit_game()

@@ -10,7 +10,7 @@ from gameobj.Battle import Battle
 from utils.MusicManager import MusicManager as Music
 from utils.GameOverManager import GameOverManager
 from utils.EvolutionManager import EvolutionManager
-from utils.Helper import images_loader_dict, set_none, set_truthy
+from utils.Helper import images_loader_dict, set_falsy, set_none, set_truthy
 from utils.MyGroup import MyGroup
 from utils.Transition import Transition
 from utils.Types import BattleStates, FontTypes
@@ -51,14 +51,14 @@ class BattleManager:
 		self.character = character
 		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
 		self.set_state('ongoing')
-		# Music.switch('overworld', 'battle')
+		Music.switch('overworld', 'battle')
 	
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		self.patch = sprite
 		monsters = { i: (monster_name, sprite.level + randint(-3, 3)) for i, monster_name in enumerate(sprite.monsters) }
 		self.battle = Battle( self.battle_grounds[sprite.biome], self.fonts, self.ui_images, monsters, *self.groups )
 		self.set_state('ongoing')
-		# Music.switch('overworld', 'battle')
+		Music.switch('overworld', 'battle')
 
 	def __handle_victory ( self ):
 		if self.character:
@@ -84,6 +84,7 @@ class BattleManager:
 		if self.battle and self.battle.defeat:
 			self.transition_game_over.start()
 			set_truthy(self.GOM, 'is_game_over')
+			set_falsy(self, 'battle')
 			self.set_state('go_to_game_over')
 			Music.switch('battle', 'game_over')
 

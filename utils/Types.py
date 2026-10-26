@@ -34,7 +34,7 @@ Sounds = Literal[ 'battle', 'evolution', 'fire', 'game_over', 'green', 'ice', 'n
 
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
-GameOverStates = Literal[ 'undecided', 'save', 'play_again', 'quit' ]
+GameOverStates = Literal[ 'undecided', 'play_again', 'quit' ]
 
 Pos = tuple[ float, float ]
 
