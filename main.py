@@ -4,6 +4,7 @@ from pygame import Font
 from pytmx import TiledMap
 from pytmx.pytmx import TiledObject
 
+from entities.Entity import Entity
 from settings import *
 from gameobj.MonsterIndex import MonsterIndex
 from entities.Player import Player
@@ -18,7 +19,7 @@ from utils.MonsterManager import MonsterManager
 from utils.MusicManager import MusicManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, sound_loader
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, set_falsy, sound_loader
 from utils.Types import FontTypes
 
 class Game:
@@ -53,7 +54,7 @@ class Game:
 		MonsterManager.init()
 		MusicManager.init()
 		
-		self.game_over_manager = GameOverManager(self.player, lambda: self.access_player(self.overworld_map, 'house', self.reset_player_pos))
+		self.game_over_manager = GameOverManager(self.player, lambda: self.reset_entity_pos(self.player), self.reset_characters)
 		
 		self.evolution_manager = EvolutionManager(self.player, self.fonts['bold'], self.player_battle_sprites)
 		
@@ -77,9 +78,14 @@ class Game:
 	def create_player ( self, obj: TiledObject ):
 		return Player(frames_loader('player'), (obj.x, obj.y), self.collision_sprites, self.all_sprites)
 
-	def reset_player_pos ( self, obj: TiledObject ):
-		self.player.rect.center = self.player.hitbox.center = (obj.x, obj.y)
+	def reset_entity_pos ( self, entity: Entity ):
+		entity.rect.center = entity.hitbox.center = entity.original_pos
 
+	def reset_characters ( self ):
+		for character in self.character_sprites:
+			self.reset_entity_pos(character)
+			character.datas['defeated'] = False
+			set_falsy(character, 'has_noticed_player')
 
 	def run ( self ):
 		

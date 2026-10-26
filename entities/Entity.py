@@ -7,6 +7,7 @@ from utils.Types import States
 class Entity ( Sprite ):
 	def __init__( self, name: str, frames: dict[str, list[Surface]], pos: tuple[float, float], *groups: MyGroup ) -> None:
 		super().__init__(name, WORLD_LAYERS['main'], frames['down'][0], *groups, center=pos)
+		self.original_pos = pos
 
 		self.state: States = 'down'
 		

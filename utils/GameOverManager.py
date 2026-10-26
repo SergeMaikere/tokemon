@@ -4,7 +4,7 @@ from pygame.key import ScancodeWrapper
 
 from settings import *
 from entities.Player import Player
-from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_truthy, compose
+from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_falsy, set_truthy, compose
 from utils.MusicManager import MusicManager
 from utils.Singleton import SingletonMeta
 from utils.Transition import Transition
@@ -12,9 +12,10 @@ from utils.MonsterManager import MonsterManager as MM
 from utils.Types import GameOverOptions, GameOverStates
 
 class GameOverManager ( metaclass=SingletonMeta ):
-	def __init__( self, player: Player, reset_player: Callable ) -> None:
+	def __init__( self, player: Player, reset_player: Callable, reset_characters: Callable ) -> None:
 		self.player = player
 		self.reset_player = reset_player
+		self.reset_characters = reset_characters
 
 		self.fonts = {
 			'giant': font_loader('dogicapixelbold', 80),
@@ -34,9 +35,11 @@ class GameOverManager ( metaclass=SingletonMeta ):
 
 
 	def __display_overworld ( self, _ ):
-		self.is_game_over = False
-		self.reset_player()
+		set_falsy(self, 'is_game_over')
+		self.state = 'undecided'
 		self.player.state = 'down'
+		self.reset_player()
+		self.reset_characters()
 		MM.set_monsters()
 		MusicManager.switch('game_over', 'overworld')
 
