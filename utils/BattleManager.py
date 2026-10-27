@@ -8,7 +8,6 @@ from entities.Player import Player
 from gameobj.MonsterPatch import MonsterPatch
 from gameobj.Battle import Battle
 from utils.MusicManager import MusicManager as Music
-from utils.GameOverManager import GameOverManager
 from utils.EvolutionManager import EvolutionManager
 from utils.Helper import images_loader_dict, set_falsy, set_none, set_truthy
 from utils.MyGroup import MyGroup
@@ -21,13 +20,14 @@ class BattleManager:
 			player: Player, 
 			fonts: dict[FontTypes, Font], 
 			ui_images: dict[str, Surface], 
+			game_over_manager,
 			evolution_manager: EvolutionManager,
 			*groups: MyGroup 
 		) -> None:
 
 		self.player = player
 		self.EM = evolution_manager
-		self.GOM = GameOverManager()
+		self.GOM = game_over_manager
 
 		self.fonts = fonts
 		self.ui_images = ui_images
@@ -62,7 +62,7 @@ class BattleManager:
 
 	def __handle_victory ( self ):
 		if self.character:
-			self.character.datas['defeated'] = True
+			set_truthy(self.character.datas, 'defeated')
 
 		if self.patch:
 			set_truthy(self.patch, 'defeated')

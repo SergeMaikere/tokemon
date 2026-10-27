@@ -4,6 +4,7 @@ from pygame import Font
 from pytmx import TiledMap
 from pytmx.pytmx import TiledObject
 
+from entities.Character import Character
 from entities.Entity import Entity
 from settings import *
 from gameobj.MonsterIndex import MonsterIndex
@@ -19,7 +20,7 @@ from utils.MonsterManager import MonsterManager
 from utils.MusicManager import MusicManager
 from utils.MyGroup import MyGroup
 from utils.DialogManager import DialogManager
-from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, set_falsy, sound_loader
+from utils.Helper import map_loader, frames_loader, get_layer_by_name, font_loader, images_loader_dict, quit_game, set_falsy, compose
 from utils.Types import FontTypes
 
 class Game:
@@ -58,7 +59,7 @@ class Game:
 		
 		self.evolution_manager = EvolutionManager(self.player, self.fonts['bold'], self.player_battle_sprites)
 		
-		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.evolution_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
+		self.battle_manager = BattleManager(self.player, self.fonts, self.ui_images, self.game_over_manager, self.evolution_manager, self.battle_sprites, self.player_battle_sprites, self.opponent_battle_sprites)
 		
 		self.dialog_manager = DialogManager(self.player, self.character_sprites, self.battle_manager, self.all_sprites)
 
@@ -80,12 +81,19 @@ class Game:
 
 	def reset_entity_pos ( self, entity: Entity ):
 		entity.rect.center = entity.hitbox.center = entity.original_pos
+		return entity
+
+	def __reset_character_defeated ( self, character: Character ):
+		set_falsy(character.datas, 'defeated')
+		return character
 
 	def reset_characters ( self ):
-		for character in self.character_sprites:
-			self.reset_entity_pos(character)
-			character.datas['defeated'] = False
-			set_falsy(character, 'has_noticed_player')
+		for character in self.character_sprites.sprites():
+			compose(
+				self.reset_entity_pos,
+				self.__reset_character_defeated,
+				lambda character: set_falsy(character, 'has_noticed_player'),
+			)( character )
 
 	def run ( self ):
 		

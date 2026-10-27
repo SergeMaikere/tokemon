@@ -10,7 +10,7 @@ from utils.Helper import compose
 
 def is_dialog_possible ( subject: Entity, entity: Entity, radius: int = 100, tolerance: int = 30 ):
 	relation = get_relation(subject, entity)
-	if relation.length() > radius: return
+	if relation.length() > radius: return False
 	return is_on_same_axis_x(relation, tolerance) and is_subject_facing_character_x(subject, relation) or\
 		is_on_same_axis_y(relation, tolerance) and is_subject_facing_character_y(subject, relation)
 

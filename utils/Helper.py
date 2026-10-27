@@ -1,19 +1,15 @@
-from random import sample
-from types import new_class
 
-from pygame.font import match_font
+from pygame import FRect, Font, Surface
 from pygame.sprite import Sprite
 from pygame.typing import ColorLike, Point
 from pytmx import TiledMap, TiledObject
-from settings import *
-from entities.Entity import Entity
+from pytmx.util_pygame import load_pygame
 from typing import Any, Callable, Optional, TypeVar, cast
-from pygame import FRect, Font, Surface
 from os import walk
 from os.path import basename, join
 from functools import partial, reduce
-from pytmx.util_pygame import load_pygame
 
+from settings import *
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
 from utils.Types import Coasts, FontTypes, MonsterNames, Pos, States, Trainers
@@ -31,11 +27,17 @@ def max_number ( maximum: float, n: float ): return min( maximum, n )
 def between ( minimum: float, maximum: float, n: float ): return min_number( minimum, max_number(maximum, n) )
 
 def set_truthy ( obj: Any, name: str ):
-	setattr(obj, name, True)
+	if isinstance(obj, dict):
+		obj[name] = True
+	else:
+		setattr(obj, name, True)
 	return obj
 
 def set_falsy ( obj: Any, name: str ):
-	setattr(obj, name, False)
+	if isinstance(obj, dict):
+		obj[name] = False
+	else:
+		setattr(obj, name, False)
 	return obj
 
 def set_none ( obj: Any, name: str ):

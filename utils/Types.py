@@ -36,6 +36,8 @@ Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
 GameOverStates = Literal[ 'undecided', 'play_again', 'quit' ]
 
+DialogStates = Literal['standby', 'noticed_player', 'player_turns', 'go_to_player', 'talk']
+
 Pos = tuple[ float, float ]
 
 T = TypeVar('T')
