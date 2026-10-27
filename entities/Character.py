@@ -72,6 +72,8 @@ class Character ( Entity ):
 	
 	def __is_player_in_range ( self ): return vector2(self.rect.center).distance_to(self.player.rect.center) < self.radius
 
+	def __is_battle_ongoing ( self ): return self.dialog_manager.BM.state != 'standby'
+
 	def __raycast ( self ):
 		match self.dialog_state:
 			case 'noticed_player': self.__notice_player()
@@ -79,16 +81,12 @@ class Character ( Entity ):
 			case 'go_to_player': self.__go_to_player()
 			case 'talk': self.__create_dialog()
 			case 'standby':
+				if self.__is_battle_ongoing(): return
 				if self.__is_still_talking(): return 
 				if not self.__has_line_of_sight(): return
 				if not is_dialog_possible(self, self.player, self.radius): return 
 				if self.has_noticed_player: return 
 				self.set_dialog_state('noticed_player')
-
-
-	def __player_is_noticed ( self ):
-		self.player.set_is_noticed(False)
-		self.set_dialog_state('player_turns')
 
 	def __notice_player ( self ):
 		if self.noticed_timer.running: return self.noticed_timer.update()
@@ -96,6 +94,10 @@ class Character ( Entity ):
 		self.player.block()
 		self.noticed_timer.start()
 		Music.play('notice')
+
+	def __player_is_noticed ( self ):
+		self.player.set_is_noticed(False)
+		self.set_dialog_state('player_turns')
 
 	def __player_stop_and_turn ( self ):
 		turn_toward_entity(self.player, self)
@@ -109,10 +111,8 @@ class Character ( Entity ):
 		if self.player.hitbox.colliderect(self.walk_hitbox): 
 			self.block()
 			self.set_dialog_state('talk')
-
 		
 	def __create_dialog ( self ):
-		self.dialog_manager.current_character = self
 		self.dialog_manager._create_dialog(self)
 		set_truthy(self, 'has_noticed_player')
 		self.set_dialog_state('standby')
