@@ -9,7 +9,7 @@ from gameobj.MonsterPatch import MonsterPatch
 from gameobj.Battle import Battle
 from utils.MusicManager import MusicManager as Music
 from utils.EvolutionManager import EvolutionManager
-from utils.Helper import images_loader_dict, set_falsy, set_none, set_truthy
+from utils.Helper import images_loader_dict, set_falsy, set_none, set_truthy, update_transition
 from utils.MyGroup import MyGroup
 from utils.Transition import Transition
 from utils.Types import BattleStates, FontTypes
@@ -36,8 +36,10 @@ class BattleManager:
 		self.battle_grounds = images_loader_dict('assets', 'graphics', 'backgrounds')
 		self.battle, self.character, self.patch = None, None, None
 
+		self.transition_battle_trainer = Transition(self.player, self.__load_battle_trainer, lambda: self.set_state('ongoing'))
 		self.transition_overworld = Transition(self.player, lambda _: set_none(self, 'battle'))
-		self.transition_game_over = Transition(self.player, lambda _: set_none(self, 'battle'))
+		self.transition_game_over = Transition(self.player, self.__launch_game_over_scene, lambda: self.set_state('standby'))
+		
 		self.state: BattleStates = 'standby'
 		self.temp = None
 
@@ -47,12 +49,14 @@ class BattleManager:
 	def set_state( self, state: BattleStates ): 
 		self.state = state
 
+	def __load_battle_trainer ( self, _ ):
+		self.battle = Battle( self.battle_grounds[self.character.datas['biome']], self.fonts, self.ui_images, self.character.datas['monsters'], *self.groups )
+		Music.switch('overworld', 'battle')
+
 	def battle_trainer ( self, character: Entity ):	
 		self.character = character
-		self.battle = Battle( self.battle_grounds[character.datas['biome']], self.fonts, self.ui_images, character.datas['monsters'], *self.groups )
-		self.set_state('ongoing')
-		Music.switch('overworld', 'battle')
-	
+		self.set_state('go_to_battle_trainer')
+
 	def battle_monsters ( self, sprite: MonsterPatch ):
 		self.patch = sprite
 		monsters = { i: (monster_name, sprite.level + randint(-3, 3)) for i, monster_name in enumerate(sprite.monsters) }
@@ -70,11 +74,10 @@ class BattleManager:
 
 		self.transition_overworld.start()
 		self.set_state('back_to_world')
-
-	def __go_to_game_over ( self, dt: float ):
-		if self.transition_game_over.state == 'standby': self.set_state('standby')
-		self.transition_game_over.update(dt)
 		
+	def __launch_game_over_scene ( self, _ ):
+		set_truthy(self.GOM, 'is_game_over')
+		Music.switch('battle', 'game_over')
 
 	def __check_victory ( self ):
 		if self.battle and self.battle.victory:
@@ -82,11 +85,7 @@ class BattleManager:
 
 	def __check_defeat ( self ):
 		if self.battle and self.battle.defeat:
-			self.transition_game_over.start()
-			set_truthy(self.GOM, 'is_game_over')
-			set_falsy(self, 'battle')
 			self.set_state('go_to_game_over')
-			Music.switch('battle', 'game_over')
 
 	def __update_battle ( self, dt: float ):
 		if not self.battle: return
@@ -109,12 +108,11 @@ class BattleManager:
 		Music.switch('evolution', 'overworld')
 
 	def update ( self, dt: float ):
-		if self.temp != self.state:
-			voyeur(f'Battle Manager state => {self.state}')
-			self.temp = self.state
-
+		state_stalker('Battle Manager state', self.state, self)
+		
 		match self.state:
 			case 'standby': return
+			case 'go_to_battle_trainer': update_transition(dt, self.transition_battle_trainer)
 			case 'ongoing':
 				self.__check_victory()
 				self.__check_defeat()
@@ -122,5 +120,5 @@ class BattleManager:
 			case 'back_to_world': self.__back_to_main_world(dt)
 			case 'evolution': self.__check_for_evolution()
 			case 'evolution_ongoing': self.__check_for_evolution_end()
-			case 'go_to_game_over': self.__go_to_game_over(dt)
+			case 'go_to_game_over': update_transition(dt, self.transition_game_over)
 		self.__update_battle(dt)

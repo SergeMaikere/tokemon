@@ -222,6 +222,10 @@ def get_tinted_surface ( ):
 def tint ( canvas: Surface, tinted_surface: Surface ): 
 	canvas.blit(tinted_surface, (0, 0))
 	return tinted_surface
+
+def update_transition ( dt: float, transition: Any ):
+	if transition.state == 'standby': transition.start()
+	transition.update(dt)
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 

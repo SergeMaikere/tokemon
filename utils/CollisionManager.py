@@ -48,8 +48,6 @@ class CollisionManager:
 		return self.__if_walking_in_monster_patchs(self.transition_battle.start_scene_transition)
 
 	def update ( self, dt: float ):
-		if self.BM.battle: return
-
 		self.__transition_manager(self.transition_map, self.__check_transition_map, dt)
 		
 		if self.timer.running:

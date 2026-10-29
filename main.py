@@ -108,23 +108,21 @@ class Game:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: quit_game()
 
+			self.all_sprites.update(dt)
+
+			self.all_sprites.draw(self.player)
+
+			self.dialog_manager.update()
+
+			self.battle_manager.update(dt)
+
+			self.collision_manager.update(dt)
+
+			self.monster_index.update(dt)
+
+			self.evolution_manager.update(dt)
+
 			self.game_over_manager.update(dt)
-			
-			if not self.game_over_manager.is_game_over:
-
-				self.all_sprites.update(dt)
-
-				self.all_sprites.draw(self.player)
-
-				self.dialog_manager.update()
-
-				self.battle_manager.update(dt)
-
-				self.collision_manager.update(dt)
-
-				self.monster_index.update(dt)
-
-				self.evolution_manager.update(dt)
 				
 			pygame.display.update( )
 

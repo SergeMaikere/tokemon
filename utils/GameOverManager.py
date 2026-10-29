@@ -4,7 +4,7 @@ from pygame.key import ScancodeWrapper
 
 from settings import *
 from entities.Player import Player
-from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_falsy, set_truthy, compose
+from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_falsy, set_truthy, compose, update_transition
 from utils.MusicManager import MusicManager
 from utils.Singleton import SingletonMeta
 from utils.Transition import Transition
@@ -23,6 +23,7 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		}
 		self.canvas = get_canvas()
 		self.state: GameOverStates = 'undecided'
+		self.temp = None
 		
 		self.text = 'GAME OVER LOSER'
 		self.options: list[GameOverOptions] = [ {'text': 'TRY AGAIN IF YOU DARE', 'state': 'play_again'}, {'text': 'QUIT', 'state': 'quit'} ]
@@ -31,17 +32,8 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		self.index = 0
 		self.is_game_over, self.is_saved = False, False
 
-		self.transition_overworld = Transition(self.player, self.__display_overworld)
+		self.transition_overworld = Transition(self.player, self.__reset_overworld, self.__display_overworld)
 
-
-	def __display_overworld ( self, _ ):
-		set_falsy(self, 'is_game_over')
-		self.state = 'undecided'
-		self.player.state = 'down'
-		self.reset_player()
-		self.reset_characters()
-		MM.set_monsters()
-		MusicManager.switch('game_over', 'overworld')
 
 	def __left_and_right ( self, keys: ScancodeWrapper ):
 		if keys[pygame.K_LEFT]: self.index -= 1
@@ -101,16 +93,24 @@ class GameOverManager ( metaclass=SingletonMeta ):
 			self.__display_options,
 		)( self.fonts['giant'] )
 	
-	def __play_new_game ( self, dt: float ):
-		if self.transition_overworld.state == 'standby':
-			self.transition_overworld.start()
-		self.transition_overworld.update(dt)
+	def __display_overworld ( self ):
+		self.state = 'undecided'
+		self.is_game_over = False
+
+	def __reset_overworld ( self, _ ):
+		self.player.unblock()
+		self.player.state = 'down'
+		self.reset_player()
+		self.reset_characters()
+		MM.set_monsters()
+		MusicManager.switch('game_over', 'overworld')
 
 	def update ( self, dt: float ):
+		state_stalker('Game Over state', self.state, self)
 		if not self.is_game_over: return
-		self.__input()
 		self.__display_game_over_screen()
-
+		
 		match self.state:
-			case 'play_again': self.__play_new_game(dt)
+			case 'undecided': self.__input()
+			case 'play_again': update_transition(dt, self.transition_overworld)
 			case 'quit': quit_game()

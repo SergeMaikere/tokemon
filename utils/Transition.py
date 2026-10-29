@@ -4,18 +4,18 @@ from gameobj.MonsterPatch import MonsterPatch
 from settings import *
 from gameobj.Sprite import Sprite
 from entities.Player import Player
-from utils.Helper import required
 from utils.Timer import Timer
 from utils.Types import TransitionState
 
 
 class Transition:
-	def __init__(self, player: Player, load_new_scene: Callable) -> None:
+	def __init__(self, player: Player, load_new_scene: Callable, callback: Callable | None = None) -> None:
 		
 		self.player = player
 		self.load_new_scene = load_new_scene
+		self.callback = callback
 
-		self.canvas = required(pygame.display.get_surface())
+		self.canvas = pygame.display.get_surface()
 		self.tint = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 		self.transition_sprite = None
@@ -23,6 +23,7 @@ class Transition:
 		self.transparency = 0
 
 		self.state: TransitionState = 'standby'
+		self.temp = None
 		self.timer = Timer(500, self.__fade_to_light)
 
 
@@ -34,7 +35,7 @@ class Transition:
 		if isinstance(sprite, MonsterPatch) and sprite.defeated: return
 		self.transition_sprite = sprite
 		self.player.block()
-		self.state = 'fade_to_black'
+		self.start()
 
 	def __fade_to_black ( self, dt: float ):
 		self.__set_transparency(dt, 1)
@@ -55,9 +56,9 @@ class Transition:
 	
 	def __load_new_scene ( self ):
 		self.load_new_scene(self.transition_sprite)
-		self.transition_sprite = None # reset transition_sprite so it is ready for next map transition
-		self.state = 'fade_to_light' # set next state
-		self.canvas.fill(0) # cleanse the display surface otherwise it shows ghosts of the old map
+		self.state = 'fade_to_light' 
+		self.transition_sprite = None 
+		self.canvas.fill(0) 
 
 	def __fade_to_light ( self, dt: float ):
 		self.__set_transparency(dt, -1)
@@ -68,14 +69,16 @@ class Transition:
 	def __set_state_to_done ( self ):
 		if self.transparency <= 0: self.state = 'done'
 
-	def __unblock_player ( self ):
+	def __finishing_touch ( self ):
+		if self.callback: self.callback()
 		self.player.unblock()
 		self.state = 'standby'
 	
 	def update ( self, dt: float ):
+		state_stalker('Transition states', self.state, self)
 		if self.state == 'standby': return
 		match self.state:
 			case 'fade_to_black': self.__fade_to_black(dt)
 			case 'load_scene': self.__load_new_scene()
 			case 'fade_to_light': self.__fade_to_light(dt)
-			case 'done': self.__unblock_player()
+			case 'done': self.__finishing_touch()

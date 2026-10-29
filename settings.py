@@ -66,6 +66,12 @@ BATTLE_CHOICES = {
 		'switch': {'pos' : vector2(30, 40), 'icon': 'arrows'}}
 }
 
+
+def state_stalker ( title: str, state:str, class_obj: Any ):
+	if getattr(class_obj, 'temp') != state:
+		voyeur(f'{title} => {state}')
+		setattr(class_obj, 'temp', state)
+
 def voyeur ( x: Any ):
 	print('\n****VOYEUR****')
 	print(x)

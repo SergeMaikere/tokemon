@@ -425,7 +425,7 @@ class Battle:
 	
 	def __check_death ( self ):
 		if self.timers['delayed death'].running or \
-		   all([int(sprite.monster.health) > 0 for sprite in self.__get_all_fighters_sprites()]): 
+		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
 		self.freeze_all_monsters()
 		self.timers['delayed death'].start()
@@ -490,14 +490,16 @@ class Battle:
 			sprite.kill()
 
 	def __battle_won ( self ):
+		voyeur('Battle, __battle_won')
 		set_truthy(self, 'victory')
 		self.__reset_player_initiative()
-		self.__kill_player_sprites()
+		self.__kill_all_fighters_sprites()
 
 	def __battle_lost ( self ):
 		voyeur('Battle, __battle_lost')
 		set_truthy(self, 'defeat')
 		self.freeze_all_monsters()
+		self.__kill_all_fighters_sprites()
 
 
 	
