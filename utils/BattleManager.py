@@ -9,7 +9,7 @@ from gameobj.MonsterPatch import MonsterPatch
 from gameobj.Battle import Battle
 from utils.MusicManager import MusicManager as Music
 from utils.EvolutionManager import EvolutionManager
-from utils.Helper import images_loader_dict, set_falsy, set_none, set_truthy, update_transition
+from utils.Helper import images_loader_dict, set_falsy, set_none, set_state, set_truthy, update_transition
 from utils.MyGroup import MyGroup
 from utils.Transition import Transition
 from utils.Types import BattleStates, FontTypes
@@ -76,7 +76,7 @@ class BattleManager:
 		self.set_state('back_to_world')
 		
 	def __launch_game_over_scene ( self, _ ):
-		set_truthy(self.GOM, 'is_game_over')
+		set_state(self.GOM, 'undecided')
 		Music.switch('battle', 'game_over')
 
 	def __check_victory ( self ):

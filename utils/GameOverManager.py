@@ -4,7 +4,7 @@ from pygame.key import ScancodeWrapper
 
 from settings import *
 from entities.Player import Player
-from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_falsy, set_truthy, compose, update_transition
+from utils.Helper import font_loader, add_background_to_text, display_item, get_canvas, get_rect, get_sized_surface, get_text_surface, quit_game, set_falsy, set_state, set_truthy, compose, update_transition
 from utils.MusicManager import MusicManager
 from utils.Singleton import SingletonMeta
 from utils.Transition import Transition
@@ -22,7 +22,7 @@ class GameOverManager ( metaclass=SingletonMeta ):
 			'option': font_loader('PixeloidSan', 24)
 		}
 		self.canvas = get_canvas()
-		self.state: GameOverStates = 'undecided'
+		self.state: GameOverStates = 'standby'
 		self.temp = None
 		
 		self.text = 'GAME OVER LOSER'
@@ -30,9 +30,8 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		self.button_padding_x, self.button_padding_y = 10, 20
 		
 		self.index = 0
-		self.is_game_over, self.is_saved = False, False
 
-		self.transition_overworld = Transition(self.player, self.__reset_overworld, self.__display_overworld)
+		self.transition_overworld = Transition(self.player, self.__reset_overworld, lambda: set_state(self, 'standby'))
 
 
 	def __left_and_right ( self, keys: ScancodeWrapper ):
@@ -87,15 +86,14 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		)( buttons )
 
 	def __display_game_over_screen ( self ):
+		if self.state == 'stop_display': return
+
 		self.canvas.fill('black')
 		return compose(
 			self.__display_positive_message,
 			self.__display_options,
 		)( self.fonts['giant'] )
-	
-	def __display_overworld ( self ):
-		self.state = 'undecided'
-		self.is_game_over = False
+
 
 	def __reset_overworld ( self, _ ):
 		self.player.unblock()
@@ -103,14 +101,17 @@ class GameOverManager ( metaclass=SingletonMeta ):
 		self.reset_player()
 		self.reset_characters()
 		MM.set_monsters()
+		set_state(self, 'stop_display')
 		MusicManager.switch('game_over', 'overworld')
 
 	def update ( self, dt: float ):
 		state_stalker('Game Over state', self.state, self)
-		if not self.is_game_over: return
+
+		if self.state == 'standby': return
+
 		self.__display_game_over_screen()
 		
 		match self.state:
 			case 'undecided': self.__input()
-			case 'play_again': update_transition(dt, self.transition_overworld)
+			case 'play_again' | 'stop_display': update_transition(dt, self.transition_overworld)
 			case 'quit': quit_game()

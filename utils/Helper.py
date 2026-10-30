@@ -12,7 +12,7 @@ from functools import partial, reduce
 from settings import *
 from utils.MyGroup import MyGroup
 from utils.Timer import Timer
-from utils.Types import Coasts, FontTypes, MonsterNames, Pos, States, Trainers
+from utils.Types import Coasts, Pos, States, T
 
 T = TypeVar('T')
 
@@ -226,6 +226,9 @@ def tint ( canvas: Surface, tinted_surface: Surface ):
 def update_transition ( dt: float, transition: Any ):
 	if transition.state == 'standby': transition.start()
 	transition.update(dt)
+
+def set_state ( obj: object, state: Any ):
+	setattr(obj, 'state', state)
 	
 load_image: Callable[ [str], Surface ] = lambda path: pygame.image.load(path).convert_alpha() 
 

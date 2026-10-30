@@ -46,7 +46,7 @@ Sounds = Literal[ 'battle', 'evolution', 'fire', 'game_over', 'green', 'ice', 'n
 
 Elements = Literal[ 'fire', 'plant', 'normal', 'water' ]
 
-GameOverStates = Literal[ 'undecided', 'play_again', 'quit' ]
+GameOverStates = Literal[ 'standby', 'undecided', 'play_again', 'stop_display', 'quit' ]
 
 DialogStates = Literal['standby', 'noticed_player', 'player_turns', 'go_to_player', 'talk']
 
