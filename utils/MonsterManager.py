@@ -24,7 +24,7 @@ class MonsterManager:
 
 	monsters_max_stats = None
 
-	starting_number_monsters = 1
+	starting_number_monsters = 2
 
 	@classmethod
 	def init ( cls ):
@@ -59,8 +59,7 @@ class MonsterManager:
 
 	@classmethod
 	def get_random_monsters ( cls ):
-		# return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], cls.starting_number_monsters)]) }
-		return { i: monster for i, monster in enumerate([Monster(monster_name, 1) for monster_name in sample([name for name in MONSTER_DATA.keys()], cls.starting_number_monsters)]) }
+		return { i: monster for i, monster in enumerate([Monster(monster_name, 12 + randint(-3, 3)) for monster_name in sample([name for name in MONSTER_DATA.keys()], cls.starting_number_monsters)]) }
 
 	@classmethod
 	def get_specific_monsters ( cls, datas: list[tuple[MonsterNames, int]] ):

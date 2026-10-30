@@ -37,7 +37,7 @@ class BattleManager:
 		self.battle, self.character, self.patch = None, None, None
 
 		self.transition_battle_trainer = Transition(self.player, self.__load_battle_trainer, lambda: self.set_state('ongoing'))
-		self.transition_overworld = Transition(self.player, lambda: Music.switch('battle', 'overworld'), lambda _: set_none(self, 'battle'))
+		self.transition_overworld = Transition(self.player, self.__load_overworld, lambda: self.set_state('standby'))
 		self.transition_game_over = Transition(self.player, self.__launch_game_over_scene, lambda: self.set_state('standby'))
 		
 		self.state: BattleStates = 'standby'
@@ -93,6 +93,10 @@ class BattleManager:
 
 	def __handle_defeated_dialog ( self ):
 		if not self.character: self.set_state('standby')
+
+	def __load_overworld ( self, _ ):
+		Music.switch('battle', 'overworld')
+		set_none(self, 'battle')
 
 	def __check_for_evolution ( self ):
 		evolution = self.EM.handle_evolution()
