@@ -425,13 +425,13 @@ class Battle:
 	
 	def __check_death ( self ):
 		if self.timers['delayed death'].running or \
-		   all([sprite.monster.health > 0 for sprite in self.__get_all_fighters_sprites()]): 
+		   all([int(sprite.monster.health) > 0 for sprite in self.__get_all_fighters_sprites()]): 
 			return
 		self.freeze_all_monsters()
 		self.timers['delayed death'].start()
 
 	def __get_dead_monster ( self ):
-		return next( (sprite for sprite in self.__get_all_fighters_sprites() if sprite.monster.health <= 0), None )
+		return next( (sprite for sprite in self.__get_all_fighters_sprites() if int(sprite.monster.health) <= 0), None )
 
 	def __bury_monster ( self ):
 		dying = self.__get_dead_monster()

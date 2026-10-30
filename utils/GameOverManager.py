@@ -96,9 +96,9 @@ class GameOverManager ( metaclass=SingletonMeta ):
 
 
 	def __reset_overworld ( self, _ ):
-		self.player.unblock()
-		self.player.state = 'down'
 		self.reset_player()
+		self.player.state = 'down'
+		self.player.unblock()
 		self.reset_characters()
 		MM.set_monsters()
 		set_state(self, 'stop_display')

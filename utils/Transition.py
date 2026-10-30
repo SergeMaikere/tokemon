@@ -75,7 +75,6 @@ class Transition:
 		self.state = 'standby'
 	
 	def update ( self, dt: float ):
-		state_stalker('Transition states', self.state, self)
 		if self.state == 'standby': return
 		match self.state:
 			case 'fade_to_black': self.__fade_to_black(dt)
